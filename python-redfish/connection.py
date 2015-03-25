@@ -116,8 +116,6 @@ Clients should always be prepared for:
 """
 
 
-__author__ = 'HP'
-
 import ssl
 import urllib2
 from urlparse import urlparse
@@ -130,184 +128,190 @@ import StringIO
 import sys
 
 
-def rest_op(operation, host, suburi, request_headers, request_body, user_name,
-        password, x_auth_token=None, enforce_SSL=True):
-    """REST operation generic handler"""
+class RedFishConnection(object):
 
-    url = urlparse('https://' + host + suburi)
+    def __init__(self):
+        super(RedFishConnection, self).__init__()
+        # XXX add members, we're going to have to cache
 
-    if request_headers is None:
-        request_headers = dict()
+    def rest_op(self, operation, host, suburi, request_headers, request_body,
+            user_name, password, x_auth_token=None, enforce_SSL=True):
+        """REST operation generic handler"""
 
-    # if X-Auth-Token specified, supply it instead of basic auth
-    if x_auth_token is not None:
-        request_headers['X-Auth-Token'] = x_auth_token
-    # else use user_name/password and Basic Auth
-    elif user_name is not None and password is not None:
-        request_headers['Authorization'] = "BASIC " + base64.b64encode(user_name + ":" + password)
-    # TODO: add support for other types of auth
+        url = urlparse('https://' + host + suburi)
 
-    # TODO: think about redirects....
-    redir_count = 4
-    while redir_count:
-        conn = None
-        if url.scheme == 'https':
-            # New in Python 2.7.9, SSL enforcement is defaulted on, but can be opted-out of.
-            # The below case is the Opt-Out condition and should be used with GREAT caution.
-            # But could be useful for debugging some things, so we're leaving it in.
-            if( sys.version_info.major == 2 and
-                sys.version_info.minor == 7 and
-                sys.version_info.micro >= 9 and
-                enforce_SSL            == False):
-                cont=ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-                cont.verify_mode = ssl.CERT_NONE
-                conn = httplib.HTTPSConnection(host=url.netloc, strict=True, context=cont)
+        if request_headers is None:
+            request_headers = dict()
+
+        # if X-Auth-Token specified, supply it instead of basic auth
+        if x_auth_token is not None:
+            request_headers['X-Auth-Token'] = x_auth_token
+        # else use user_name/password and Basic Auth
+        elif user_name is not None and password is not None:
+            request_headers['Authorization'] = "BASIC " + base64.b64encode(user_name + ":" + password)
+        # TODO: add support for other types of auth
+
+        # TODO: think about redirects....
+        redir_count = 4
+        while redir_count:
+            conn = None
+            if url.scheme == 'https':
+                # New in Python 2.7.9, SSL enforcement is defaulted on, but can be opted-out of.
+                # The below case is the Opt-Out condition and should be used with GREAT caution.
+                # But could be useful for debugging some things, so we're leaving it in.
+                if( sys.version_info.major == 2 and
+                    sys.version_info.minor == 7 and
+                    sys.version_info.micro >= 9 and
+                    enforce_SSL            == False):
+                    cont=ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+                    cont.verify_mode = ssl.CERT_NONE
+                    conn = httplib.HTTPSConnection(host=url.netloc, strict=True, context=cont)
+                else:
+                    conn = httplib.HTTPSConnection(host=url.netloc, strict=True)
+            elif url.scheme == 'http':
+                conn = httplib.HTTPConnection(host=url.netloc, strict=True)
             else:
-                conn = httplib.HTTPSConnection(host=url.netloc, strict=True)
-        elif url.scheme == 'http':
-            conn = httplib.HTTPConnection(host=url.netloc, strict=True)
-        else:
-            assert(False)
-        conn.request(operation, url.path, headers=request_headers, body=json.dumps(request_body))
-        resp = conn.getresponse()
-        body = resp.read()
+                assert(False)
+            conn.request(operation, url.path, headers=request_headers, body=json.dumps(request_body))
+            resp = conn.getresponse()
+            body = resp.read()
 
-        # NOTE:  Do not assume every HTTP operation will return a JSON body.
-        # For example, ExtendedError structures are only required for HTTP 400
-        # errors and are optional elsewhere as they are mostly redundant for many
-        # of the other HTTP status code.  In particular, 200 OK responses
-        # should not have to return any body.
+            # NOTE:  Do not assume every HTTP operation will return a JSON body.
+            # For example, ExtendedError structures are only required for HTTP 400
+            # errors and are optional elsewhere as they are mostly redundant for many
+            # of the other HTTP status code.  In particular, 200 OK responses
+            # should not have to return any body.
 
-        # NOTE:  this makes sure the headers names are all lower cases because
-        # HTTP says they are case insensitive
-        headers = dict((x.lower(), y) for x, y in resp.getheaders())
+            # NOTE:  this makes sure the headers names are all lower cases because
+            # HTTP says they are case insensitive
+            headers = dict((x.lower(), y) for x, y in resp.getheaders())
 
-        # Follow HTTP redirect
-        if resp.status == 301 and 'location' in  headers:
-            url = urlparse(headers['location'])
-            redir_count -= 1
-        else:
-            break
+            # Follow HTTP redirect
+            if resp.status == 301 and 'location' in  headers:
+                url = urlparse(headers['location'])
+                redir_count -= 1
+            else:
+                break
 
-    response = dict()
-    try:
-        response = json.loads(body.decode('utf-8'))
-    except ValueError: # if it doesn't decode as json
-        # NOTE:  resources may return gzipped content
-        # try to decode as gzip (we should check the headers for Content-Encoding=gzip)
+        response = dict()
         try:
-            gzipper = gzip.GzipFile(fileobj=StringIO.StringIO(body))
-            uncompressed_string = gzipper.read().decode('UTF-8')
-            response = json.loads(uncompressed_string)
-        except:
+            response = json.loads(body.decode('utf-8'))
+        except ValueError: # if it doesn't decode as json
+            # NOTE:  resources may return gzipped content
+            # try to decode as gzip (we should check the headers for Content-Encoding=gzip)
+            try:
+                gzipper = gzip.GzipFile(fileobj=StringIO.StringIO(body))
+                uncompressed_string = gzipper.read().decode('UTF-8')
+                response = json.loads(uncompressed_string)
+            except:
+                pass
+
+            # return empty
             pass
 
-        # return empty
-        pass
-
-    return resp.status, headers, response
+        return resp.status, headers, response
 
 
-def rest_get(host, suburi, request_headers, user_name, password):
-    """Generic REST GET handler"""
-    # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
-    return rest_op('GET', host, suburi, request_headers, None, user_name, password)
+    def rest_get(self, host, suburi, request_headers, user_name, password):
+        """Generic REST GET handler"""
+        # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
+        return rest_op('GET', host, suburi, request_headers, None, user_name, password)
 
 
-def rest_patch(server, suburi, request_headers, request_body, user_name, password):
-    """REST PATCH"""
-    if not isinstance(request_headers, dict):  request_headers = dict()
-    request_headers['Content-Type'] = 'application/json'
-    return rest_op('PATCH', server, suburi, request_headers, request_body, user_name, password)
-    # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
+    def rest_patch(self, server, suburi, request_headers, request_body, user_name, password):
+        """REST PATCH"""
+        if not isinstance(request_headers, dict):  request_headers = dict()
+        request_headers['Content-Type'] = 'application/json'
+        return rest_op('PATCH', server, suburi, request_headers, request_body, user_name, password)
+        # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
 
-def rest_put(host, suburi, request_headers, request_body, user_name, password):
-    """REST PUT"""
-    if not isinstance(request_headers, dict):  request_headers = dict()
-    request_headers['Content-Type'] = 'application/json'
-    return rest_op('PUT', host, suburi, request_headers, request_body, user_name, password)
-    # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
+    def rest_put(self, host, suburi, request_headers, request_body, user_name, password):
+        """REST PUT"""
+        if not isinstance(request_headers, dict):  request_headers = dict()
+        request_headers['Content-Type'] = 'application/json'
+        return rest_op('PUT', host, suburi, request_headers, request_body, user_name, password)
+        # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
-# REST POST
-def rest_post(host, suburi, request_headers, request_body, user_name, password):
-    if not isinstance(request_headers, dict):  request_headers = dict()
-    request_headers['Content-Type'] = 'application/json'
-    return rest_op('POST', host, suburi, request_headers, request_body, user_name, password)
-    # NOTE:  don't assume any newly created resource is included in the response.  Only the Location header matters.
-    # the response body may be the new resource, it may be an ExtendedError, or it may be empty.
+    # REST POST
+    def rest_post(self, host, suburi, request_headers, request_body, user_name, password):
+        if not isinstance(request_headers, dict):  request_headers = dict()
+        request_headers['Content-Type'] = 'application/json'
+        return rest_op('POST', host, suburi, request_headers, request_body, user_name, password)
+        # NOTE:  don't assume any newly created resource is included in the response.  Only the Location header matters.
+        # the response body may be the new resource, it may be an ExtendedError, or it may be empty.
 
-# REST DELETE
-def rest_delete(host, suburi, request_headers, user_name, password):
-    return rest_op('DELETE', host, suburi, request_headers, None, user_name, password)
-    # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
-    # NOTE:  response may be an ExtendedError or may be empty
+    # REST DELETE
+    def rest_delete(self, host, suburi, request_headers, user_name, password):
+        return rest_op('DELETE', host, suburi, request_headers, None, user_name, password)
+        # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
+        # NOTE:  response may be an ExtendedError or may be empty
 
 
-# this is a generator that returns collection members
-def collection(host, collection_uri, request_headers, user_name, password):
-    """
-    collections are of two tupes:
-    - array of things that are fully expanded (details)
-    - array of URLs (links)
-    """
-    # get the collection
-    status, headers, thecollection = rest_get(
-            host, collection_uri, request_headers, user_name, password)
+    # this is a generator that returns collection members
+    def collection(self, host, collection_uri, request_headers, user_name, password):
+        """
+        collections are of two tupes:
+        - array of things that are fully expanded (details)
+        - array of URLs (links)
+        """
+        # get the collection
+        status, headers, thecollection = rest_get(
+                host, collection_uri, request_headers, user_name, password)
 
-    # TODO: commment this
-    while status < 300:
-        # verify expected type
+        # TODO: commment this
+        while status < 300:
+            # verify expected type
 
-        # NOTE:  Because of the Redfish standards effort, we have versioned many things at 0 in anticipation of
-        # them being ratified for version 1 at some point.  So this code makes the (unguarranteed) assumption
-        # throughout that version 0 and 1 are both legitimate at this point.  Don't write code requiring version 0 as
-        # we will bump to version 1 at some point.
+            # NOTE:  Because of the Redfish standards effort, we have versioned many things at 0 in anticipation of
+            # them being ratified for version 1 at some point.  So this code makes the (unguarranteed) assumption
+            # throughout that version 0 and 1 are both legitimate at this point.  Don't write code requiring version 0 as
+            # we will bump to version 1 at some point.
 
-        # hint:  don't limit to version 0 here as we will rev to 1.0 at some point hopefully with minimal changes
-        assert(get_type(thecollection) == 'Collection.0' or get_type(thecollection) == 'Collection.1')
+            # hint:  don't limit to version 0 here as we will rev to 1.0 at some point hopefully with minimal changes
+            assert(get_type(thecollection) == 'Collection.0' or get_type(thecollection) == 'Collection.1')
 
-        # if this collection has inline items, return those
+            # if this collection has inline items, return those
 
-        # NOTE:  Collections are very flexible in how the represent members.  They can be inline in the collection
-        # as members of the 'Items' array, or they may be href links in the links/Members array.  The could actually
-        # be both.  We have
-        # to render it with the href links when an array contains PATCHable items because its complex to PATCH
-        # inline collection members.
-        # A client may wish to pass in a boolean flag favoring the href links vs. the Items in case a collection
-        # contains both.
+            # NOTE:  Collections are very flexible in how the represent members.  They can be inline in the collection
+            # as members of the 'Items' array, or they may be href links in the links/Members array.  The could actually
+            # be both.  We have
+            # to render it with the href links when an array contains PATCHable items because its complex to PATCH
+            # inline collection members.
+            # A client may wish to pass in a boolean flag favoring the href links vs. the Items in case a collection
+            # contains both.
 
-        if 'Items' in thecollection:
+            if 'Items' in thecollection:
 
-            # iterate items
-            for item in thecollection['Items']:
-                # if the item has a self uri pointer, supply that for convenience
-                memberuri = None
-                if 'links' in item and 'self' in item['links']:
-                    memberuri = item['links']['self']['href']
+                # iterate items
+                for item in thecollection['Items']:
+                    # if the item has a self uri pointer, supply that for convenience
+                    memberuri = None
+                    if 'links' in item and 'self' in item['links']:
+                        memberuri = item['links']['self']['href']
 
-                # Read up on Python generator functions to understand what this does.
-                yield 200, None, item, memberuri
+                    # Read up on Python generator functions to understand what this does.
+                    yield 200, None, item, memberuri
 
-        # else walk the member links
-        elif 'links' in thecollection and 'Member' in thecollection['links']:
+            # else walk the member links
+            elif 'links' in thecollection and 'Member' in thecollection['links']:
 
-            # iterate members
-            for memberuri in thecollection['links']['Member']:
-                # for each member return the resource indicated by the member link
-                status, headers, member = rest_get(host, memberuri['href'], request_headers, user_name, password)
+                # iterate members
+                for memberuri in thecollection['links']['Member']:
+                    # for each member return the resource indicated by the member link
+                    status, headers, member = rest_get(host, memberuri['href'], request_headers, user_name, password)
 
-                # Read up on Python generator functions to understand what this does.
-                yield status, headers, member, memberuri['href']
+                    # Read up on Python generator functions to understand what this does.
+                    yield status, headers, member, memberuri['href']
 
-        # page forward if there are more pages in the collection
-        if 'links' in thecollection and 'NextPage' in thecollection['links']:
-            next_link_uri = collection_uri + '?page=' + str(thecollection['links']['NextPage']['page'])
-            status, headers, thecollection = rest_get(host, next_link_uri, request_headers, user_name, password)
+            # page forward if there are more pages in the collection
+            if 'links' in thecollection and 'NextPage' in thecollection['links']:
+                next_link_uri = collection_uri + '?page=' + str(thecollection['links']['NextPage']['page'])
+                status, headers, thecollection = rest_get(host, next_link_uri, request_headers, user_name, password)
 
-        # else we are finished iterating the collection
-        else:
-            break
+            # else we are finished iterating the collection
+            else:
+                break
 
 
 # return the type of an object (down to the major version, skipping minor, and errata)
