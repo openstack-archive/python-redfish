@@ -134,7 +134,7 @@ class RedfishConnection(object):
         super(RedfishConnection, self).__init__()
         # XXX add members, we're going to have to cache
 
-    def rest_op(self, operation, host, suburi, request_headers, request_body,
+    def _op(self, operation, host, suburi, request_headers, request_body,
             user_name, password, x_auth_token=None, enforce_SSL=True):
         """REST operation generic handler"""
 
@@ -216,14 +216,14 @@ class RedfishConnection(object):
         """Generic REST GET handler"""
         # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
         # XXX need parameter sanitization; request_headers must be a dict or None
-        return self.rest_op('GET', host, suburi, request_headers, None, user_name, password)
+        return self._op('GET', host, suburi, request_headers, None, user_name, password)
 
 
     def rest_patch(self, server, suburi, request_headers, request_body, user_name, password):
         """REST PATCH"""
         if not isinstance(request_headers, dict):  request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
-        return self.rest_op('PATCH', server, suburi, request_headers, request_body, user_name, password)
+        return self._op('PATCH', server, suburi, request_headers, request_body, user_name, password)
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
 
@@ -231,20 +231,20 @@ class RedfishConnection(object):
         """REST PUT"""
         if not isinstance(request_headers, dict):  request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
-        return self.rest_op('PUT', host, suburi, request_headers, request_body, user_name, password)
+        return self._op('PUT', host, suburi, request_headers, request_body, user_name, password)
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
     # REST POST
     def rest_post(self, host, suburi, request_headers, request_body, user_name, password):
         if not isinstance(request_headers, dict):  request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
-        return self.rest_op('POST', host, suburi, request_headers, request_body, user_name, password)
+        return self._op('POST', host, suburi, request_headers, request_body, user_name, password)
         # NOTE:  don't assume any newly created resource is included in the response.  Only the Location header matters.
         # the response body may be the new resource, it may be an ExtendedError, or it may be empty.
 
     # REST DELETE
     def rest_delete(self, host, suburi, request_headers, user_name, password):
-        return self.rest_op('DELETE', host, suburi, request_headers, None, user_name, password)
+        return self._op('DELETE', host, suburi, request_headers, None, user_name, password)
         # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
         # NOTE:  response may be an ExtendedError or may be empty
 
