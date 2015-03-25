@@ -130,8 +130,15 @@ import sys
 
 class RedfishConnection(object):
 
-    def __init__(self):
+    def __init__(self, host, user_name, password):
         super(RedfishConnection, self).__init__()
+        self.host = host
+        self.user_name = user_name
+        self.password = password
+        authen = {'Password': self.password, 'UserName': self.user_name}
+        self.rest_post(self.host, '/rest/v1/sessions', None, json.dumps(authen),
+            self.user_name, self.password)
+
         # XXX add members, we're going to have to cache
 
     def _op(self, operation, host, suburi, request_headers, request_body,
