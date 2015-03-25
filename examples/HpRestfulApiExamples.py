@@ -14,100 +14,104 @@
 
 
 """
-
-Provides examples of using the HP RESTful API on iLO for common use cases.  This is for tutorial/example purposes only.
-
----------------------------------------------------------------------------------------------------------------------
-IMPORTANT!!!
----------------------------------------------------------------------------------------------------------------------
-When developing a client for the HP RESTful API, be sure to not code based upon assumptions that are not guaranteed.
-Search for, and note any 'NOTE' comments in this code to read about ways to avoid incorrect assumptions.
-
-The reason avoiding these assumptions is so important is that implementations may vary across systems and firmware
-versions, and we want your code to work consistently.
-
----------------------------------------------------------------------------------------------------------------------
 STARTING ASSUMPTIONS
----------------------------------------------------------------------------------------------------------------------
 
 On URIs:
 
-The HP RESTful API is a "hypermedia API" by design.  This is to avoid building in restrictive assumptions to the
-data model that will make it difficult to adapt to future hardware implementations.  A hypermedia API avoids these
-assumptions by making the data model discoverable via links between resources.
+The RedFish RESTful API is a "hypermedia API" by design.  This is to avoid
+building in restrictive assumptions to the data model that will make it
+difficult to adapt to future hardware implementations.  A hypermedia API avoids
+these assumptions by making the data model discoverable via links between
+resources.
 
-A URI should be treated by the client as opaque, and thus should not be attempted to be understood or deconstructed
-by the client.  Only specific top level URIs (any URI in this sample code) may be assumed, and even these may be
-absent based upon the implementation (e.g. there might be no /rest/v1/Systems collection on something that doesn't
-have compute nodes.)
+A URI should be treated by the client as opaque, and thus should not be
+attempted to be understood or deconstructed by the client.  Only specific top
+level URIs (any URI in this sample code) may be assumed, and even these may be
+absent based upon the implementation (e.g. there might be no /rest/v1/Systems
+collection on something that doesn't have compute nodes.)
 
-The other URIs must be discovered dynamically by following href links.  This is because the API will eventually be
-implemented on a system that breaks any existing data model "shape" assumptions we may make now.  In particular,
-clients should not make assumptions about the URIs for the resource members of a collection.  For instance, the URI of
-a collection member will NOT always be /rest/v1/.../collection/1, or 2.  On Moonshot a System collection member might be
-/rest/v1/Systems/C1N1.
+The other URIs must be discovered dynamically by following href links.  This is
+because the API will eventually be implemented on a system that breaks any
+existing data model "shape" assumptions we may make now.  In particular,
+clients should not make assumptions about the URIs for the resource members of
+a collection.  For instance, the URI of a collection member will NOT always be
+/rest/v1/.../collection/1, or 2.  On systems with multiple compute nodes per
+manager, a System collection member might be /rest/v1/Systems/C1N1.
 
-This sounds very complicated, but in reality (as these examples demonstrate), if you are looking for specific items,
-the traversal logic isn't too complicated.
+This sounds very complicated, but in reality (as these examples demonstrate),
+if you are looking for specific items, the traversal logic isn't too
+complicated.
 
 On Resource Model Traversal:
 
-Although the resources in the data model are linked together, because of cross link references between resources,
-a client may not assume the resource model is a tree.  It is a graph instead, so any crawl of the data model should
-keep track of visited resources to avoid an infinite traversal loop.
+Although the resources in the data model are linked together, because of cross
+link references between resources, a client may not assume the resource model
+is a tree.  It is a graph instead, so any crawl of the data model should keep
+track of visited resources to avoid an infinite traversal loop.
 
-A reference to another resource is any property called "href" no matter where it occurs in a resource.
+A reference to another resource is any property called "href" no matter where
+it occurs in a resource.
 
-An external reference to a resource outside the data model is referred to by a property called "extref".  Any
-resource referred to by extref should not be assumed to follow the conventions of the API.
+An external reference to a resource outside the data model is referred to by a
+property called "extref".  Any resource referred to by extref should not be
+assumed to follow the conventions of the API.
 
 On Resource Versions:
 
-Each resource has a "Type" property with a value of the format Tyepname.x.y.z where
-* x = major version - incrementing this is a breaking change to the schema
-* y = minor version - incrementing this is a non-breaking additive change to the schema
-* z = errata - non-breaking change
+Each resource has a "Type" property with a value of the format Tyepname.x.y.z
+where
+* x = major version - incrementing this is a breaking change to the schema y =
+* minor version - incrementing this is a non-breaking additive change to the
+* schema z = errata - non-breaking change
 
-Because all resources are versioned and schema also have a version, it is possible to design rules for "nearest"
-match (e.g. if you are interacting with multiple services using a common batch of schema files).  The mechanism
-is not prescribed, but a client should be prepared to encounter both older and newer versions of resource types.
+Because all resources are versioned and schema also have a version, it is
+possible to design rules for "nearest" match (e.g. if you are interacting with
+multiple services using a common batch of schema files).  The mechanism is not
+prescribed, but a client should be prepared to encounter both older and newer
+versions of resource types.
 
 On HTTP POST to create:
 
-WHen POSTing to create a resource (e.g. create an account or session) the guarantee is that a successful response
-includes a "Location" HTTP header indicating the resource URI of the newly created resource.  The POST may also
-include a representation of the newly created object in a JSON response body but may not.  Do not assume the response
-body, but test it.  It may also be an ExtendedError object.
+WHen POSTing to create a resource (e.g. create an account or session) the
+guarantee is that a successful response includes a "Location" HTTP header
+indicating the resource URI of the newly created resource.  The POST may also
+include a representation of the newly created object in a JSON response body
+but may not.  Do not assume the response body, but test it.  It may also be an
+ExtendedError object.
 
 HTTP REDIRECT:
 
-All clients must correctly handle HTTP redirect.  We (or Redfish) may eventually need to use redirection as a way
-to alias portions of the data model.
+All clients must correctly handle HTTP redirect.  We (or Redfish) may
+eventually need to use redirection as a way to alias portions of the data
+model.
 
 FUTURE:  Asynchronous tasks
 
-In the future some operations may start asynchonous tasks.  In this case, the client should recognized and handle
-HTTP 202 if needed and the 'Location' header will point to a resource with task information and status.
+In the future some operations may start asynchonous tasks.  In this case, the
+client should recognized and handle HTTP 202 if needed and the 'Location'
+header will point to a resource with task information and status.
 
 JSON-SCHEMA:
 
-The json-schema available at /rest/v1/Schemas governs the content of the resources, but keep in mind:
+The json-schema available at /rest/v1/Schemas governs the content of the
+resources, but keep in mind:
 * not every property in the schema is implemented in every implementation.
-* some properties are schemed to allow both null and anotehr type like string or integer.
+* some properties are schemed to allow both null and anotehr type like string
+* or integer.
 
-Robust client code should check both the existence and type of interesting properties and fail gracefully if
-expectations are not met.
+Robust client code should check both the existence and type of interesting
+properties and fail gracefully if expectations are not met.
 
 GENERAL ADVICE:
 
 Clients should always be prepared for:
 * unimplemented properties (e.g. a property doesn't apply in a particular case)
-* null values in some cases if the value of a property is not currently known due to system conditions
-* HTTP status codes other than 200 OK.  Can your code handle an HTTP 500 Internal Server Error with no other info?
-* URIs are case insensitive
-* HTTP header names are case insensitive
-* JSON Properties and Enum values are case sensitive
-* A client should be tolerant of any set of HTTP headers the service returns
+* null values in some cases if the value of a property is not currently known
+* due to system conditions HTTP status codes other than 200 OK.  Can your code
+* handle an HTTP 500 Internal Server Error with no other info?  URIs are case
+* insensitive HTTP header names are case insensitive JSON Properties and Enum
+* values are case sensitive A client should be tolerant of any set of HTTP
+* headers the service returns
 
 """
 
@@ -125,11 +129,12 @@ import gzip
 import StringIO
 import sys
 
-# REST operation generic handler
-def rest_op(operation, host, suburi, request_headers, request_body, iLO_loginname, iLO_password, x_auth_token=None, enforce_SSL=True):
+
+def rest_op(operation, host, suburi, request_headers, request_body, user_name,
+        password, x_auth_token=None, enforce_SSL=True):
+    """REST operation generic handler"""
 
     url = urlparse('https://' + host + suburi)
-    #url = urlparse('http://' + host + suburi)
 
     if request_headers is None:
         request_headers = dict()
@@ -137,16 +142,19 @@ def rest_op(operation, host, suburi, request_headers, request_body, iLO_loginnam
     # if X-Auth-Token specified, supply it instead of basic auth
     if x_auth_token is not None:
         request_headers['X-Auth-Token'] = x_auth_token
-    # else use iLO_loginname/iLO_password and Basic Auth
-    elif iLO_loginname is not None and iLO_password is not None:
-        request_headers['Authorization'] = "BASIC " + base64.b64encode(iLO_loginname + ":" + iLO_password)
+    # else use user_name/password and Basic Auth
+    elif user_name is not None and password is not None:
+        request_headers['Authorization'] = "BASIC " + base64.b64encode(user_name + ":" + password)
+    # TODO: add support for other types of auth
 
+    # TODO: think about redirects....
     redir_count = 4
     while redir_count:
         conn = None
         if url.scheme == 'https':
             # New in Python 2.7.9, SSL enforcement is defaulted on, but can be opted-out of.
             # The below case is the Opt-Out condition and should be used with GREAT caution.
+            # But could be useful for debugging some things, so we're leaving it in.
             if( sys.version_info.major == 2 and
                 sys.version_info.minor == 7 and
                 sys.version_info.micro >= 9 and
@@ -164,11 +172,14 @@ def rest_op(operation, host, suburi, request_headers, request_body, iLO_loginnam
         resp = conn.getresponse()
         body = resp.read()
 
-        # NOTE:  Do not assume every HTTP operation will return a JSON body.  For example, ExtendedError structures
-        # are only required for HTTP 400 errors and are optional elsewhere as they are mostly redundant for many of the
-        # other HTTP status code.  In particular, 200 OK responses should not have to return any body.
+        # NOTE:  Do not assume every HTTP operation will return a JSON body.
+        # For example, ExtendedError structures are only required for HTTP 400
+        # errors and are optional elsewhere as they are mostly redundant for many
+        # of the other HTTP status code.  In particular, 200 OK responses
+        # should not have to return any body.
 
-        # NOTE:  this makes sure the headers names are all lower cases because HTTP says they are case insensitive
+        # NOTE:  this makes sure the headers names are all lower cases because
+        # HTTP says they are case insensitive
         headers = dict((x.lower(), y) for x, y in resp.getheaders())
 
         # Follow HTTP redirect
@@ -196,47 +207,56 @@ def rest_op(operation, host, suburi, request_headers, request_body, iLO_loginnam
 
     return resp.status, headers, response
 
-# REST GET
-def rest_get(host, suburi, request_headers, iLO_loginname, iLO_password):
-    return rest_op('GET', host, suburi, request_headers, None, iLO_loginname, iLO_password)
-    # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
 
-# REST PATCH
-def rest_patch(server, suburi, request_headers, request_body, iLO_loginname, iLO_password):
+def rest_get(host, suburi, request_headers, user_name, password):
+    """Generic REST GET handler"""
+    # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
+    return rest_op('GET', host, suburi, request_headers, None, user_name, password)
+
+
+def rest_patch(server, suburi, request_headers, request_body, user_name, password):
+    """REST PATCH"""
     if not isinstance(request_headers, dict):  request_headers = dict()
     request_headers['Content-Type'] = 'application/json'
-    return rest_op('PATCH', server, suburi, request_headers, request_body, iLO_loginname, iLO_password)
+    return rest_op('PATCH', server, suburi, request_headers, request_body, user_name, password)
     # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
-# REST PUT
-def rest_put(host, suburi, request_headers, request_body, iLO_loginname, iLO_password):
+
+def rest_put(host, suburi, request_headers, request_body, user_name, password):
+    """REST PUT"""
     if not isinstance(request_headers, dict):  request_headers = dict()
     request_headers['Content-Type'] = 'application/json'
-    return rest_op('PUT', host, suburi, request_headers, request_body, iLO_loginname, iLO_password)
+    return rest_op('PUT', host, suburi, request_headers, request_body, user_name, password)
     # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
 # REST POST
-def rest_post(host, suburi, request_headers, request_body, iLO_loginname, iLO_password):
+def rest_post(host, suburi, request_headers, request_body, user_name, password):
     if not isinstance(request_headers, dict):  request_headers = dict()
     request_headers['Content-Type'] = 'application/json'
-    return rest_op('POST', host, suburi, request_headers, request_body, iLO_loginname, iLO_password)
+    return rest_op('POST', host, suburi, request_headers, request_body, user_name, password)
     # NOTE:  don't assume any newly created resource is included in the response.  Only the Location header matters.
     # the response body may be the new resource, it may be an ExtendedError, or it may be empty.
 
 # REST DELETE
-def rest_delete(host, suburi, request_headers, iLO_loginname, iLO_password):
-    return rest_op('DELETE', host, suburi, request_headers, None, iLO_loginname, iLO_password)
+def rest_delete(host, suburi, request_headers, user_name, password):
+    return rest_op('DELETE', host, suburi, request_headers, None, user_name, password)
     # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
     # NOTE:  response may be an ExtendedError or may be empty
 
+
 # this is a generator that returns collection members
-def collection(host, collection_uri, request_headers, iLO_loginname, iLO_password):
-
+def collection(host, collection_uri, request_headers, user_name, password):
+    """
+    collections are of two tupes:
+    - array of things that are fully expanded (details)
+    - array of URLs (links)
+    """
     # get the collection
-    status, headers, thecollection = rest_get(host, collection_uri, request_headers, iLO_loginname, iLO_password)
+    status, headers, thecollection = rest_get(
+            host, collection_uri, request_headers, user_name, password)
 
+    # TODO: commment this
     while status < 300:
-
         # verify expected type
 
         # NOTE:  Because of the Redfish standards effort, we have versioned many things at 0 in anticipation of
@@ -251,7 +271,7 @@ def collection(host, collection_uri, request_headers, iLO_loginname, iLO_passwor
 
         # NOTE:  Collections are very flexible in how the represent members.  They can be inline in the collection
         # as members of the 'Items' array, or they may be href links in the links/Members array.  The could actually
-        # be both.  Typically, iLO implements the inline (Items) for only when the collection is read only.  We have
+        # be both.  We have
         # to render it with the href links when an array contains PATCHable items because its complex to PATCH
         # inline collection members.
         # A client may wish to pass in a boolean flag favoring the href links vs. the Items in case a collection
@@ -275,7 +295,7 @@ def collection(host, collection_uri, request_headers, iLO_loginname, iLO_passwor
             # iterate members
             for memberuri in thecollection['links']['Member']:
                 # for each member return the resource indicated by the member link
-                status, headers, member = rest_get(host, memberuri['href'], request_headers, iLO_loginname, iLO_password)
+                status, headers, member = rest_get(host, memberuri['href'], request_headers, user_name, password)
 
                 # Read up on Python generator functions to understand what this does.
                 yield status, headers, member, memberuri['href']
@@ -283,11 +303,12 @@ def collection(host, collection_uri, request_headers, iLO_loginname, iLO_passwor
         # page forward if there are more pages in the collection
         if 'links' in thecollection and 'NextPage' in thecollection['links']:
             next_link_uri = collection_uri + '?page=' + str(thecollection['links']['NextPage']['page'])
-            status, headers, thecollection = rest_get(host, next_link_uri, request_headers, iLO_loginname, iLO_password)
+            status, headers, thecollection = rest_get(host, next_link_uri, request_headers, user_name, password)
 
         # else we are finished iterating the collection
         else:
             break
+
 
 # return the type of an object (down to the major version, skipping minor, and errata)
 def get_type(obj):
@@ -302,8 +323,11 @@ def operation_allowed(headers_dict, operation):
             return True
     return False
 
+
 # Message registry support
+# XXX not supported yet
 message_registries = {}
+
 
 # Build a list of decoded messages from the extended_error using the message registries
 # An ExtendedError JSON object is a response from the with its own schema.  This function knows
@@ -337,6 +361,7 @@ def render_extended_error_message_list(extended_error):
                     messages.append('No Message Registry Info:  '+ str(msg))
 
     return messages
+
 
 # Print a list of decoded messages from the extended_error using the message registries
 def print_extended_error(extended_error):
