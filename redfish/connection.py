@@ -136,7 +136,7 @@ class RedfishConnection(object):
         self.user_name = user_name
         self.password = password
         authen = {'Password': self.password, 'UserName': self.user_name}
-        self.rest_post(self.host, '/rest/v1/sessions', None, json.dump(authen),
+        self.rest_post(self.host, '/rest/v1/sessions', None, json.dumps(authen),
             self.user_name, self.password)
 
         # XXX add members, we're going to have to cache
