@@ -27,15 +27,8 @@ from redfish import connection
 
 class RedfishOperation(connection.RedfishConnection):
 
-    def __init__(self, host, user_name, password):
-        super(RedfishOperation, self).__init__(host,
-                user_name, password)
-        # XXX add members, we're going to have to cache
-
-    # noinspection PyPep8Naming
     def reset_server(self):
-        (status, headers, system) = self.rest_get(self.host,
-                    '/rest/v1/Systems', None, self.user_name, self.password)
+        (status, headers, system) = self.rest_get('/rest/v1/Systems', None)
 
         memberuri = system['links']['Member'][0]['href']
         # verify expected type
@@ -51,7 +44,6 @@ class RedfishOperation(connection.RedfishConnection):
 
         # perform the POST action
         print('POST ' + json.dumps(action) + ' to ' + memberuri)
-        (status, headers, response) = self.rest_post(self.host, memberuri, None,
-                action, self.user_name, self.password)
+        (status, headers, response) = self.rest_post(memberuri, None, action)
         print('POST response = ' + str(status))
         connection.print_extended_error(response)

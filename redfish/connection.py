@@ -129,33 +129,42 @@ import sys
 
 
 class RedfishConnection(object):
+    """Implements basic connection handling for Redfish APIs."""
 
-    def __init__(self, host, user_name, password):
+    def __init__(self, host, user_name, password,
+                 auth_token=None, enforce_SSL=True):
         super(RedfishConnection, self).__init__()
         self.host = host
         self.user_name = user_name
         self.password = password
-        authen = {'Password': self.password, 'UserName': self.user_name}
-        self.rest_post(self.host, '/rest/v1/sessions', None, json.dumps(authen),
-            self.user_name, self.password)
+        self.auth_token = auth_token
+        self.enforse_SSL = enforse_SSL
+        # TODO: cache the token returned by this call
+        auth_dict = {'Password': self.password, 'UserName': self.user_name}
+        self.rest_post(self.host, '/rest/v1/sessions', None,
+                       json.dumps(auth_dict), self.user_name, self.password)
+        # TODO: do some schema discovery here and cache the result
 
-        # XXX add members, we're going to have to cache
+    def _op(self, operation, suburi, request_headers=None, request_body=None):
+        """
+        REST operation generic handler
 
-    def _op(self, operation, host, suburi, request_headers, request_body,
-            user_name, password, x_auth_token=None, enforce_SSL=True):
-        """REST operation generic handler"""
+        :param operation: GET, POST, etc
+        :param suburi: the URI path to the resource
+        :param request_headers: optional dict of headers
+        :param request_body: optional JSON body
+        """
 
-        url = urlparse('https://' + host + suburi)
+        url = urlparse('https://' + self.host + suburi)
 
-        if request_headers is None:
-            request_headers = dict()
+        if not isinstance(request_headers, dict):  request_headers = dict()
 
         # if X-Auth-Token specified, supply it instead of basic auth
-        if x_auth_token is not None:
-            request_headers['X-Auth-Token'] = x_auth_token
+        if self.auth_token is not None:
+            request_headers['X-Auth-Token'] = self.auth_token
         # else use user_name/password and Basic Auth
-        elif user_name is not None and password is not None:
-            request_headers['Authorization'] = "BASIC " + base64.b64encode(user_name + ":" + password)
+        elif self.user_name is not None and self.password is not None:
+            request_headers['Authorization'] = "BASIC " + base64.b64encode(self.user_name + ":" + self.password)
         # TODO: add support for other types of auth
 
         # TODO: think about redirects....
@@ -218,54 +227,77 @@ class RedfishConnection(object):
 
         return resp.status, headers, response
 
+    def rest_get(self, suburi, request_headers):
+        """REST GET
 
-    def rest_get(self, host, suburi, request_headers, user_name, password):
-        """Generic REST GET handler"""
+        :param: suburi
+        :param: request_headers
+        """
+        if not isinstance(request_headers, dict):  request_headers = dict()
         # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
-        # XXX need parameter sanitization; request_headers must be a dict or None
-        return self._op('GET', host, suburi, request_headers, None, user_name, password)
+        return self._op('GET', suburi, request_headers, None)
 
+    def rest_patch(self, suburi, request_headers, request_body):
+        """REST PATCH
 
-    def rest_patch(self, server, suburi, request_headers, request_body, user_name, password):
-        """REST PATCH"""
+        :param: suburi
+        :param: request_headers
+        :param: request_body
+        NOTE: this body is a dict, not a JSONPATCH document.
+              redfish does not follow IETF JSONPATCH standard
+              https://tools.ietf.org/html/rfc6902
+        """
         if not isinstance(request_headers, dict):  request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
-        return self._op('PATCH', server, suburi, request_headers, request_body, user_name, password)
+        return self._op('PATCH', suburi, request_headers, request_body)
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
+    def rest_put(self, suburi, request_headers, request_body):
+        """REST PUT
 
-    def rest_put(self, host, suburi, request_headers, request_body, user_name, password):
-        """REST PUT"""
+        :param: suburi
+        :param: request_headers
+        :param: request_body
+        """
         if not isinstance(request_headers, dict):  request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
-        return self._op('PUT', host, suburi, request_headers, request_body, user_name, password)
+        return self._op('PUT', suburi, request_headers, request_body)
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
-    # REST POST
-    def rest_post(self, host, suburi, request_headers, request_body, user_name, password):
+    def rest_post(self, suburi, request_headers, request_body):
+        """REST POST
+
+        :param: suburi
+        :param: request_headers
+        :param: request_body
+        """
         if not isinstance(request_headers, dict):  request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
-        return self._op('POST', host, suburi, request_headers, request_body, user_name, password)
+        return self._op('POST', suburi, request_headers, request_body)
         # NOTE:  don't assume any newly created resource is included in the response.  Only the Location header matters.
         # the response body may be the new resource, it may be an ExtendedError, or it may be empty.
 
-    # REST DELETE
-    def rest_delete(self, host, suburi, request_headers, user_name, password):
-        return self._op('DELETE', host, suburi, request_headers, None, user_name, password)
+    def rest_delete(self, suburi, request_headers):
+        """REST DELETE
+
+        :param: suburi
+        :param: request_headers
+        """
+        if not isinstance(request_headers, dict):  request_headers = dict()
+        return self._op('DELETE', suburi, request_headers, None)
         # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
         # NOTE:  response may be an ExtendedError or may be empty
 
-
     # this is a generator that returns collection members
-    def collection(self, host, collection_uri, request_headers, user_name, password):
+    def collection(self, collection_uri, request_headers):
         """
         collections are of two tupes:
         - array of things that are fully expanded (details)
         - array of URLs (links)
         """
         # get the collection
-        status, headers, thecollection = rest_get(
-                host, collection_uri, request_headers, user_name, password)
+        status, headers, thecollection = self.rest_get(
+                collection_uri, request_headers)
 
         # TODO: commment this
         while status < 300:
