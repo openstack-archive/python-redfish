@@ -15,4 +15,13 @@
 
 class RedfishException(Exception):
     """Base class for redfish exceptions"""
-    pass
+    def __init__(self, message=None, **kwargs):
+        self.kwargs = kwargs
+
+        if not message:
+            try:
+                message = self.message % kwargs
+            except Excetion as e:
+                LOG.exception('Error in string format operation')
+                message = self.message
+        super(RedfishException, self).__init__(message)

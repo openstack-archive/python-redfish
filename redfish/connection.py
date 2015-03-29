@@ -127,10 +127,11 @@ import sys
 import urllib2
 from urlparse import urlparse
 
+from redfish import exception
 
 LOG = logging.getLogger(__name__)
-
 LOG.setLevel(logging.DEBUG)
+
 
 class RedfishConnection(object):
     """Implements basic connection handling for Redfish APIs."""
@@ -196,7 +197,7 @@ class RedfishConnection(object):
             elif url.scheme == 'http':
                 conn = httplib.HTTPConnection(host=url.netloc, strict=True)
             else:
-                raise RedfishException(message='Unknown connection schema')
+                raise exception.RedfishException(message='Unknown connection schema')
 
             # NOTE:  Do not assume every HTTP operation will return a JSON body.
             # For example, ExtendedError structures are only required for HTTP 400
@@ -220,7 +221,9 @@ class RedfishConnection(object):
 
         response = dict()
         try:
+            LOG.debug("BODY: %s." % body.decode('utf-8'))
             response = json.loads(body.decode('utf-8'))
+            LOG.debug("Loaded json: %s" % response)
         except ValueError: # if it doesn't decode as json
             # NOTE:  resources may return gzipped content
             # try to decode as gzip (we should check the headers for Content-Encoding=gzip)
@@ -229,10 +232,7 @@ class RedfishConnection(object):
                 uncompressed_string = gzipper.read().decode('UTF-8')
                 response = json.loads(uncompressed_string)
             except:
-                pass
-
-            # return empty
-            pass
+                raise exception.RedfishException(message='Failed to parse response as a JSON document, received "%s".' % body)
 
         return resp.status, headers, response
 

@@ -42,7 +42,7 @@ def get_response():
     class _response(object):
         status = 200
         def read(self):
-            return "{'foo': 'bar'}"
+            return '{"foo": "bar"}'
         def getheaders(self):
             return [('Fake-Header', 'fake value')]
     return _response()
@@ -91,3 +91,12 @@ class TestRedfishConnection(base.TestCase):
 #        ssl_mock.return_value = mock.Mock()
 #        con = connection.RedfishConnection(*get_fake_params)
 #        ssl_mock.assert_called_once_with(ssl.PROTOCOL_TLSv1)
+
+    def test_get_ok(self):
+        con = connection.RedfishConnection(*get_fake_params())
+        res = con.rest_get('/v1/test', '')
+        self.assertEqual(200, res[0])
+        # Headers ae lower cased when returned
+        self.assertIn('fake-header', res[1].keys())
+        print(res)
+        self.assertIn('foo', res[2].keys())
