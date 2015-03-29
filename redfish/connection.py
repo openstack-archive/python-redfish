@@ -115,18 +115,22 @@ Clients should always be prepared for:
 
 """
 
-
-import ssl
-import urllib2
-from urlparse import urlparse
-import httplib
 import base64
-import json
-import hashlib
 import gzip
+import hashlib
+import httplib
+import json
+import logging
+import ssl
 import StringIO
 import sys
+import urllib2
+from urlparse import urlparse
 
+
+LOG = logging.getLogger(__name__)
+
+LOG.setLevel(logging.DEBUG)
 
 class RedfishConnection(object):
     """Implements basic connection handling for Redfish APIs."""
@@ -138,12 +142,14 @@ class RedfishConnection(object):
         self.user_name = user_name
         self.password = password
         self.auth_token = auth_token
-        self.enforse_SSL = enforse_SSL
+        self.enforce_SSL = enforce_SSL
+
         # TODO: cache the token returned by this call
         auth_dict = {'Password': self.password, 'UserName': self.user_name}
-        self.rest_post(self.host, '/rest/v1/sessions', None,
-                       json.dumps(auth_dict), self.user_name, self.password)
+        self.rest_post('/rest/v1/sessions', None, json.dumps(auth_dict))
+
         # TODO: do some schema discovery here and cache the result
+        LOG.debug('Connection established to host %s.', self.host)
 
     def _op(self, operation, suburi, request_headers=None, request_body=None):
         """
@@ -155,7 +161,10 @@ class RedfishConnection(object):
         :param request_body: optional JSON body
         """
 
-        url = urlparse('https://' + self.host + suburi)
+        # If the http schema wasn't specified, default to HTTPS
+        if self.host[0:4] != 'http':
+            self.host = 'https://' + self.host
+        url = urlparse(self.host + suburi)
 
         if not isinstance(request_headers, dict):  request_headers = dict()
 
@@ -178,7 +187,7 @@ class RedfishConnection(object):
                 if( sys.version_info.major == 2 and
                     sys.version_info.minor == 7 and
                     sys.version_info.micro >= 9 and
-                    enforce_SSL            == False):
+                    self.enforce_SSL            == False):
                     cont=ssl.SSLContext(ssl.PROTOCOL_TLSv1)
                     cont.verify_mode = ssl.CERT_NONE
                     conn = httplib.HTTPSConnection(host=url.netloc, strict=True, context=cont)
@@ -187,10 +196,7 @@ class RedfishConnection(object):
             elif url.scheme == 'http':
                 conn = httplib.HTTPConnection(host=url.netloc, strict=True)
             else:
-                assert(False)
-            conn.request(operation, url.path, headers=request_headers, body=json.dumps(request_body))
-            resp = conn.getresponse()
-            body = resp.read()
+                raise RedfishException(message='Unknown connection schema')
 
             # NOTE:  Do not assume every HTTP operation will return a JSON body.
             # For example, ExtendedError structures are only required for HTTP 400
@@ -198,6 +204,9 @@ class RedfishConnection(object):
             # of the other HTTP status code.  In particular, 200 OK responses
             # should not have to return any body.
 
+            conn.request(operation, url.path, headers=request_headers, body=json.dumps(request_body))
+            resp = conn.getresponse()
+            body = resp.read()
             # NOTE:  this makes sure the headers names are all lower cases because
             # HTTP says they are case insensitive
             headers = dict((x.lower(), y) for x, y in resp.getheaders())
