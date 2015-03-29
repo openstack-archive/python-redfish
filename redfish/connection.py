@@ -174,7 +174,8 @@ class RedfishConnection(object):
             request_headers['X-Auth-Token'] = self.auth_token
         # else use user_name/password and Basic Auth
         elif self.user_name is not None and self.password is not None:
-            request_headers['Authorization'] = "BASIC " + base64.b64encode(self.user_name + ":" + self.password)
+            request_headers['Authorization'] = ("BASIC " + base64.b64encode(
+                    self.user_name + ":" + self.password))
         # TODO: add support for other types of auth
 
         # TODO: think about redirects....
@@ -182,34 +183,38 @@ class RedfishConnection(object):
         while redir_count:
             conn = None
             if url.scheme == 'https':
-                # New in Python 2.7.9, SSL enforcement is defaulted on, but can be opted-out of.
-                # The below case is the Opt-Out condition and should be used with GREAT caution.
-                # But could be useful for debugging some things, so we're leaving it in.
-                if( sys.version_info.major == 2 and
-                    sys.version_info.minor == 7 and
-                    sys.version_info.micro >= 9 and
-                    self.enforce_SSL            == False):
-                    cont=ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+                # New in Python 2.7.9, SSL enforcement is defaulted on.
+                # It can be opted-out of, which might be useful for debugging
+                # some things. The below case is the Opt-Out condition and
+                # should be used with GREAT caution.
+                if (sys.version_info.major == 2
+                        and sys.version_info.minor == 7
+                        and sys.version_info.micro >= 9
+                        and self.enforce_SSL == False):
+                    cont = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
                     cont.verify_mode = ssl.CERT_NONE
-                    conn = httplib.HTTPSConnection(host=url.netloc, strict=True, context=cont)
+                    conn = httplib.HTTPSConnection(
+                            host=url.netloc, strict=True, context=cont)
                 else:
-                    conn = httplib.HTTPSConnection(host=url.netloc, strict=True)
+                    conn = httplib.HTTPSConnection(host=url.netloc,
+                                                   strict=True)
             elif url.scheme == 'http':
                 conn = httplib.HTTPConnection(host=url.netloc, strict=True)
             else:
-                raise exception.RedfishException(message='Unknown connection schema')
+                raise exception.RedfishException(
+                        message='Unknown connection schema')
 
-            # NOTE:  Do not assume every HTTP operation will return a JSON body.
-            # For example, ExtendedError structures are only required for HTTP 400
-            # errors and are optional elsewhere as they are mostly redundant for many
-            # of the other HTTP status code.  In particular, 200 OK responses
-            # should not have to return any body.
-
-            conn.request(operation, url.path, headers=request_headers, body=json.dumps(request_body))
+            # NOTE: Do not assume every HTTP operation will return a JSON body.
+            # For example, ExtendedError structures are only required for
+            # HTTP 400 errors and are optional elsewhere as they are mostly
+            # redundant for many of the other HTTP status code.  In particular,
+            # 200 OK responses should not have to return any body.
+            conn.request(operation, url.path, headers=request_headers,
+                         body=json.dumps(request_body))
             resp = conn.getresponse()
             body = resp.read()
-            # NOTE:  this makes sure the headers names are all lower cases because
-            # HTTP says they are case insensitive
+            # NOTE:  this makes sure the headers names are all lower case
+            # because HTTP says they are case insensitive
             headers = dict((x.lower(), y) for x, y in resp.getheaders())
 
             # Follow HTTP redirect
@@ -225,14 +230,16 @@ class RedfishConnection(object):
             response = json.loads(body.decode('utf-8'))
             LOG.debug("Loaded json: %s" % response)
         except ValueError: # if it doesn't decode as json
-            # NOTE:  resources may return gzipped content
-            # try to decode as gzip (we should check the headers for Content-Encoding=gzip)
+            # NOTE:  resources may return gzipped content, so try to decode
+            # as gzip (we should check the headers for Content-Encoding=gzip)
             try:
                 gzipper = gzip.GzipFile(fileobj=StringIO.StringIO(body))
                 uncompressed_string = gzipper.read().decode('UTF-8')
                 response = json.loads(uncompressed_string)
             except:
-                raise exception.RedfishException(message='Failed to parse response as a JSON document, received "%s".' % body)
+                raise exception.RedfishException(message=
+                        'Failed to parse response as a JSON document, '
+                        'received "%s".' % body)
 
         return resp.status, headers, response
 
@@ -242,8 +249,9 @@ class RedfishConnection(object):
         :param: suburi
         :param: request_headers
         """
-        if not isinstance(request_headers, dict):  request_headers = dict()
-        # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
+        # NOTE:  be prepared for various HTTP responses including 500, 404, etc
         return self._op('GET', suburi, request_headers, None)
 
     def rest_patch(self, suburi, request_headers, request_body):
@@ -256,10 +264,11 @@ class RedfishConnection(object):
               redfish does not follow IETF JSONPATCH standard
               https://tools.ietf.org/html/rfc6902
         """
-        if not isinstance(request_headers, dict):  request_headers = dict()
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
+        # NOTE:  be prepared for various HTTP responses including 500, 404, 202
         return self._op('PATCH', suburi, request_headers, request_body)
-        # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
     def rest_put(self, suburi, request_headers, request_body):
         """REST PUT
@@ -268,10 +277,11 @@ class RedfishConnection(object):
         :param: request_headers
         :param: request_body
         """
-        if not isinstance(request_headers, dict):  request_headers = dict()
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
+        # NOTE:  be prepared for various HTTP responses including 500, 404, 202
         return self._op('PUT', suburi, request_headers, request_body)
-        # NOTE:  be prepared for various HTTP responses including 500, 404, 202 etc.
 
     def rest_post(self, suburi, request_headers, request_body):
         """REST POST
@@ -280,11 +290,14 @@ class RedfishConnection(object):
         :param: request_headers
         :param: request_body
         """
-        if not isinstance(request_headers, dict):  request_headers = dict()
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
         request_headers['Content-Type'] = 'application/json'
+        # NOTE:  don't assume any newly created resource is included in the
+        # # response.  Only the Location header matters.
+        # the response body may be the new resource, it may be an
+        # ExtendedError, or it may be empty.
         return self._op('POST', suburi, request_headers, request_body)
-        # NOTE:  don't assume any newly created resource is included in the response.  Only the Location header matters.
-        # the response body may be the new resource, it may be an ExtendedError, or it may be empty.
 
     def rest_delete(self, suburi, request_headers):
         """REST DELETE
@@ -292,10 +305,11 @@ class RedfishConnection(object):
         :param: suburi
         :param: request_headers
         """
-        if not isinstance(request_headers, dict):  request_headers = dict()
-        return self._op('DELETE', suburi, request_headers, None)
-        # NOTE:  be prepared for various HTTP responses including 500, 404, etc.
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
+        # NOTE:  be prepared for various HTTP responses including 500, 404
         # NOTE:  response may be an ExtendedError or may be empty
+        return self._op('DELETE', suburi, request_headers, None)
 
     # this is a generator that returns collection members
     def collection(self, collection_uri, request_headers):
@@ -331,7 +345,6 @@ class RedfishConnection(object):
             # contains both.
 
             if 'Items' in thecollection:
-
                 # iterate items
                 for item in thecollection['Items']:
                     # if the item has a self uri pointer, supply that for convenience
@@ -344,11 +357,11 @@ class RedfishConnection(object):
 
             # else walk the member links
             elif 'links' in thecollection and 'Member' in thecollection['links']:
-
                 # iterate members
                 for memberuri in thecollection['links']['Member']:
                     # for each member return the resource indicated by the member link
-                    status, headers, member = rest_get(host, memberuri['href'], request_headers, user_name, password)
+                    status, headers, member = rest_get(
+                        host, memberuri['href'], request_headers, user_name, password)
 
                     # Read up on Python generator functions to understand what this does.
                     yield status, headers, member, memberuri['href']
@@ -368,6 +381,7 @@ def get_type(obj):
     typever = obj['Type']
     typesplit = typever.split('.')
     return typesplit[0] + '.' + typesplit[1]
+
 
 # checks HTTP response headers for specified operation (e.g. 'GET' or 'PATCH')
 def operation_allowed(headers_dict, operation):
