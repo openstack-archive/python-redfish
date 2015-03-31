@@ -21,6 +21,7 @@ Tests for `redfish` module.
 
 import fixtures
 import httplib
+import json
 import mock
 import ssl
 
@@ -84,6 +85,8 @@ class TestRedfishConnection(base.TestCase):
                           connection.RedfishConnection,
                           *get_fake_params(host='http://fake'))
 
+    # TODO: add test for unknown connection schema (eg, ftp://)
+
 # FIXME: ssl module has no attribute 'SSLContext'
 # NOTE: skip this test if sys.version_info (major, minor) != (2, 7) and micro < 9
 #    @mock.patch.object(ssl, 'SSLContext')
@@ -98,5 +101,18 @@ class TestRedfishConnection(base.TestCase):
         self.assertEqual(200, res[0])
         # Headers ae lower cased when returned
         self.assertIn('fake-header', res[1].keys())
-        print(res)
         self.assertIn('foo', res[2].keys())
+
+    # TODO: add test for redirects
+
+    # TODO: add test for collections
+
+    # TODO: add test for gzip'd body
+
+    def test_post_ok(self):
+        body = '{"fake": "body"}'
+        json_body = json.dumps(body)
+        con = connection.RedfishConnection(*get_fake_params())
+        res = con.rest_put('/v1/test', '', body)
+        self.con_mock.assert_called_with('GET', '/v1/test', {}, json_body)
+        self.assertEqual(200, res[0])
