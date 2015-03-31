@@ -147,7 +147,7 @@ class RedfishConnection(object):
 
         # TODO: cache the token returned by this call
         auth_dict = {'Password': self.password, 'UserName': self.user_name}
-        self.rest_post('/rest/v1/sessions', None, json.dumps(auth_dict))
+        self.rest_post('/rest/v1/Sessions', None, json.dumps(auth_dict))
 
         # TODO: do some schema discovery here and cache the result
         LOG.debug('Connection established to host %s.', self.host)
@@ -218,8 +218,10 @@ class RedfishConnection(object):
             headers = dict((x.lower(), y) for x, y in resp.getheaders())
 
             # Follow HTTP redirect
-            if resp.status == 301 and 'location' in  headers:
+            if resp.status == 301 and 'location' in headers:
                 url = urlparse(headers['location'])
+                # TODO: cache these redirects
+                LOG.debug("Following redirect to %s", headers['location'])
                 redir_count -= 1
             else:
                 break
