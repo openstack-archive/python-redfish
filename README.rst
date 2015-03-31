@@ -5,11 +5,14 @@ This repository will be used to house the Redfish python library, a reference
 implementation to enable Python developers to communicate with the Redfish API
 (http://www.redfishspecification.org/).
 
-.. sidebar:: NOTE - DRAFT - WORK IN PROGRESS
+NOTE::
+
+    DRAFT - WORK IN PROGRESS
 
     The current Redfish specification revsion is 0.91 - anything and everything
     in this library is subject to change until the DMTF ratifies the Redfish API
     standard v1.0.
+
 
 Project Structure
 -------------------
@@ -32,11 +35,17 @@ To use the enclosed examples, you will need Python 2.7
 (https://www.python.org/downloads/).  Note that Python 2.7.9 enforces greater
 SSL verification requiring server certificates be installed.  Parameters to
 relax the requirements are available in the library, but these configurations
-are discouraged due to security concerns.
+are discouraged due to sec
 
-Project python dependencies are listed in "requirements.txt".
+Python requirements are listed in requirements.txt; additional requirements for
+running the unit test suite are listed in test-requirements.txt.
 
-Any test-specific requirements are listed in "test-requirements.txt".
+Developer setup
+---------------
+
+To initialize a local development environment (eg, so you can run unit tests)
+you should run the following commands::
+
 
 Further References
 ------------------
