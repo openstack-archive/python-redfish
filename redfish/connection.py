@@ -153,10 +153,13 @@ class RedfishConnection(object):
         self._connect()
 
         if not self.auth_token:
-            # TODO: cache the token returned by this call
+            # TODO: if a token is returned by this call, cache it. However,
+            # the sample HTML does not include any token data, so it's unclear
+            # what we should do here.
             LOG.debug('Initiating session with host %s', self.host)
             auth_dict = {'Password': self.password, 'UserName': self.user_name}
-            self.rest_post('/rest/v1/Sessions', None, json.dumps(auth_dict))
+            (status, headers, response) = self.rest_post(
+                    '/rest/v1/Sessions', None, json.dumps(auth_dict))
 
         # TODO: do some schema discovery here and cache the result
         # self.schema = ...
@@ -198,9 +201,6 @@ class RedfishConnection(object):
         :param request_body: optional JSON body
         """
 
-        # If the http schema wasn't specified, default to HTTPS
-        if self.host[0:4] != 'http':
-            self.host = 'https://' + self.host
         url = urlparse(self.host + suburi)
 
         if not isinstance(request_headers, dict):  request_headers = dict()
@@ -338,23 +338,28 @@ class RedfishConnection(object):
         while status < 300:
             # verify expected type
 
-            # NOTE:  Because of the Redfish standards effort, we have versioned many things at 0 in anticipation of
-            # them being ratified for version 1 at some point.  So this code makes the (unguarranteed) assumption
-            # throughout that version 0 and 1 are both legitimate at this point.  Don't write code requiring version 0 as
-            # we will bump to version 1 at some point.
+            # NOTE:  Because of the Redfish standards effort, we have versioned
+            # many things at 0 in anticipation of them being ratified for
+            # version 1 at some point. So this code makes the (unguarranteed)
+            # assumption throughout that version 0 and 1 are both legitimate at
+            # this point. Don't write code requiring version 0 as  we will bump
+            # to version 1 at some point.
 
-            # hint:  don't limit to version 0 here as we will rev to 1.0 at some point hopefully with minimal changes
-            assert(get_type(thecollection) == 'Collection.0' or get_type(thecollection) == 'Collection.1')
+            # hint:  don't limit to version 0 here as we will rev to 1.0 at
+            # some point hopefully with minimal changes
+            assert(get_type(thecollection) == 'Collection.0' or 
+                   get_type(thecollection) == 'Collection.1')
 
             # if this collection has inline items, return those
 
-            # NOTE:  Collections are very flexible in how the represent members.  They can be inline in the collection
-            # as members of the 'Items' array, or they may be href links in the links/Members array.  The could actually
-            # be both.  We have
-            # to render it with the href links when an array contains PATCHable items because its complex to PATCH
-            # inline collection members.
-            # A client may wish to pass in a boolean flag favoring the href links vs. the Items in case a collection
-            # contains both.
+            # NOTE:  Collections are very flexible in how the represent
+            # members.  They can be inline in the collection as members of the
+            # 'Items' array, or they may be href links in the links/Members
+            # array.  The could actually be both.  We have to render it with
+            # the href links when an array contains PATCHable items because its
+            # complex to PATCH inline collection members.  A client may wish
+            # to pass in a boolean flag favoring the href links vs. the Items in
+            # case a collection contains both.
 
             if 'Items' in thecollection:
                 # iterate items
@@ -408,10 +413,11 @@ def operation_allowed(headers_dict, operation):
 message_registries = {}
 
 
-# Build a list of decoded messages from the extended_error using the message registries
-# An ExtendedError JSON object is a response from the with its own schema.  This function knows
-# how to parse the ExtendedError object and, using any loaded message registries, render an array of
-# plain language strings that represent the response.
+# Build a list of decoded messages from the extended_error using the message
+# registries An ExtendedError JSON object is a response from the with its own
+# schema.  This function knows how to parse the ExtendedError object and, using
+# any loaded message registries, render an array of plain language strings that
+# represent the response.
 def render_extended_error_message_list(extended_error):
     messages = []
     if isinstance(extended_error, dict):
