@@ -102,6 +102,8 @@ class TestRedfishConnection(base.TestCase):
         # Headers ae lower cased when returned
         self.assertIn('fake-header', res[1].keys())
         self.assertIn('foo', res[2].keys())
+        self.con_mock.request.assert_called_with(
+                'GET', '/v1/test', body='null', headers=mock.ANY)
 
     # TODO: add test for redirects
 
@@ -113,6 +115,7 @@ class TestRedfishConnection(base.TestCase):
         body = '{"fake": "body"}'
         json_body = json.dumps(body)
         con = connection.RedfishConnection(*get_fake_params())
-        res = con.rest_put('/v1/test', '', body)
-        self.con_mock.assert_called_with('GET', '/v1/test', {}, json_body)
+        res = con.rest_post('/v1/test', '', body)
         self.assertEqual(200, res[0])
+        self.con_mock.request.assert_called_with(
+                'POST', '/v1/test', body=json_body, headers=mock.ANY)

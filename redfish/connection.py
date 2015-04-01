@@ -138,19 +138,55 @@ class RedfishConnection(object):
 
     def __init__(self, host, user_name, password,
                  auth_token=None, enforce_SSL=True):
+        """Initialize a connection to a Redfish service."""
         super(RedfishConnection, self).__init__()
-        self.host = host
+
         self.user_name = user_name
         self.password = password
         self.auth_token = auth_token
         self.enforce_SSL = enforce_SSL
 
-        # TODO: cache the token returned by this call
-        auth_dict = {'Password': self.password, 'UserName': self.user_name}
-        self.rest_post('/rest/v1/Sessions', None, json.dumps(auth_dict))
+        # If the http schema wasn't specified, default to HTTPS
+        if host[0:4] != 'http':
+            host = 'https://' + host
+        self.host = host
+        self._connect()
+
+        if not self.auth_token:
+            # TODO: cache the token returned by this call
+            LOG.debug('Initiating session with host %s', self.host)
+            auth_dict = {'Password': self.password, 'UserName': self.user_name}
+            self.rest_post('/rest/v1/Sessions', None, json.dumps(auth_dict))
 
         # TODO: do some schema discovery here and cache the result
-        LOG.debug('Connection established to host %s.', self.host)
+        # self.schema = ...
+        LOG.info('Connection established to host %s', self.host)
+
+    def _connect(self):
+        LOG.debug("Establishing connection to host %s", self.host)
+        url = urlparse(self.host)
+        if url.scheme == 'https':
+            # New in Python 2.7.9, SSL enforcement is defaulted on.
+            # It can be opted-out of, which might be useful for debugging
+            # some things. The below case is the Opt-Out condition and
+            # should be used with GREAT caution.
+            if (sys.version_info.major == 2
+                    and sys.version_info.minor == 7
+                    and sys.version_info.micro >= 9
+                    and self.enforce_SSL == False):
+                cont = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+                cont.verify_mode = ssl.CERT_NONE
+                self.connection = httplib.HTTPSConnection(
+                        host=url.netloc, strict=True, context=cont)
+            else:
+                self.connection = httplib.HTTPSConnection(
+                        host=url.netloc, strict=True)
+        elif url.scheme == 'http':
+            self.connection = httplib.HTTPConnection(
+                    host=url.netloc, strict=True)
+        else:
+            raise exception.RedfishException(
+                    message='Unknown connection schema')
 
     def _op(self, operation, suburi, request_headers=None, request_body=None):
         """
@@ -178,40 +214,16 @@ class RedfishConnection(object):
                     self.user_name + ":" + self.password))
         # TODO: add support for other types of auth
 
-        # TODO: think about redirects....
         redir_count = 4
         while redir_count:
-            conn = None
-            if url.scheme == 'https':
-                # New in Python 2.7.9, SSL enforcement is defaulted on.
-                # It can be opted-out of, which might be useful for debugging
-                # some things. The below case is the Opt-Out condition and
-                # should be used with GREAT caution.
-                if (sys.version_info.major == 2
-                        and sys.version_info.minor == 7
-                        and sys.version_info.micro >= 9
-                        and self.enforce_SSL == False):
-                    cont = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-                    cont.verify_mode = ssl.CERT_NONE
-                    conn = httplib.HTTPSConnection(
-                            host=url.netloc, strict=True, context=cont)
-                else:
-                    conn = httplib.HTTPSConnection(host=url.netloc,
-                                                   strict=True)
-            elif url.scheme == 'http':
-                conn = httplib.HTTPConnection(host=url.netloc, strict=True)
-            else:
-                raise exception.RedfishException(
-                        message='Unknown connection schema')
-
             # NOTE: Do not assume every HTTP operation will return a JSON body.
             # For example, ExtendedError structures are only required for
             # HTTP 400 errors and are optional elsewhere as they are mostly
             # redundant for many of the other HTTP status code.  In particular,
             # 200 OK responses should not have to return any body.
-            conn.request(operation, url.path, headers=request_headers,
-                         body=json.dumps(request_body))
-            resp = conn.getresponse()
+            self.connection.request(operation, url.path,
+                    headers=request_headers, body=json.dumps(request_body))
+            resp = self.connection.getresponse()
             body = resp.read()
             # NOTE:  this makes sure the headers names are all lower case
             # because HTTP says they are case insensitive
@@ -228,9 +240,7 @@ class RedfishConnection(object):
 
         response = dict()
         try:
-            LOG.debug("BODY: %s." % body.decode('utf-8'))
             response = json.loads(body.decode('utf-8'))
-            LOG.debug("Loaded json: %s" % response)
         except ValueError: # if it doesn't decode as json
             # NOTE:  resources may return gzipped content, so try to decode
             # as gzip (we should check the headers for Content-Encoding=gzip)
