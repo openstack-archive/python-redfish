@@ -120,17 +120,23 @@ import gzip
 import hashlib
 import httplib
 import json
-import logging
 import ssl
 import StringIO
 import sys
 import urllib2
 from urlparse import urlparse
 
-from redfish import exception
+from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
-LOG.setLevel(logging.DEBUG)
+from redfish import exception
+from redfish import types
+
+
+LOG = logging.getLogger('redfish')
+
+
+def connect(host, user, password):
+    return RedfishConnection(host, user, password)
 
 
 class RedfishConnection(object):
@@ -146,10 +152,15 @@ class RedfishConnection(object):
         self.auth_token = auth_token
         self.enforce_SSL = enforce_SSL
 
+        # context for the last status and header returned from a call
+        self.status = None
+        self.headers = None
+
         # If the http schema wasn't specified, default to HTTPS
         if host[0:4] != 'http':
             host = 'https://' + host
         self.host = host
+
         self._connect()
 
         if not self.auth_token:
@@ -158,7 +169,7 @@ class RedfishConnection(object):
             # what we should do here.
             LOG.debug('Initiating session with host %s', self.host)
             auth_dict = {'Password': self.password, 'UserName': self.user_name}
-            (status, headers, response) = self.rest_post(
+            response = self.rest_post(
                     '/rest/v1/Sessions', None, json.dumps(auth_dict))
 
         # TODO: do some schema discovery here and cache the result
@@ -200,10 +211,14 @@ class RedfishConnection(object):
         :param request_headers: optional dict of headers
         :param request_body: optional JSON body
         """
-
+        # ensure trailing slash
+        if suburi[-1:] != '/':
+            suburi = suburi + '/'
         url = urlparse(self.host + suburi)
 
-        if not isinstance(request_headers, dict):  request_headers = dict()
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
+        request_headers['Content-Type'] = 'application/json'
 
         # if X-Auth-Token specified, supply it instead of basic auth
         if self.auth_token is not None:
@@ -253,7 +268,9 @@ class RedfishConnection(object):
                         'Failed to parse response as a JSON document, '
                         'received "%s".' % body)
 
-        return resp.status, headers, response
+        self.status = resp.status
+        self.headers = headers
+        return response
 
     def rest_get(self, suburi, request_headers):
         """REST GET
@@ -261,8 +278,6 @@ class RedfishConnection(object):
         :param: suburi
         :param: request_headers
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
         # NOTE:  be prepared for various HTTP responses including 500, 404, etc
         return self._op('GET', suburi, request_headers, None)
 
@@ -276,9 +291,6 @@ class RedfishConnection(object):
               redfish does not follow IETF JSONPATCH standard
               https://tools.ietf.org/html/rfc6902
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
-        request_headers['Content-Type'] = 'application/json'
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202
         return self._op('PATCH', suburi, request_headers, request_body)
 
@@ -289,9 +301,6 @@ class RedfishConnection(object):
         :param: request_headers
         :param: request_body
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
-        request_headers['Content-Type'] = 'application/json'
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202
         return self._op('PUT', suburi, request_headers, request_body)
 
@@ -302,9 +311,6 @@ class RedfishConnection(object):
         :param: request_headers
         :param: request_body
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
-        request_headers['Content-Type'] = 'application/json'
         # NOTE:  don't assume any newly created resource is included in the
         # # response.  Only the Location header matters.
         # the response body may be the new resource, it may be an
@@ -317,80 +323,27 @@ class RedfishConnection(object):
         :param: suburi
         :param: request_headers
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
         # NOTE:  be prepared for various HTTP responses including 500, 404
         # NOTE:  response may be an ExtendedError or may be empty
         return self._op('DELETE', suburi, request_headers, None)
 
-    # this is a generator that returns collection members
-    def collection(self, collection_uri, request_headers):
-        """
-        collections are of two tupes:
-        - array of things that are fully expanded (details)
-        - array of URLs (links)
-        """
-        # get the collection
-        status, headers, thecollection = self.rest_get(
-                collection_uri, request_headers)
+    def get_root(self):
+        return types.Root(self.rest_get('/rest/v1', {}), connection=self)
 
-        # TODO: commment this
-        while status < 300:
-            # verify expected type
 
-            # NOTE:  Because of the Redfish standards effort, we have versioned
-            # many things at 0 in anticipation of them being ratified for
-            # version 1 at some point. So this code makes the (unguarranteed)
-            # assumption throughout that version 0 and 1 are both legitimate at
-            # this point. Don't write code requiring version 0 as  we will bump
-            # to version 1 at some point.
+class Version(object):
+    def __init__(self, string):
+        try:
+            buf = string.split('.')
+            if len(buf) < 2:
+                raise AttributeError
+        except AttributeError:
+            raise RedfishException(message="Failed to parse version string")
+        self.major = int(buf[0])
+        self.minor = int(buf[1])
 
-            # hint:  don't limit to version 0 here as we will rev to 1.0 at
-            # some point hopefully with minimal changes
-            assert(get_type(thecollection) == 'Collection.0' or 
-                   get_type(thecollection) == 'Collection.1')
-
-            # if this collection has inline items, return those
-
-            # NOTE:  Collections are very flexible in how the represent
-            # members.  They can be inline in the collection as members of the
-            # 'Items' array, or they may be href links in the links/Members
-            # array.  The could actually be both.  We have to render it with
-            # the href links when an array contains PATCHable items because its
-            # complex to PATCH inline collection members.  A client may wish
-            # to pass in a boolean flag favoring the href links vs. the Items in
-            # case a collection contains both.
-
-            if 'Items' in thecollection:
-                # iterate items
-                for item in thecollection['Items']:
-                    # if the item has a self uri pointer, supply that for convenience
-                    memberuri = None
-                    if 'links' in item and 'self' in item['links']:
-                        memberuri = item['links']['self']['href']
-
-                    # Read up on Python generator functions to understand what this does.
-                    yield 200, None, item, memberuri
-
-            # else walk the member links
-            elif 'links' in thecollection and 'Member' in thecollection['links']:
-                # iterate members
-                for memberuri in thecollection['links']['Member']:
-                    # for each member return the resource indicated by the member link
-                    status, headers, member = rest_get(
-                        host, memberuri['href'], request_headers, user_name, password)
-
-                    # Read up on Python generator functions to understand what this does.
-                    yield status, headers, member, memberuri['href']
-
-            # page forward if there are more pages in the collection
-            if 'links' in thecollection and 'NextPage' in thecollection['links']:
-                next_link_uri = collection_uri + '?page=' + str(thecollection['links']['NextPage']['page'])
-                status, headers, thecollection = rest_get(host, next_link_uri, request_headers, user_name, password)
-
-            # else we are finished iterating the collection
-            else:
-                break
+    def __repr__(self):
+        return str(self.major) + '.' + str(self.minor)
 
 
 # return the type of an object (down to the major version, skipping minor, and errata)

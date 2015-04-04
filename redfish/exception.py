@@ -25,3 +25,7 @@ class RedfishException(Exception):
                 LOG.exception('Error in string format operation')
                 message = self.message
         super(RedfishException, self).__init__(message)
+
+
+class ObjectLoadException(RedfishException):
+    pass
