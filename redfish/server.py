@@ -27,7 +27,7 @@ resources.
 A URI should be treated by the client as opaque, and thus should not be
 attempted to be understood or deconstructed by the client.  Only specific top
 level URIs (any URI in this sample code) may be assumed, and even these may be
-absent based upon the implementation (e.g. there might be no /rest/v1/Systems
+absent based upon the implementation (e.g. there might be no /redfish/v1/Systems
 collection on something that doesn't have compute nodes.)
 
 The other URIs must be discovered dynamically by following href links.  This is
@@ -35,8 +35,8 @@ because the API will eventually be implemented on a system that breaks any
 existing data model "shape" assumptions we may make now.  In particular,
 clients should not make assumptions about the URIs for the resource members of
 a collection.  For instance, the URI of a collection member will NOT always be
-/rest/v1/.../collection/1, or 2.  On systems with multiple compute nodes per
-manager, a System collection member might be /rest/v1/Systems/C1N1.
+/redfish/v1/.../collection/1, or 2.  On systems with multiple compute nodes per
+manager, a System collection member might be /redfish/v1/Systems/C1N1.
 
 This sounds very complicated, but in reality (as these examples demonstrate),
 if you are looking for specific items, the traversal logic isn't too
@@ -93,7 +93,7 @@ header will point to a resource with task information and status.
 
 JSON-SCHEMA:
 
-The json-schema available at /rest/v1/Schemas governs the content of the
+The json-schema available at /redfish/v1/Schemas governs the content of the
 resources, but keep in mind:
 * not every property in the schema is implemented in every implementation.
 * some properties are schemed to allow both null and anotehr type like string
@@ -170,7 +170,7 @@ class RedfishConnection(object):
             LOG.debug('Initiating session with host %s', self.host)
             auth_dict = {'Password': self.password, 'UserName': self.user_name}
             response = self.rest_post(
-                    '/rest/v1/Sessions', None, json.dumps(auth_dict))
+                    '/redfish/v1/Sessions', None, json.dumps(auth_dict))
 
         # TODO: do some schema discovery here and cache the result
         # self.schema = ...
@@ -328,7 +328,7 @@ class RedfishConnection(object):
         return self._op('DELETE', suburi, request_headers, None)
 
     def get_root(self):
-        return types.Root(self.rest_get('/rest/v1', {}), connection=self)
+        return types.Root(self.rest_get('/redfish/v1', {}), connection=self)
 
 
 class Version(object):
