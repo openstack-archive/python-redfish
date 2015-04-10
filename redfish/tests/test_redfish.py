@@ -21,11 +21,13 @@ Tests for `redfish` module.
 
 import fixtures
 import httplib
+import json
 import mock
 import ssl
 
 from redfish.tests import base
-from redfish import connection
+from redfish import server
+from redfish import types
 
 
 def get_fake_params(host=None, user=None, pword=None):
@@ -68,21 +70,23 @@ class TestRedfishConnection(base.TestCase):
         self.addCleanup(self.https_mock.stop)
 
     def test_create_ok(self):
-        con = connection.RedfishConnection(*get_fake_params())
+        con = server.RedfishConnection(*get_fake_params())
         self.assertEqual(1, self.https_mock.call_count)
         self.assertEqual(0, self.http_mock.call_count)
 
     def test_create_calls_https_connect(self):
         self.https_mock.side_effect = TestException()
         self.assertRaises(TestException,
-                          connection.RedfishConnection,
+                          server.RedfishConnection,
                           *get_fake_params(host='https://fake'))
 
     def test_create_calls_http_connect(self):
         self.http_mock.side_effect = TestException()
         self.assertRaises(TestException,
-                          connection.RedfishConnection,
+                          server.RedfishConnection,
                           *get_fake_params(host='http://fake'))
+
+    # TODO: add test for unknown connection schema (eg, ftp://)
 
 # FIXME: ssl module has no attribute 'SSLContext'
 # NOTE: skip this test if sys.version_info (major, minor) != (2, 7) and micro < 9
@@ -93,10 +97,26 @@ class TestRedfishConnection(base.TestCase):
 #        ssl_mock.assert_called_once_with(ssl.PROTOCOL_TLSv1)
 
     def test_get_ok(self):
-        con = connection.RedfishConnection(*get_fake_params())
-        res = con.rest_get('/v1/test', '')
-        self.assertEqual(200, res[0])
+        con = server.RedfishConnection(*get_fake_params())
+        res = con.rest_get('/v1/test/', '')
+        self.assertEqual(200, con.status)
         # Headers ae lower cased when returned
-        self.assertIn('fake-header', res[1].keys())
-        print(res)
-        self.assertIn('foo', res[2].keys())
+        self.assertIn('fake-header', con.headers.keys())
+        self.assertIn('foo', res.keys())
+        self.con_mock.request.assert_called_with(
+                'GET', '/v1/test/', body='null', headers=mock.ANY)
+
+    # TODO: add test for redirects
+
+    # TODO: add test for collections
+
+    # TODO: add test for gzip'd body
+
+    def test_post_ok(self):
+        body = '{"fake": "body"}'
+        json_body = json.dumps(body)
+        con = server.RedfishConnection(*get_fake_params())
+        res = con.rest_post('/v1/test/', '', body)
+        self.assertEqual(200, con.status)
+        self.con_mock.request.assert_called_with(
+                'POST', '/v1/test/', body=json_body, headers=mock.ANY)

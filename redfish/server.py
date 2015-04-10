@@ -120,17 +120,23 @@ import gzip
 import hashlib
 import httplib
 import json
-import logging
 import ssl
 import StringIO
 import sys
 import urllib2
 from urlparse import urlparse
 
-from redfish import exception
+from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
-LOG.setLevel(logging.DEBUG)
+from redfish import exception
+from redfish import types
+
+
+LOG = logging.getLogger('redfish')
+
+
+def connect(host, user, password):
+    return RedfishConnection(host, user, password)
 
 
 class RedfishConnection(object):
@@ -138,19 +144,63 @@ class RedfishConnection(object):
 
     def __init__(self, host, user_name, password,
                  auth_token=None, enforce_SSL=True):
+        """Initialize a connection to a Redfish service."""
         super(RedfishConnection, self).__init__()
-        self.host = host
+
         self.user_name = user_name
         self.password = password
         self.auth_token = auth_token
         self.enforce_SSL = enforce_SSL
 
-        # TODO: cache the token returned by this call
-        auth_dict = {'Password': self.password, 'UserName': self.user_name}
-        self.rest_post('/rest/v1/sessions', None, json.dumps(auth_dict))
+        # context for the last status and header returned from a call
+        self.status = None
+        self.headers = None
+
+        # If the http schema wasn't specified, default to HTTPS
+        if host[0:4] != 'http':
+            host = 'https://' + host
+        self.host = host
+
+        self._connect()
+
+        if not self.auth_token:
+            # TODO: if a token is returned by this call, cache it. However,
+            # the sample HTML does not include any token data, so it's unclear
+            # what we should do here.
+            LOG.debug('Initiating session with host %s', self.host)
+            auth_dict = {'Password': self.password, 'UserName': self.user_name}
+            response = self.rest_post(
+                    '/rest/v1/Sessions', None, json.dumps(auth_dict))
 
         # TODO: do some schema discovery here and cache the result
-        LOG.debug('Connection established to host %s.', self.host)
+        # self.schema = ...
+        LOG.info('Connection established to host %s', self.host)
+
+    def _connect(self):
+        LOG.debug("Establishing connection to host %s", self.host)
+        url = urlparse(self.host)
+        if url.scheme == 'https':
+            # New in Python 2.7.9, SSL enforcement is defaulted on.
+            # It can be opted-out of, which might be useful for debugging
+            # some things. The below case is the Opt-Out condition and
+            # should be used with GREAT caution.
+            if (sys.version_info.major == 2
+                    and sys.version_info.minor == 7
+                    and sys.version_info.micro >= 9
+                    and self.enforce_SSL == False):
+                cont = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+                cont.verify_mode = ssl.CERT_NONE
+                self.connection = httplib.HTTPSConnection(
+                        host=url.netloc, strict=True, context=cont)
+            else:
+                self.connection = httplib.HTTPSConnection(
+                        host=url.netloc, strict=True)
+        elif url.scheme == 'http':
+            self.connection = httplib.HTTPConnection(
+                    host=url.netloc, strict=True)
+        else:
+            raise exception.RedfishException(
+                    message='Unknown connection schema')
 
     def _op(self, operation, suburi, request_headers=None, request_body=None):
         """
@@ -161,13 +211,14 @@ class RedfishConnection(object):
         :param request_headers: optional dict of headers
         :param request_body: optional JSON body
         """
-
-        # If the http schema wasn't specified, default to HTTPS
-        if self.host[0:4] != 'http':
-            self.host = 'https://' + self.host
+        # ensure trailing slash
+        if suburi[-1:] != '/':
+            suburi = suburi + '/'
         url = urlparse(self.host + suburi)
 
-        if not isinstance(request_headers, dict):  request_headers = dict()
+        if not isinstance(request_headers, dict):
+            request_headers = dict()
+        request_headers['Content-Type'] = 'application/json'
 
         # if X-Auth-Token specified, supply it instead of basic auth
         if self.auth_token is not None:
@@ -178,57 +229,33 @@ class RedfishConnection(object):
                     self.user_name + ":" + self.password))
         # TODO: add support for other types of auth
 
-        # TODO: think about redirects....
         redir_count = 4
         while redir_count:
-            conn = None
-            if url.scheme == 'https':
-                # New in Python 2.7.9, SSL enforcement is defaulted on.
-                # It can be opted-out of, which might be useful for debugging
-                # some things. The below case is the Opt-Out condition and
-                # should be used with GREAT caution.
-                if (sys.version_info.major == 2
-                        and sys.version_info.minor == 7
-                        and sys.version_info.micro >= 9
-                        and self.enforce_SSL == False):
-                    cont = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-                    cont.verify_mode = ssl.CERT_NONE
-                    conn = httplib.HTTPSConnection(
-                            host=url.netloc, strict=True, context=cont)
-                else:
-                    conn = httplib.HTTPSConnection(host=url.netloc,
-                                                   strict=True)
-            elif url.scheme == 'http':
-                conn = httplib.HTTPConnection(host=url.netloc, strict=True)
-            else:
-                raise exception.RedfishException(
-                        message='Unknown connection schema')
-
             # NOTE: Do not assume every HTTP operation will return a JSON body.
             # For example, ExtendedError structures are only required for
             # HTTP 400 errors and are optional elsewhere as they are mostly
             # redundant for many of the other HTTP status code.  In particular,
             # 200 OK responses should not have to return any body.
-            conn.request(operation, url.path, headers=request_headers,
-                         body=json.dumps(request_body))
-            resp = conn.getresponse()
+            self.connection.request(operation, url.path,
+                    headers=request_headers, body=json.dumps(request_body))
+            resp = self.connection.getresponse()
             body = resp.read()
             # NOTE:  this makes sure the headers names are all lower case
             # because HTTP says they are case insensitive
             headers = dict((x.lower(), y) for x, y in resp.getheaders())
 
             # Follow HTTP redirect
-            if resp.status == 301 and 'location' in  headers:
+            if resp.status == 301 and 'location' in headers:
                 url = urlparse(headers['location'])
+                # TODO: cache these redirects
+                LOG.debug("Following redirect to %s", headers['location'])
                 redir_count -= 1
             else:
                 break
 
         response = dict()
         try:
-            LOG.debug("BODY: %s." % body.decode('utf-8'))
             response = json.loads(body.decode('utf-8'))
-            LOG.debug("Loaded json: %s" % response)
         except ValueError: # if it doesn't decode as json
             # NOTE:  resources may return gzipped content, so try to decode
             # as gzip (we should check the headers for Content-Encoding=gzip)
@@ -241,7 +268,9 @@ class RedfishConnection(object):
                         'Failed to parse response as a JSON document, '
                         'received "%s".' % body)
 
-        return resp.status, headers, response
+        self.status = resp.status
+        self.headers = headers
+        return response
 
     def rest_get(self, suburi, request_headers):
         """REST GET
@@ -249,8 +278,6 @@ class RedfishConnection(object):
         :param: suburi
         :param: request_headers
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
         # NOTE:  be prepared for various HTTP responses including 500, 404, etc
         return self._op('GET', suburi, request_headers, None)
 
@@ -264,9 +291,6 @@ class RedfishConnection(object):
               redfish does not follow IETF JSONPATCH standard
               https://tools.ietf.org/html/rfc6902
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
-        request_headers['Content-Type'] = 'application/json'
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202
         return self._op('PATCH', suburi, request_headers, request_body)
 
@@ -277,9 +301,6 @@ class RedfishConnection(object):
         :param: request_headers
         :param: request_body
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
-        request_headers['Content-Type'] = 'application/json'
         # NOTE:  be prepared for various HTTP responses including 500, 404, 202
         return self._op('PUT', suburi, request_headers, request_body)
 
@@ -290,9 +311,6 @@ class RedfishConnection(object):
         :param: request_headers
         :param: request_body
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
-        request_headers['Content-Type'] = 'application/json'
         # NOTE:  don't assume any newly created resource is included in the
         # response.  Only the Location header matters.
         # the response body may be the new resource, it may be an
@@ -305,75 +323,27 @@ class RedfishConnection(object):
         :param: suburi
         :param: request_headers
         """
-        if not isinstance(request_headers, dict):
-            request_headers = dict()
         # NOTE:  be prepared for various HTTP responses including 500, 404
         # NOTE:  response may be an ExtendedError or may be empty
         return self._op('DELETE', suburi, request_headers, None)
 
-    # this is a generator that returns collection members
-    def collection(self, collection_uri, request_headers):
-        """
-        collections are of two tupes:
-        - array of things that are fully expanded (details)
-        - array of URLs (links)
-        """
-        # get the collection
-        status, headers, thecollection = self.rest_get(
-                collection_uri, request_headers)
+    def get_root(self):
+        return types.Root(self.rest_get('/rest/v1', {}), connection=self)
 
-        # TODO: commment this
-        while status < 300:
-            # verify expected type
 
-            # NOTE:  Because of the Redfish standards effort, we have versioned many things at 0 in anticipation of
-            # them being ratified for version 1 at some point.  So this code makes the (unguarranteed) assumption
-            # throughout that version 0 and 1 are both legitimate at this point.  Don't write code requiring version 0 as
-            # we will bump to version 1 at some point.
+class Version(object):
+    def __init__(self, string):
+        try:
+            buf = string.split('.')
+            if len(buf) < 2:
+                raise AttributeError
+        except AttributeError:
+            raise RedfishException(message="Failed to parse version string")
+        self.major = int(buf[0])
+        self.minor = int(buf[1])
 
-            # hint:  don't limit to version 0 here as we will rev to 1.0 at some point hopefully with minimal changes
-            assert(get_type(thecollection) == 'Collection.0' or get_type(thecollection) == 'Collection.1')
-
-            # if this collection has inline items, return those
-
-            # NOTE:  Collections are very flexible in how the represent members.  They can be inline in the collection
-            # as members of the 'Items' array, or they may be href links in the links/Members array.  The could actually
-            # be both.  We have
-            # to render it with the href links when an array contains PATCHable items because its complex to PATCH
-            # inline collection members.
-            # A client may wish to pass in a boolean flag favoring the href links vs. the Items in case a collection
-            # contains both.
-
-            if 'Items' in thecollection:
-                # iterate items
-                for item in thecollection['Items']:
-                    # if the item has a self uri pointer, supply that for convenience
-                    memberuri = None
-                    if 'links' in item and 'self' in item['links']:
-                        memberuri = item['links']['self']['href']
-
-                    # Read up on Python generator functions to understand what this does.
-                    yield 200, None, item, memberuri
-
-            # else walk the member links
-            elif 'links' in thecollection and 'Member' in thecollection['links']:
-                # iterate members
-                for memberuri in thecollection['links']['Member']:
-                    # for each member return the resource indicated by the member link
-                    status, headers, member = rest_get(
-                        host, memberuri['href'], request_headers, user_name, password)
-
-                    # Read up on Python generator functions to understand what this does.
-                    yield status, headers, member, memberuri['href']
-
-            # page forward if there are more pages in the collection
-            if 'links' in thecollection and 'NextPage' in thecollection['links']:
-                next_link_uri = collection_uri + '?page=' + str(thecollection['links']['NextPage']['page'])
-                status, headers, thecollection = rest_get(host, next_link_uri, request_headers, user_name, password)
-
-            # else we are finished iterating the collection
-            else:
-                break
+    def __repr__(self):
+        return str(self.major) + '.' + str(self.minor)
 
 
 # return the type of an object (down to the major version, skipping minor, and errata)
@@ -396,10 +366,11 @@ def operation_allowed(headers_dict, operation):
 message_registries = {}
 
 
-# Build a list of decoded messages from the extended_error using the message registries
-# An ExtendedError JSON object is a response from the with its own schema.  This function knows
-# how to parse the ExtendedError object and, using any loaded message registries, render an array of
-# plain language strings that represent the response.
+# Build a list of decoded messages from the extended_error using the message
+# registries An ExtendedError JSON object is a response from the with its own
+# schema.  This function knows how to parse the ExtendedError object and, using
+# any loaded message registries, render an array of plain language strings that
+# represent the response.
 def render_extended_error_message_list(extended_error):
     messages = []
     if isinstance(extended_error, dict):
