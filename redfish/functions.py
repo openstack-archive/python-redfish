@@ -28,7 +28,7 @@ from redfish import connection
 class RedfishOperation(connection.RedfishConnection):
 
     def reset_server(self):
-        (status, headers, system) = self.rest_get('/rest/v1/Systems', None)
+        (status, headers, system) = self.rest_get('/redfish/v1/Systems', None)
 
         memberuri = system['links']['Member'][0]['href']
         # verify expected type

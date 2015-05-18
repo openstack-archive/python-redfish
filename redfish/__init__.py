@@ -14,6 +14,9 @@
 
 import pbr.version
 
+import redfish.server
+import redfish.types
+
 
 __version__ = pbr.version.VersionInfo(
     'redfish').version_string()
