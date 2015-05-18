@@ -3,11 +3,11 @@ python-redfish
 
 This repository will be used to house the Redfish python library, a reference
 implementation to enable Python developers to communicate with the Redfish API
-(http://www.redfishspecification.org/).
+(http://www.dmtf.org/standards/redfish).
 
 .. sidebar:: NOTE - DRAFT - WORK IN PROGRESS
 
-    The current Redfish specification revsion is 0.91 - anything and everything
+    The current Redfish specification revision is 0.96.0a - anything and everything
     in this library is subject to change until the DMTF ratifies the Redfish API
     standard v1.0.
 
