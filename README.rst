@@ -9,9 +9,9 @@ NOTE::
 
     DRAFT - WORK IN PROGRESS
 
-    The current Redfish specification revision is 0.96.0a - anything and everything
-    in this library is subject to change until the DMTF ratifies the Redfish API
-    standard v1.0.
+    The current Redfish specification revision is 1.0.0 - Note that the mockup 
+    is still at version 0.99.0a and may not reflect what the standard provides 
+    fully
 
 
 Project Structure
@@ -35,7 +35,7 @@ To use the enclosed examples, you will need Python 2.7
 (https://www.python.org/downloads/).  Note that Python 2.7.9 enforces greater
 SSL verification requiring server certificates be installed.  Parameters to
 relax the requirements are available in the library, but these configurations
-are discouraged due to sec
+are discouraged due to security.
 
 Python requirements are listed in requirements.txt; additional requirements for
 running the unit test suite are listed in test-requirements.txt.
