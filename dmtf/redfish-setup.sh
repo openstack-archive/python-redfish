@@ -16,10 +16,11 @@ trap stop_apache HUP INT QUIT KILL TERM
 
 # Main
 cd /var/www/html
-unzip -q -o /tmp/DSP2043_0.96.0a.zip
-mkdir -p redfish
+unzip -q -o /tmp/DSP2043_0.99.0a.zip
+chmod 755 DSP2043_0.99.0a
+ln -sf DSP2043_0.99.0a redfish
 cd redfish
-ln -sf .. v1
+ln -sf . v1
 cd ..
 ip a
 #sed -i -e 's/Listen 80/Listen 8000/' /etc/apache2/ports.conf

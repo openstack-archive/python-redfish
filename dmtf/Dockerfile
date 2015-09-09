@@ -8,6 +8,6 @@ RUN apt-get update
 RUN apt-get -y install apache2 unzip sed
 EXPOSE 80
 COPY redfish-setup.sh /tmp/redfish-setup.sh
-COPY DSP2043_0.96.0a.zip /tmp/DSP2043_0.96.0a.zip
+COPY DSP2043_0.99.0a.zip /tmp/DSP2043_0.99.0a.zip
 RUN chmod 755 /tmp/redfish-setup.sh 
 CMD /tmp/redfish-setup.sh

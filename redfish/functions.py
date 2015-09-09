@@ -33,10 +33,10 @@ class RedfishOperation(connection.RedfishConnection):
         memberuri = system['links']['Member'][0]['href']
         # verify expected type
         # hint:  don't limit to version 0 here as we will rev to 1.0 at some point hopefully with minimal changes
-#        assert(connection.get_type(system) == 'ComputerSystem.0' or connection.get_type(system) == 'ComputerSystem.1')
+        # assert(connection.get_type(system) == 'ComputerSystem.0' or connection.get_type(system) == 'ComputerSystem.1')
 
         # verify it supports POST
-#        assert(connection.operation_allowed(headers, 'POST'))
+        # assert(connection.operation_allowed(headers, 'POST'))
 
         action = dict()
         action['Action'] = 'Reset'
