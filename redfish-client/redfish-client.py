@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
 
     # Main program
-    redfishclient_version = "redfish-client 0.1"
+    redfishclient_version = "redfish-client PBVER"
 
     # Parse and manage arguments
     arguments = docopt.docopt(__doc__, version=redfishclient_version)

@@ -1,0 +1,30 @@
+#
+# $Id$
+#
+# Filter for rpm build
+#
+
+# PBGRP is replaced by the RPM group of apps
+filter PBGRP = Applications/System
+
+# PBLIC is replaced by the license of the application
+filter PBLIC = ASL 2.0
+
+# PBDEP is replaced by the list of dependencies
+#filter PBDEP =
+
+# PBBDEP is replaced by the list of build dependencies
+filter PBBDEP = python-devel, python-setuptools
+filter PBDEP = python-docopt, python-tortilla
+
+# PBSUF is replaced by the package suffix ($pb->{'suf'} in code)
+filter PBSUF = $pb->{'suf'}
+
+# PBOBS is replaced by the Obsolete line
+#filter PBOBS =
+
+# transform a variable from the key on the right to the key on the left using the perl expression
+# after the input key name.  Useful for taking multi-line documentation and removing trailing spaces
+# or leading spaces.
+#transform PBDESC = PBDESC_raw s/\s+\n/\n/go;
+

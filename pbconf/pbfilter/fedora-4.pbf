@@ -1,0 +1,9 @@
+#
+# $Id$
+#
+# Filter for old fedora build
+#
+
+# PBSUF is replaced by the package suffix ($pb->{'suf'} in code)
+filter PBSUF = $pb->{'suf'}
+
