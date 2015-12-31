@@ -13,7 +13,7 @@ Usage:
   redfish-client.py [options] config showall
   redfish-client.py (-h | --help)
   redfish-client.py --version
-  
+
 
 Options:
   -h --help     Show this screen.
@@ -33,52 +33,56 @@ import docopt
 
 
 class ConfigFile(object):
+
     def __init__(self, config_file):
-	self._config_file = config_file
+        self._config_file = config_file
         # read json file
         try:
             with open(self._config_file) as json_data:
                 self.data = json.load(json_data)
                 json_data.close()
         except (ValueError, IOError):
-            self.data = {"Managers":{}}
+            self.data = {"Managers": {}}
 
     def save(self):
         try:
-            with open(self._config_file , 'w') as json_data:
+            with open(self._config_file, 'w') as json_data:
                 json.dump(self.data, json_data)
                 json_data.close()
         except IOError as e:
-	    print(e.msg)
-	    sys.exit(1)
-    
+            print(e.msg)
+            sys.exit(1)
+
     def add_manager(self, manager_name, url, login, password):
         self.data['Managers'][manager_name] = {}
         self.data['Managers'][manager_name]['url'] = url
-        if login != None:
+        if login is not None:
             self.data['Managers'][manager_name]['login'] = login
-        if password != None:
+        if password is not None:
             self.data['Managers'][manager_name]['password'] = password
-    
+
     def get_managers(self):
         managers = []
         for manager in self.data['Managers']:
-                managers += [manager]
+            managers += [manager]
         return(managers)
-    
+
     def get_manager_info(self, manager):
         info = {}
-        url=self.data['Managers'][manager]['url']
-        login=self.data['Managers'][manager]['login']
-        password=self.data['Managers'][manager]['password']
-        info={'url':url, 'login':login, 'password':password}
-        return(info)    
+        url = self.data['Managers'][manager]['url']
+        login = self.data['Managers'][manager]['login']
+        password = self.data['Managers'][manager]['password']
+        info = {'url': url, 'login': login, 'password': password}
+        return(info)
+
 
 class RedfishClientException(Exception):
+
     """Base class for redfish client exceptions"""
+
     def __init__(self, message=None, **kwargs):
         self.kwargs = kwargs
-        self.message = message  
+        self.message = message
 
 
 if __name__ == '__main__':
@@ -87,12 +91,12 @@ if __name__ == '__main__':
         print("Managers configured :")
         for manager in conf_file.get_managers():
             print(manager)
-            if all == True:
+            if all is True:
                 info = conf_file.get_manager_info(manager)
                 print("\tUrl : {}".format(info['url']))
                 print("\tLogin : {}".format(info['login']))
                 print("\tPassword : {}".format(info['password']))
-    
+
     # Get $HOME environment.
     HOME = os.getenv('HOME')
 
@@ -107,20 +111,16 @@ if __name__ == '__main__':
 
     conf_file = ConfigFile(arguments['--conf_file'])
 
-
-    if arguments['config'] == True:
-        if arguments['show'] == True:
+    if arguments['config'] is True:
+        if arguments['show'] is True:
             show_manager()
-        elif arguments['showall'] == True:
+        elif arguments['showall'] is True:
             show_manager(True)
-        elif arguments['add'] == True:
+        elif arguments['add'] is True:
             conf_file.add_manager(arguments['<manager_name>'],
                                   arguments['<manager_url>'],
                                   arguments['<login>'],
                                   arguments['password'])
             pprint.pprint(conf_file.data)
-
-	conf_file.save()
-
-
+        conf_file.save()
     sys.exit(0)
