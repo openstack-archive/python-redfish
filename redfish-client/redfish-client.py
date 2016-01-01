@@ -81,7 +81,8 @@ class ConfigFile(object):
 
         '''
         try:
-            manager_name in self.get_managers()
+            if manager_name not in self.get_managers():
+                raise KeyError(manager_name)
         except KeyError as e:
             self.manager_incorect(e)
 
