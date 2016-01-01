@@ -11,6 +11,7 @@ Usage:
   redfish-client.py [options] config modify <manager_name> (manager_name | url | login | password) <changed_value>
   redfish-client.py [options] config show
   redfish-client.py [options] config showall
+  redfish-client.py [options] manager getinfo [<manager_name>]
   redfish-client.py (-h | --help)
   redfish-client.py --version
 
@@ -19,11 +20,13 @@ Options:
   -h --help     Show this screen.
   --version     Show version.
   --conf_file FILE      Configuration file [default: ~/.redfish.conf].
+  --insecure    Check SSL certificats
 
 
-config commands manage the configuration file.
-
-"""
+config commands : manage the configuration file.
+manager commands : manage the manager (Ligh out management). If <manager_name>
+                   is not provided use the 'default' entry
+'''
 
 import os
 import sys
@@ -248,6 +251,15 @@ if __name__ == '__main__':
                 print('\tLogin : {}'.format(info['login']))
                 print('\tPassword : {}'.format(info['password']))
 
+    def get_manager_info(manager_name, check_SSL):
+        connection_parameters = conf_file.get_manager_info(manager_name)
+        remote_mgmt = redfish.connect(connection_parameters['url'],
+                                      connection_parameters['login'],
+                                      connection_parameters['password'],
+                                      verify_cert=check_SSL
+                                      )
+
+        print ('Redfish API version : %s \n' % remote_mgmt.get_api_version())
 
     # Initialize logger
     logger = None
@@ -303,4 +315,16 @@ if __name__ == '__main__':
                                          arguments['<changed_value>'])
             logger.debug(pprint.pprint(conf_file.data))
             conf_file.save()
+    if arguments['manager'] is True:
+        if arguments['getinfo'] is True:
+            # If manager is not defined set it to 'default'
+            if not arguments['<manager_name>']:
+                manager_name = 'default'
+                # Check if the default section is available in our conf file
+                conf_file.check_manager(manager_name)
+            if arguments['--insecure'] is True:
+                get_manager_info(manager_name, False)
+            else:
+                get_manager_info(manager_name, True)
+
     sys.exit(0)
