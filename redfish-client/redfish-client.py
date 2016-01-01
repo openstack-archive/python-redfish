@@ -30,11 +30,24 @@ import sys
 import json
 import pprint
 import docopt
+import logging
+from logging.handlers import RotatingFileHandler
 
 
 class ConfigFile(object):
-
+    """redfisht-client configuration file management"""
     def __init__(self, config_file):
+        """Initialize the configuration file
+
+        Open and load configuration file data.
+        If the file does not exist create an empty one ready to receive data
+
+        :param config_file: File name of the configuration file
+                            default: ~/.redfish.conf
+        :type str
+        :returns: Nothing
+
+        """
         self._config_file = config_file
         # read json file
         try:
@@ -45,6 +58,7 @@ class ConfigFile(object):
             self.data = {"Managers": {}}
 
     def save(self):
+        """Save the configuration file data"""
         try:
             with open(self._config_file, 'w') as json_data:
                 json.dump(self.data, json_data)
@@ -52,6 +66,11 @@ class ConfigFile(object):
         except IOError as e:
             print(e.msg)
             sys.exit(1)
+
+    def manager_incorect(self, exception):
+        """ Log and exit if manager name is incorect"""
+        logger.error("Incorect manager name : %s" % exception.args)
+        sys.exit(1)
 
     def add_manager(self, manager_name, url, login, password):
         self.data['Managers'][manager_name] = {}
@@ -61,13 +80,70 @@ class ConfigFile(object):
         if password is not None:
             self.data['Managers'][manager_name]['password'] = password
 
+    def modify_manager(self, manager_name, parameter, parameter_value):
+        """Modify the manager settings
+
+        :param manager name: Name of the manager
+        :type str
+        :param parameter: url | login | password
+        :type str
+        :param parameter_value: Value of the parameter
+        :type str
+        :returns: Nothing
+
+        """
+
+        if parameter == "url":
+            try:
+                self.data['Managers'][manager_name]['url'] = parameter_value
+            except KeyError as e:
+                self.manager_incorect(e)
+        elif parameter == "login":
+            try:
+                self.data['Managers'][manager_name]['login'] = parameter_value
+            except KeyError as e:
+                self.manager_incorect(e)
+        elif parameter == "password":
+            try:
+                self.data['Managers'][manager_name]['password'] = parameter_value
+            except KeyError as e:
+                self.manager_incorect(e)
+
+    def delete_manager(self, manager_name):
+        """Delete manager
+
+        :param manager name: Name of the manager
+        :type str
+        :returns: Nothing
+
+        """
+
+        try:
+            del self.data['Managers'][manager_name]
+        except KeyError as e:
+            self.manager_incorect(e)
+
     def get_managers(self):
+        """Get manager configured
+
+        :returns: Managers
+        :type list
+
+        """
         managers = []
         for manager in self.data['Managers']:
             managers += [manager]
         return(managers)
 
     def get_manager_info(self, manager):
+        """Show manager infos (url, login, password)
+
+        :param manager: Name of the manager
+        :type str
+        :returns: info containing url, login, password
+        :type dict
+
+        """
         info = {}
         url = self.data['Managers'][manager]['url']
         login = self.data['Managers'][manager]['login']
@@ -86,8 +162,47 @@ class RedfishClientException(Exception):
 
 
 if __name__ == '__main__':
+    """Main application redfish-client"""
     # Functions
+
+    def initialize_logger(redfish_logfile, logger_level):
+        """Initialize a global loggeer to track application behaviour
+
+        :param redfish_logfile: log file name
+        :type str
+        :param logger_level: log level (logging.DEBUG, logging.ERROR, ...)
+        :type logging constant
+        :returns:  True
+
+        """
+        global logger
+        logger = logging.getLogger()
+
+        logger.setLevel(logger_level)
+        formatter = logging.Formatter(
+            '%(asctime)s :: %(levelname)s :: %(message)s'
+            )
+        file_handler = RotatingFileHandler(redfish_logfile, 'a', 1000000, 1)
+
+        # First logger to file
+        file_handler.setLevel(logger_level)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+        # Second logger to console
+        steam_handler = logging.StreamHandler()
+        steam_handler.setLevel(logger_level)
+        logger.addHandler(steam_handler)
+        return True
+
     def show_manager(all=False):
+        """Display manager infos
+
+        :param all: Add login and password info
+        :type bool
+        :returns: Nothing
+
+        """
         print("Managers configured :")
         for manager in conf_file.get_managers():
             print(manager)
@@ -97,6 +212,10 @@ if __name__ == '__main__':
                 print("\tLogin : {}".format(info['login']))
                 print("\tPassword : {}".format(info['password']))
 
+    # Initialize logger
+    logger = None
+    initialize_logger("redfish-client.log", logging.DEBUG)
+
     # Get $HOME environment.
     HOME = os.getenv('HOME')
 
@@ -104,8 +223,9 @@ if __name__ == '__main__':
         print("$HOME environment variable not set, please check your system")
         sys.exit(1)
 
+    # Parse and manage arguments
     arguments = docopt.docopt(__doc__, version='redfish-client 0.1')
-    print(arguments)
+    logger.debug(arguments)
 
     arguments['--conf_file'] = arguments['--conf_file'].replace('~', HOME)
 
@@ -121,6 +241,25 @@ if __name__ == '__main__':
                                   arguments['<manager_url>'],
                                   arguments['<login>'],
                                   arguments['password'])
-            pprint.pprint(conf_file.data)
-        conf_file.save()
+            logger.debug(pprint.pprint(conf_file.data))
+            conf_file.save()
+        elif arguments['del'] is True:
+            conf_file.delete_manager(arguments['<manager_name>'])
+            logger.debug(pprint.pprint(conf_file.data))
+            conf_file.save()
+        elif arguments['modify'] is True:
+            if arguments['url'] is not False:
+                conf_file.modify_manager(arguments['<manager_name>'],
+                                         "url",
+                                         arguments['<changed_value>'])
+            elif arguments['login'] is not False:
+                conf_file.modify_manager(arguments['<manager_name>'],
+                                         "login",
+                                         arguments['<changed_value>'])
+            elif arguments['password'] is not False:
+                conf_file.modify_manager(arguments['<manager_name>'],
+                                         "password",
+                                         arguments['<changed_value>'])
+            logger.debug(pprint.pprint(conf_file.data))
+            conf_file.save()
     sys.exit(0)
