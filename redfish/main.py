@@ -271,7 +271,7 @@ class RedfishConnection(object):
     #
     #     print self.systemCollection.Name
     #
-    # ======================================================================== 
+    # ========================================================================
     def get_api_version(self):
         """Return api version.
 
@@ -286,14 +286,15 @@ class RedfishConnection(object):
         url = self.Root.get_link_url(
                                     mapping.redfish_mapper.map_sessionservice()
                                     )
-        
-        # Handle login with redfish 1.00, url must be : 
+
+        # Handle login with redfish 1.00, url must be :
         # /rest/v1/SessionService/Sessions as specified by the specification
         if float(mapping.redfish_version) >= 1.00:
             url += '/Sessions'
 
         # Craft request body and header
         requestBody = {"UserName": self.connection_parameters.user_name  , "Password": self.connection_parameters.password}
+        config.logger.debug(requestBody)
         header = {'Content-type': 'application/json'}
         # =======================================================================
         # Tortilla seems not able to provide the header of a post request answer.
@@ -308,13 +309,16 @@ class RedfishConnection(object):
                              headers=header,
                              verify=self.connection_parameters.verify_cert
                             )
- 
+
         # =======================================================================
         # TODO : Manage exception with a class.
         # =======================================================================
         if auth.status_code != 201:
-            raise exception.AuthenticationFailureException("Login request return an invalid status code")
-            #sysraise "Error getting token", auth.status_code
+            try:
+                answer=auth.json()
+            except ValueError as e:
+                answer = ""
+            raise exception.AuthenticationFailureException("Login request return an invalid status code ", code=auth.status_code, queryAnswer=answer)
 
         self.connection_parameters.auth_token = auth.headers.get("x-auth-token")
         self.connection_parameters.user_uri = auth.headers.get("location")
