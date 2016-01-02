@@ -17,11 +17,14 @@ Usage:
 
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
-  --conf_file FILE      Configuration file [default: ~/.redfish.conf].
-  --insecure    Check SSL certificats
-
+  -h --help             Show this screen.
+  --version             Show version.
+  --conf_file FILE      Configuration file [default: ~/.redfish.conf]
+  --insecure            Check SSL certificats
+  --debug LEVEL         Run in debug mode, LEVEL from 1 to 3 increase verbosity
+                        Security warning LEVEL > 1 could reveal password into the logs
+  --debugfile FILE      Specify the client debugfile [default: redfish-client.log]
+  --libdebugfile FILE   Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
 
 config commands : manage the configuration file.
 manager commands : manage the manager (Ligh out management). If <manager_name>
@@ -232,7 +235,7 @@ if __name__ == '__main__':
         try:
             print 'Gathering data from manager, please wait...'
             # TODO : Add a rotating star showing program is running ?
-            #        Could be a nice exercice for learning python
+            #        Could be a nice exercice for learning python. :)
             logger.info('Gathering data from manager')
             remote_mgmt = redfish.connect(connection_parameters['url'],
                                           connection_parameters['login'],
@@ -254,20 +257,53 @@ if __name__ == '__main__':
     # Parse and manage arguments
     arguments = docopt.docopt(__doc__, version=redfishclient_version)
 
-    # Initialize logger
+    # Check debuging options
+    # Debugging LEVEL :
+    # 1- Only client
+    # 2- Client and lib
+    # 3- Client and lib + Tortilla
+
+    loglevel = {"console_logger_level": "nolog",
+                "file_logger_level": logging.INFO,
+                "tortilla": False,
+                "lib_console_logger_level": "nolog",
+                "lib_file_logger_level": logging.INFO,
+                "urllib3_disable_warning": True}
+
+    if arguments['--debug'] == '1':
+        loglevel['console_logger_level'] = logging.DEBUG
+        loglevel['file_logger_level'] = logging.DEBUG
+    elif arguments['--debug'] == '2':
+        loglevel['console_logger_level'] = logging.DEBUG
+        loglevel['file_logger_level'] = logging.DEBUG
+        loglevel['lib_console_logger_level'] = logging.DEBUG
+        loglevel['lib_file_logger_level'] = logging.DEBUG
+        loglevel['urllib3_disable_warning'] = False
+    elif arguments['--debug'] == '3':
+        loglevel['console_logger_level'] = logging.DEBUG
+        loglevel['file_logger_level'] = logging.DEBUG
+        loglevel['lib_console_logger_level'] = logging.DEBUG
+        loglevel['lib_file_logger_level'] = logging.DEBUG
+        loglevel['urllib3_disable_warning'] = False
+        loglevel['tortilla'] = True
+
+    # Initialize logger according to command line parameters
     logger = None
-    logger = redfish.config.initialize_logger('redfish-client.log',
-                                              "nolog",
-                                              logging.DEBUG,
+    logger = redfish.config.initialize_logger(arguments['--debugfile'],
+                                              loglevel['console_logger_level'],
+                                              loglevel['file_logger_level'],
                                               __name__)
-    redfish.config.TORTILLADEBUG = False
-    redfish.config.CONSOLE_LOGGER_LEVEL = "nolog"
+    redfish.config.REDFISH_LOGFILE = arguments['--libdebugfile']
+    redfish.config.TORTILLADEBUG = loglevel['tortilla']
+    redfish.config.CONSOLE_LOGGER_LEVEL = loglevel['lib_console_logger_level']
+    redfish.config.FILE_LOGGER_LEVEL = loglevel['lib_file_logger_level']
     # Avoid warning messages from request / urllib3
     # SecurityWarning: Certificate has no `subjectAltName`, falling back
     # to check for a `commonName` for now. This feature is being removed
     # by major browsers and deprecated by RFC 2818.
     # (See https://github.com/shazow/urllib3/issues/497 for details.)
-    requests.packages.urllib3.disable_warnings()
+    if loglevel['urllib3_disable_warning'] is True:
+        requests.packages.urllib3.disable_warnings()
 
     logger.info("*** Starting %s ***" % redfishclient_version)
     logger.info("Arguments parsed")
