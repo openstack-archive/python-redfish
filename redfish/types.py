@@ -14,9 +14,9 @@ import exception
 
 
 class Base(object):
-    """Abstract class to manage types (Chassis, Servers etc...)."""
+    '''Abstract class to manage types (Chassis, Servers etc...).'''
     def __init__(self, url, connection_parameters):
-        """Class constructor"""
+        '''Class constructor'''
         global TORTILLADEBUG
         self.connection_parameters = connection_parameters # Uggly hack to check
         self.url = url
@@ -31,34 +31,34 @@ class Base(object):
                                              )
         except requests.ConnectionError as e:
             # Log and transmit the exception.
-            config.logger.info("Raise a RedfishException to upper level")
-            msg = "Connection error : {}\n".format(e.message)
+            config.logger.info('Raise a RedfishException to upper level')
+            msg = 'Connection error : {}\n'.format(e.message)
             raise exception.ConnectionFailureException(msg)
         except simplejson.scanner.JSONDecodeError as e:
             # Log and transmit the exception.
-            config.logger.info("Raise a RedfishException to upper level")
+            config.logger.info('Raise a RedfishException to upper level')
             msg = \
-                "Ivalid content : Content does not appear to be a valid " + \
-                "Redfish json\n"
+                'Ivalid content : Content does not appear to be a valid ' + \
+                'Redfish json\n'
             raise exception.InvalidRedfishContentException(msg)
         except TypeError as e:
             # This happen connecting to a manager using non trusted
             # SSL certificats.
             # The exception is not what could be expected in such case but this
             # is the one provided by Tortilla.
-            config.logger.info("Raise a RedfishException to upper level")
-            msg = "Connection error\n"
+            config.logger.info('Raise a RedfishException to upper level')
+            msg = 'Connection error\n'
             raise exception.NonTrustedCertificatException(msg)
         config.logger.debug(self.data)
 
     def get_link_url(self, link_type):
-        """Need to be explained.
+        '''Need to be explained.
 
         :param redfish_logfile: redfish log
         :type str
         :returns:  True
 
-        """
+        '''
         self.links=[]
 
         # Manage standard < 1.0
@@ -80,36 +80,36 @@ class Base(object):
         self.__url = url
 
     def get_parameter(self, parameter_name):
-        """Generic function to get any system parameter
+        '''Generic function to get a specific parameter
 
         :param parameter_name: name of the parameter
         :returns:  string -- parameter value
 
-        """
+        '''
         try:
             return self.data[parameter_name]
         except:
-            return "Parameter does not exist"
+            return 'Parameter does not exist'
 
     def get_parameters(self):
-        """Generic function to get all system parameters
+        '''Generic function to get all parameters
 
         :returns:  string -- parameter value
 
-        """
+        '''
         try:
             return self.data
         except:
             return -1
 
     def set_parameter(self, parameter_name, value):
-        """Generic function to set any system parameter
+        '''Generic function to set a specific parameter
 
         :param parameter_name: name of the parameter
         :param value: value to set
         :returns:   string -- http response of PATCH request
 
-        """
+        '''
         # Craft the request
         action = dict()
         action[parameter_name] = value
@@ -117,14 +117,15 @@ class Base(object):
 
         # Perform the POST action
         config.logger.debug(self.api_url)
-        response = self.api_url.patch(verify=self.connection_parameters.verify_cert,
-                                     headers={'x-auth-token': self.connection_parameters.auth_token},
-                                     data=action
-                                     )
+        response = self.api_url.patch(
+            verify=self.connection_parameters.verify_cert,
+            headers={'x-auth-token': self.connection_parameters.auth_token},
+            data=action)
         return response
 
+
 class BaseCollection(Base):
-    """Abstract class to manage collection (Chassis, Servers etc...)."""
+    '''Abstract class to manage collection (Chassis, Servers etc...).'''
     def __init__(self, url, connection_parameters):
         super(BaseCollection, self).__init__(url, connection_parameters)
 
@@ -139,8 +140,8 @@ class BaseCollection(Base):
         else:
             linksmembers = getattr(self.data, mapping.redfish_mapper.map_members())
         for link in linksmembers:
-            #self.links.append(getattr(link,"@odata.id"))
-            #self.links.append(getattr(link,"href"))
+            #self.links.append(getattr(link,'@odata.id'))
+            #self.links.append(getattr(link,'href'))
             self.links.append(urljoin(self.url, getattr(link, mapping.redfish_mapper.map_links_ref())))
 
 
@@ -148,14 +149,14 @@ class BaseCollection(Base):
 
 
 class Root(Base):
-    """Class to manage redfish Root data."""
+    '''Class to manage redfish Root data.'''
     def get_api_version(self):
-        """Return api version.
+        '''Return api version.
 
         :returns:  string -- version
         :raises: AttributeError
 
-        """
+        '''
         try:
             version = self.data.RedfishVersion
         except AttributeError:
@@ -166,52 +167,52 @@ class Root(Base):
         return(version)
 
     def get_api_UUID(self):
-        """Return UUID version.
+        '''Return UUID version.
 
         :returns:  string -- UUID
 
-        """
+        '''
         return self.data.UUID
 
     def get_api_link_to_server(self):
-        """Return api link to server.
+        '''Return api link to server.
 
         :returns:  string -- path
 
-        """
-        return getattr(self.root.Links.Systems, "@odata.id")
+        '''
+        return getattr(self.root.Links.Systems, '@odata.id')
 
 
 class SessionService(Base):
-    """Class to manage redfish SessionService data."""
+    '''Class to manage redfish SessionService data.'''
     pass
 
 
 class Managers(Base):
-    """Class to manage redfish Managers."""
+    '''Class to manage redfish Managers.'''
     def __init__(self, url, connection_parameters):
         super(Managers, self).__init__(url, connection_parameters)
         try:
 
 #             self.ethernet_interfaces_collection = EthernetInterfacesCollection(
-#                                                         self.get_link_url("EthernetInterfaces"),
+#                                                         self.get_link_url('EthernetInterfaces'),
 #                                                         connection_parameters
 #                                                         )
 
             # Works on proliant, need to treat 095 vs 0.96 differences
             self.ethernet_interfaces_collection = EthernetInterfacesCollection(
-                                                        self.get_link_url("EthernetNICs"),
+                                                        self.get_link_url('EthernetNICs'),
                                                         connection_parameters
                                                         )
         except:
             pass
 
     def get_firmware_version(self):
-        """Get bios version of the system.
+        '''Get bios version of the system.
 
         :returns:  string -- bios version
 
-        """
+        '''
         try:
             # Returned by proliant
             return self.data.FirmwareVersion
@@ -220,33 +221,35 @@ class Managers(Base):
             # Hopefully this kind of discrepencies will be fixed with Redfish 1.0 (August)
             return self.data.FirmwareVersion
 
+
 class ManagersCollection(BaseCollection):
-    """Class to manage redfish ManagersCollection data."""
+    '''Class to manage redfish ManagersCollection data.'''
     def __init__(self, url, connection_parameters):
-        """Class constructor"""
+        '''Class constructor'''
         super(ManagersCollection, self).__init__(url, connection_parameters)
         self.managers_list = []
         for link in self.links:
             self.managers_list.append(Managers(link, connection_parameters))
 
+
 class Systems(Base):
-    """Class to manage redfish Systems data."""
+    '''Class to manage redfish Systems data.'''
     # TODO : Need to discuss with Bruno the required method.
     #        Also to check with the ironic driver requirement.
     def __init__(self, url, connection_parameters):
-        """Class constructor"""
+        '''Class constructor'''
         super(Systems, self).__init__(url, connection_parameters)
         try:
-            self.bios = Bios(url + "Bios/Settings", connection_parameters)
+            self.bios = Bios(url + 'Bios/Settings', connection_parameters)
         except:
             pass
 
     def reset_system(self):
-        """Force reset of the system.
+        '''Force reset of the system.
 
         :returns:  string -- http response of POST request
 
-        """
+        '''
         # Craft the request
         action = dict()
         action['Action'] = 'Reset'
@@ -262,11 +265,11 @@ class Systems(Base):
         return response
 
     def get_bios_version(self):
-        """Get bios version of the system.
+        '''Get bios version of the system.
 
         :returns:  string -- bios version
 
-        """
+        '''
         try:
             # Returned by proliant
             return self.data.Bios.Current.VersionString
@@ -276,37 +279,37 @@ class Systems(Base):
             return self.data.BiosVersion
 
     def get_serial_number(self):
-        """Get serial number of the system.
+        '''Get serial number of the system.
 
         :returns:  string -- serial number
 
-        """
+        '''
         try:
             # Returned by proliant
             return self.data.SerialNumber
         except:
             # Returned by mockup.
             # Hopefully this kind of discrepencies will be fixed with Redfish 1.0 (August)
-            return ""
+            return ''
 
     def get_power(self):
-        """Get power status of the system.
+        '''Get power status of the system.
 
         :returns:  string -- power status or NULL if there is an issue
 
-        """
+        '''
         try:
             return self.data.Power
         except:
-            return ""
+            return ''
 
     def set_parameter_json(self, value):
-        """Generic function to set any system parameter using json structure
+        '''Generic function to set any system parameter using json structure
 
         :param value: json structure with value to update
         :returns:   string -- http response of PATCH request
 
-        """
+        '''
         # perform the POST action
         #print self.api_url.url()
         response = requests.patch(self.api_url.url(),
@@ -316,30 +319,31 @@ class Systems(Base):
         return response.reason
 
     def set_boot_source_override(self, target, enabled):
-        """Shotcut function to set boot source
+        '''Shotcut function to set boot source
 
         :param target: new boot source. Supported values:
-            "None",
-            "Pxe",
-            "Floppy",
-            "Cd",
-            "Usb",
-            "Hdd",
-            "BiosSetup",
-            "Utilities",
-            "Diags",
-            "UefiShell",
-            "UefiTarget"
+            'None',
+            'Pxe',
+            'Floppy',
+            'Cd',
+            'Usb',
+            'Hdd',
+            'BiosSetup',
+            'Utilities',
+            'Diags',
+            'UefiShell',
+            'UefiTarget'
         :param enabled: Supported values:
-            "Disabled",
-            "Once",
-            "Continuous"
+            'Disabled',
+            'Once',
+            'Continuous'
         :returns:   string -- http response of PATCH request
-        """
-        return self.set_parameter_json('{"Boot": {"BootSourceOverrideTarget": "'+target+'"},{"BootSourceOverrideEnabled" : "'+enabled+'"}}')
+        '''
+        return self.set_parameter_json('{'Boot': {'BootSourceOverrideTarget': ''+target+''},{'BootSourceOverrideEnabled' : ''+enabled+''}}')
+
 
 class SystemsCollection(BaseCollection):
-    """Class to manage redfish ManagersCollection data."""
+    '''Class to manage redfish ManagersCollection data.'''
     def __init__(self, url, connection_parameters):
         super(SystemsCollection, self).__init__(url, connection_parameters)
 
@@ -348,19 +352,22 @@ class SystemsCollection(BaseCollection):
         for link in self.links:
             self.systems_list.append(Systems(link, connection_parameters))
 
+
 class Bios(Base):
-    """Class to manage redfish Bios data."""
+    '''Class to manage redfish Bios data.'''
     def __init__(self, url, connection_parameters):
         super(Bios, self).__init__(url, connection_parameters)
-        self.boot = Boot(re.findall(".+/Bios",url)[0]+"/Boot/Settings", connection_parameters)
+        self.boot = Boot(re.findall('.+/Bios',url)[0]+'/Boot/Settings', connection_parameters)
+
 
 class Boot(Base):
-    """Class to manage redfish Boot data."""
+    '''Class to manage redfish Boot data.'''
     def __init__(self, url, connection_parameters):
         super(Boot, self).__init__(url, connection_parameters)
 
+
 class EthernetInterfacesCollection(BaseCollection):
-    """Class to manage redfish EthernetInterfacesColkection data."""
+    '''Class to manage redfish EthernetInterfacesColkection data.'''
     def __init__(self, url, connection_parameters):
         super(EthernetInterfacesCollection, self).__init__(url, connection_parameters)
 
@@ -372,6 +379,7 @@ class EthernetInterfacesCollection(BaseCollection):
         for link in self.links:
             self.ethernet_interfaces_list.append(EthernetInterfaces(link, connection_parameters))
 
+
 class EthernetInterfaces(Base):
-    """Class to manage redfish EthernetInterfaces data."""
+    '''Class to manage redfish EthernetInterfaces data.'''
     pass
