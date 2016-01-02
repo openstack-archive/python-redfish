@@ -289,7 +289,7 @@ if __name__ == '__main__':
             conf_file.add_manager(arguments['<manager_name>'],
                                   arguments['<manager_url>'],
                                   arguments['<login>'],
-                                  arguments['password'])
+                                  arguments['<password>'])
             logger.debug(pprint.pprint(conf_file.data))
             conf_file.save()
         elif arguments['del'] is True:
