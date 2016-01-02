@@ -253,10 +253,18 @@ if __name__ == '__main__':
 
     def get_manager_info(manager_name, check_SSL):
         connection_parameters = conf_file.get_manager_info(manager_name)
+        if not connection_parameters['login']:
+            simulator = True
+            enforceSSL = False
+        else:
+            simulator = False
+            enforceSSL = True
         remote_mgmt = redfish.connect(connection_parameters['url'],
                                       connection_parameters['login'],
                                       connection_parameters['password'],
-                                      verify_cert=check_SSL
+                                      verify_cert=check_SSL,
+                                      simulator=simulator,
+                                      enforceSSL=enforceSSL
                                       )
 
         print ('Redfish API version : %s \n' % remote_mgmt.get_api_version())
@@ -320,8 +328,10 @@ if __name__ == '__main__':
             # If manager is not defined set it to 'default'
             if not arguments['<manager_name>']:
                 manager_name = 'default'
-                # Check if the default section is available in our conf file
-                conf_file.check_manager(manager_name)
+            else:
+                manager_name = arguments['<manager_name>']
+            # Check if the default section is available in our conf file
+            conf_file.check_manager(manager_name)
             if arguments['--insecure'] is True:
                 get_manager_info(manager_name, False)
             else:
