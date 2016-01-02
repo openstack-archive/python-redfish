@@ -229,13 +229,22 @@ if __name__ == '__main__':
         else:
             simulator = False
             enforceSSL = True
-        remote_mgmt = redfish.connect(connection_parameters['url'],
-                                      connection_parameters['login'],
-                                      connection_parameters['password'],
-                                      verify_cert=check_SSL,
-                                      simulator=simulator,
-                                      enforceSSL=enforceSSL
-                                      )
+        try:
+            print 'Gathering data from manager, please wait...'
+            # TODO : Add a rotating star showing program is running ?
+            #        Could be a nice exercice for learning python
+            logger.info('Gathering data from manager')
+            remote_mgmt = redfish.connect(connection_parameters['url'],
+                                          connection_parameters['login'],
+                                          connection_parameters['password'],
+                                          verify_cert=check_SSL,
+                                          simulator=simulator,
+                                          enforceSSL=enforceSSL
+                                          )
+        except redfish.exception.RedfishException as e:
+            sys.stderr.write(str(e.message))
+            sys.stderr.write(str(e.advices))
+            sys.exit(1)
 
         print ('Redfish API version : %s \n' % remote_mgmt.get_api_version())
 
