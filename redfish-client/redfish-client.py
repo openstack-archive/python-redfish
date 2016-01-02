@@ -34,7 +34,6 @@ import json
 import pprint
 import docopt
 import logging
-from logging.handlers import RotatingFileHandler
 import redfish
 import requests.packages.urllib3
 
@@ -205,41 +204,6 @@ if __name__ == '__main__':
     '''Main application redfish-client'''
     # Functions
 
-    def initialize_logger(redfish_logfile,
-                          console_logger_level,
-                          file_logger_level):
-        '''Initialize a global logger to track application behaviour
-
-        :param redfish_logfile: Log filename
-        :type str
-        :param screen_logger_level: Console log level
-                                    (logging.DEBUG, logging.ERROR, ..) or nolog
-        :type logging constant or string
-        :param file_logger_level: File log level
-        :type logging constant
-        :returns:  True
-
-        '''
-        global logger
-        logger = logging.getLogger(__name__)
-
-        formatter = logging.Formatter(
-            '%(asctime)s :: %(levelname)s :: %(message)s'
-            )
-        file_handler = RotatingFileHandler(redfish_logfile, 'a', 1000000, 1)
-
-        # First logger to file
-        file_handler.setLevel(file_logger_level)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-        # Second logger to console
-        if console_logger_level != "nolog":
-            steam_handler = logging.StreamHandler()
-            steam_handler.setLevel(console_logger_level)
-            logger.addHandler(steam_handler)
-        return True
-
     def show_manager(all=False):
         '''Display manager info
 
@@ -283,7 +247,6 @@ if __name__ == '__main__':
 
     # Initialize logger
     logger = None
-    #initialize_logger('redfish-client.log', "nolog", logging.DEBUG)
     logger = redfish.config.initialize_logger('redfish-client.log',
                                               "nolog",
                                               logging.DEBUG,
