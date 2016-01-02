@@ -36,6 +36,7 @@ import docopt
 import logging
 from logging.handlers import RotatingFileHandler
 import redfish
+import requests.packages.urllib3
 
 
 class ConfigFile(object):
@@ -288,7 +289,13 @@ if __name__ == '__main__':
                                               logging.DEBUG,
                                               __name__)
     redfish.config.TORTILLADEBUG = False
-    #redfish.config.
+    redfish.config.CONSOLE_LOGGER_LEVEL = "nolog"
+    # Avoid warning messages from request / urllib3
+    # SecurityWarning: Certificate has no `subjectAltName`, falling back
+    # to check for a `commonName` for now. This feature is being removed
+    # by major browsers and deprecated by RFC 2818.
+    # (See https://github.com/shazow/urllib3/issues/497 for details.)
+    requests.packages.urllib3.disable_warnings()
 
     logger.info("*** Starting %s ***" % redfishclient_version)
     logger.info("Arguments parsed")
