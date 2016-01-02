@@ -193,17 +193,18 @@ class Managers(Base):
     def __init__(self, url, connection_parameters):
         super(Managers, self).__init__(url, connection_parameters)
         try:
-
-#             self.ethernet_interfaces_collection = EthernetInterfacesCollection(
-#                                                         self.get_link_url('EthernetInterfaces'),
-#                                                         connection_parameters
-#                                                         )
-
-            # Works on proliant, need to treat 095 vs 0.96 differences
+            # New proliant firmware now respects Redfish v1.00, so seems to correct below statement
+            # TODO : better handle exception and if possible support old firmware ?
             self.ethernet_interfaces_collection = EthernetInterfacesCollection(
-                                                        self.get_link_url('EthernetNICs'),
+                                                        self.get_link_url('EthernetInterfaces'),
                                                         connection_parameters
                                                         )
+
+            # Works on proliant, need to treat 095 vs 0.96 differences
+            #self.ethernet_interfaces_collection = EthernetInterfacesCollection(
+            #                                            self.get_link_url('EthernetNICs'),
+            #                                            connection_parameters
+            #                                            )
         except:
             pass
 
@@ -227,9 +228,10 @@ class ManagersCollection(BaseCollection):
     def __init__(self, url, connection_parameters):
         '''Class constructor'''
         super(ManagersCollection, self).__init__(url, connection_parameters)
-        self.managers_list = []
+        self.managers_dict = {}
         for link in self.links:
-            self.managers_list.append(Managers(link, connection_parameters))
+            index = re.search(r'Managers/(\w+)', link)
+            self.managers_dict[index.group(1)] = Managers(link, connection_parameters)
 
 
 class Systems(Base):
@@ -322,28 +324,28 @@ class Systems(Base):
         '''Shotcut function to set boot source
 
         :param target: new boot source. Supported values:
-            'None',
-            'Pxe',
-            'Floppy',
-            'Cd',
-            'Usb',
-            'Hdd',
-            'BiosSetup',
-            'Utilities',
-            'Diags',
-            'UefiShell',
-            'UefiTarget'
+            "None",
+            "Pxe",
+            "Floppy",
+            "Cd",
+            "Usb",
+            "Hdd",
+            "BiosSetup",
+            "Utilities",
+            "Diags",
+            "UefiShell",
+            "UefiTarget"
         :param enabled: Supported values:
-            'Disabled',
-            'Once',
-            'Continuous'
+            "Disabled",
+            "Once",
+            "Continuous"
         :returns:   string -- http response of PATCH request
         '''
-        return self.set_parameter_json('{'Boot': {'BootSourceOverrideTarget': ''+target+''},{'BootSourceOverrideEnabled' : ''+enabled+''}}')
+        return self.set_parameter_json('{"Boot": {"BootSourceOverrideTarget": "'+target+'"},{"BootSourceOverrideEnabled" : "'+enabled+'"}}')
 
 
 class SystemsCollection(BaseCollection):
-    '''Class to manage redfish ManagersCollection data.'''
+    '''Class to manage redfish SystemsCollection data.'''
     def __init__(self, url, connection_parameters):
         super(SystemsCollection, self).__init__(url, connection_parameters)
 
@@ -357,7 +359,7 @@ class Bios(Base):
     '''Class to manage redfish Bios data.'''
     def __init__(self, url, connection_parameters):
         super(Bios, self).__init__(url, connection_parameters)
-        self.boot = Boot(re.findall('.+/Bios',url)[0]+'/Boot/Settings', connection_parameters)
+        self.boot = Boot(re.findall('.+/Bios', url)[0] + '/Boot/Settings', connection_parameters)
 
 
 class Boot(Base):
@@ -373,8 +375,8 @@ class EthernetInterfacesCollection(BaseCollection):
 
         self.ethernet_interfaces_list = []
 
-        # Url returned by the mock up is wrong /redfish/v1/Managers/EthernetInterfaces/1 returns a 404.
-        # The correct one should be /redfish/v1/Managers/1/EthernetInterfaces/1
+        # Url returned by the mock up is wrong /redfish/v1/Managers/EthernetInterfaces/1 returns a 404. --> this is not true anymore (2016/01/03)
+        # The correct one should be /redfish/v1/Managers/1/EthernetInterfaces/1 --> correct by mockup return invalid content (not json)
         # Check more than 1 hour for this bug.... grrr....
         for link in self.links:
             self.ethernet_interfaces_list.append(EthernetInterfaces(link, connection_parameters))

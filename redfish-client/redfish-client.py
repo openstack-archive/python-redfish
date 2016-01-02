@@ -249,7 +249,10 @@ if __name__ == '__main__':
             sys.stderr.write(str(e.advices))
             sys.exit(1)
 
-        print ('Redfish API version : %s \n' % remote_mgmt.get_api_version())
+        print('Redfish API version : %s \n' % remote_mgmt.get_api_version())
+        print('Managers information :\n')
+        
+
 
     # Main program
     redfishclient_version = "redfish-client 0.1"
