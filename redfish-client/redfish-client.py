@@ -204,34 +204,39 @@ if __name__ == '__main__':
     '''Main application redfish-client'''
     # Functions
 
-    def initialize_logger(redfish_logfile, logger_level):
-        '''Initialize a global loggeer to track application behaviour
+    def initialize_logger(redfish_logfile,
+                          console_logger_level,
+                          file_logger_level):
+        '''Initialize a global logger to track application behaviour
 
-        :param redfish_logfile: log file name
+        :param redfish_logfile: Log filename
         :type str
-        :param logger_level: log level (logging.DEBUG, logging.ERROR, ...)
+        :param screen_logger_level: Console log level
+                                    (logging.DEBUG, logging.ERROR, ..) or nolog
+        :type logging constant or string
+        :param file_logger_level: File log level
         :type logging constant
         :returns:  True
 
         '''
         global logger
-        logger = logging.getLogger()
+        logger = logging.getLogger(__name__)
 
-        logger.setLevel(logger_level)
         formatter = logging.Formatter(
             '%(asctime)s :: %(levelname)s :: %(message)s'
             )
         file_handler = RotatingFileHandler(redfish_logfile, 'a', 1000000, 1)
 
         # First logger to file
-        file_handler.setLevel(logger_level)
+        file_handler.setLevel(file_logger_level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
         # Second logger to console
-        steam_handler = logging.StreamHandler()
-        steam_handler.setLevel(logger_level)
-        logger.addHandler(steam_handler)
+        if console_logger_level != "nolog":
+            steam_handler = logging.StreamHandler()
+            steam_handler.setLevel(console_logger_level)
+            logger.addHandler(steam_handler)
         return True
 
     def show_manager(all=False):
@@ -269,31 +274,48 @@ if __name__ == '__main__':
 
         print ('Redfish API version : %s \n' % remote_mgmt.get_api_version())
 
+    # Main program
+    redfishclient_version = "redfish-client 0.1"
+
+    # Parse and manage arguments
+    arguments = docopt.docopt(__doc__, version=redfishclient_version)
+
     # Initialize logger
     logger = None
-    initialize_logger('redfish-client.log', logging.DEBUG)
+    #initialize_logger('redfish-client.log', "nolog", logging.DEBUG)
+    logger = redfish.config.initialize_logger('redfish-client.log',
+                                              "nolog",
+                                              logging.DEBUG,
+                                              __name__)
+    redfish.config.TORTILLADEBUG = False
+    #redfish.config.
+
+    logger.info("*** Starting %s ***" % redfishclient_version)
+    logger.info("Arguments parsed")
+    logger.debug(arguments)
 
     # Get $HOME environment.
     HOME = os.getenv('HOME')
 
-    if HOME == '':
+    if not HOME:
         print('$HOME environment variable not set, please check your system')
+        logger.error('$HOME environment variable not set')
         sys.exit(1)
-
-    # Parse and manage arguments
-    arguments = docopt.docopt(__doc__, version='redfish-client 0.1')
-    logger.debug(arguments)
+    logger.debug("Home directory : %s" % HOME)
 
     arguments['--conf_file'] = arguments['--conf_file'].replace('~', HOME)
-
     conf_file = ConfigFile(arguments['--conf_file'])
 
     if arguments['config'] is True:
+        logger.debug("Config commands")
         if arguments['show'] is True:
+            logger.debug('show command')
             show_manager()
         elif arguments['showall'] is True:
+            logger.debug('showall command')
             show_manager(True)
         elif arguments['add'] is True:
+            logger.debug('add command')
             conf_file.add_manager(arguments['<manager_name>'],
                                   arguments['<manager_url>'],
                                   arguments['<login>'],
@@ -301,10 +323,12 @@ if __name__ == '__main__':
             logger.debug(pprint.pprint(conf_file.data))
             conf_file.save()
         elif arguments['del'] is True:
+            logger.debug('del command')
             conf_file.delete_manager(arguments['<manager_name>'])
             logger.debug(pprint.pprint(conf_file.data))
             conf_file.save()
         elif arguments['modify'] is True:
+            logger.debug('modify command')
             if arguments['url'] is not False:
                 conf_file.modify_manager(arguments['<manager_name>'],
                                          'url',
@@ -324,7 +348,9 @@ if __name__ == '__main__':
             logger.debug(pprint.pprint(conf_file.data))
             conf_file.save()
     if arguments['manager'] is True:
+        logger.debug("Manager commands")
         if arguments['getinfo'] is True:
+            logger.debug('getinfo command')
             # If manager is not defined set it to 'default'
             if not arguments['<manager_name>']:
                 manager_name = 'default'
@@ -337,4 +363,5 @@ if __name__ == '__main__':
             else:
                 get_manager_info(manager_name, True)
 
+    logger.info("Client session teminated")
     sys.exit(0)

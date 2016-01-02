@@ -49,7 +49,7 @@ class Base(object):
             config.logger.info("Raise a RedfishException to upper level")
             msg = "Connection error\n"
             raise exception.NonTrustedCertificatException(msg)
-        print self.data
+        config.logger.debug(self.data)
 
     def get_link_url(self, link_type):
         """Need to be explained.
@@ -113,10 +113,10 @@ class Base(object):
         # Craft the request
         action = dict()
         action[parameter_name] = value
-        print(action)
+        config.logger.debug(action)
 
         # Perform the POST action
-        print self.api_url
+        config.logger.debug(self.api_url)
         response = self.api_url.patch(verify=self.connection_parameters.verify_cert,
                                      headers={'x-auth-token': self.connection_parameters.auth_token},
                                      data=action
@@ -144,7 +144,7 @@ class BaseCollection(Base):
             self.links.append(urljoin(self.url, getattr(link, mapping.redfish_mapper.map_links_ref())))
 
 
-        print self.links
+        config.logger.debug(self.links)
 
 
 class Root(Base):

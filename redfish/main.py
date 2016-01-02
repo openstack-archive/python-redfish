@@ -117,7 +117,7 @@ Clients should always be prepared for:
 
 # coding=utf-8
 
-import sys
+
 import json
 from urlparse import urlparse
 import requests
@@ -126,21 +126,7 @@ import types
 import mapping
 import exception
 
-# Global variable definition
-redfish_logfile = "/var/log/python-redfish/python-redfish.log"
-
-# ===============================================================================
-# TODO : create method to set logging level and TORTILLADEBUG.
-# ===============================================================================
-
-
-def set_log_file(logfile):
-    global redfish_logfile
-    redfish_logfile = logfile
-    return True
-
-
-""" Function to wrap RedfishConnection """
+"""Function to wrap RedfishConnection"""
 
 
 def connect(
@@ -150,9 +136,8 @@ def connect(
         simulator=False,
         enforceSSL=True,
         verify_cert=True
-    ):
-    global redfish_logfile
-    config.initialize_logger(redfish_logfile)
+        ):
+
     return RedfishConnection(
         url,
         user,
@@ -173,9 +158,11 @@ class RedfishConnection(object):
                  simulator=False,
                  enforceSSL=True,
                  verify_cert=True
-                ):
+                 ):
         """Initialize a connection to a Redfish service."""
-        super(RedfishConnection, self).__init__()
+        config.logger = config.initialize_logger(config.REDFISH_LOGFILE,
+                                                 config.CONSOLE_LOGGER_LEVEL,
+                                                 config.FILE_LOGGER_LEVEL)
 
         config.logger.info("Initialize python-redfish")
 
