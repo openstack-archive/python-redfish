@@ -233,7 +233,7 @@ if __name__ == '__main__':
             simulator = False
             enforceSSL = True
         try:
-            print 'Gathering data from manager, please wait...'
+            print('Gathering data from manager, please wait...\n')
             # TODO : Add a rotating star showing program is running ?
             #        Could be a nice exercice for learning python. :)
             logger.info('Gathering data from manager')
@@ -249,8 +249,20 @@ if __name__ == '__main__':
             sys.stderr.write(str(e.advices))
             sys.exit(1)
 
-        print('Redfish API version : %s \n' % remote_mgmt.get_api_version())
-        print('Managers information :\n')
+        # Display manager information
+        # TODO : Use a templating system
+        print('Redfish API version : %s' % remote_mgmt.get_api_version())
+        print(remote_mgmt.Root.get_name())
+        print('\n')
+        print('Managers information :')
+        print('----------------------')
+        for manager_index in sorted(remote_mgmt.Managers.managers_dict):
+            manager = remote_mgmt.Managers.managers_dict[manager_index]
+            print('\nManager id {} :').format(manager_index)
+            print('UUID : {}').format(manager.get_uuid())
+            print('Type : {}').format(manager.get_type())
+            print('Firmware version : {}').format(manager.get_firmware_version())
+            print('State : {}').format(manager.get_status())
         
 
 

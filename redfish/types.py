@@ -181,6 +181,17 @@ class Root(Base):
 
         '''
         return getattr(self.root.Links.Systems, '@odata.id')
+    
+    def get_name(self):
+        '''Get root name
+
+        :returns:  string -- root name or "Not available"
+
+        '''
+        try:
+            return self.data.Name
+        except AttributeError:
+            return "Not available"
 
 
 class SessionService(Base):
@@ -209,18 +220,51 @@ class Managers(Base):
             pass
 
     def get_firmware_version(self):
-        '''Get bios version of the system.
+        '''Get firmware version of the manager
 
-        :returns:  string -- bios version
+        :returns:  string -- bios version or "Not available"
 
         '''
         try:
-            # Returned by proliant
             return self.data.FirmwareVersion
-        except:
-            # Returned by mockup.
-            # Hopefully this kind of discrepencies will be fixed with Redfish 1.0 (August)
-            return self.data.FirmwareVersion
+        except AttributeError:
+            # We are here because the attribute could be not defined.
+            # This is the case with the mockup for manager 2 and 3
+            return "Not available"
+
+    def get_type(self):
+        '''Get manager type
+
+        :returns:  string -- manager type or "Not available"
+
+        '''
+        try:
+            return self.data.ManagerType
+        except AttributeError:
+            return "Not available"
+
+    def get_uuid(self):
+        '''Get manager type
+
+        :returns:  string -- manager uuid or "Not available"
+
+        '''
+        try:
+            return self.data.UUID
+        except AttributeError:
+            return "Not available"
+        
+    def get_status(self):
+        '''Get manager status
+
+        :returns:  string -- manager status or "Not available"
+
+        '''
+        try:
+            return self.data.Status.State
+        except AttributeError:
+            return "Not available"
+
 
 
 class ManagersCollection(BaseCollection):
