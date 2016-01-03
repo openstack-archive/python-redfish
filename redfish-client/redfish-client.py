@@ -263,6 +263,16 @@ if __name__ == '__main__':
             print('Type : {}').format(manager.get_type())
             print('Firmware version : {}').format(manager.get_firmware_version())
             print('State : {}').format(manager.get_status())
+            print('Ethernet interfaces :')
+            try :
+                for ethernetinterface_index in sorted(manager.ethernet_interfaces_collection.ethernet_interfaces_dict):
+                    ei = manager.ethernet_interfaces_collection.ethernet_interfaces_dict[ethernetinterface_index]
+                    print('\nEthernet Interface id {} :').format(ethernetinterface_index)
+                    print(ei.get_name())
+                    print(ei.get_parameter('FQDN'))
+            except AttributeError:
+                # We don't have ethernet interfaces
+                pass
         
 
 

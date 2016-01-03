@@ -122,6 +122,17 @@ class Base(object):
             headers={'x-auth-token': self.connection_parameters.auth_token},
             data=action)
         return response
+    
+    def get_name(self):
+        '''Get root name
+
+        :returns:  string -- root name or "Not available"
+
+        '''
+        try:
+            return self.data.Name
+        except AttributeError:
+            return "Not available"
 
 
 class BaseCollection(Base):
@@ -180,18 +191,7 @@ class Root(Base):
         :returns:  string -- path
 
         '''
-        return getattr(self.root.Links.Systems, '@odata.id')
-    
-    def get_name(self):
-        '''Get root name
-
-        :returns:  string -- root name or "Not available"
-
-        '''
-        try:
-            return self.data.Name
-        except AttributeError:
-            return "Not available"
+        return getattr(self.root.Links.Systems, '@odata.id')   
 
 
 class SessionService(Base):
@@ -216,7 +216,12 @@ class Managers(Base):
             #                                            self.get_link_url('EthernetNICs'),
             #                                            connection_parameters
             #                                            )
-        except:
+        except exception.InvalidRedfishContentException:
+            # This is to avoid invalid content from the mockup
+            pass
+        
+        except AttributeError:
+            # This means we don't have EthernetInterfaces
             pass
 
     def get_firmware_version(self):
@@ -417,15 +422,16 @@ class EthernetInterfacesCollection(BaseCollection):
     def __init__(self, url, connection_parameters):
         super(EthernetInterfacesCollection, self).__init__(url, connection_parameters)
 
-        self.ethernet_interfaces_list = []
+        self.ethernet_interfaces_dict = {}
 
         # Url returned by the mock up is wrong /redfish/v1/Managers/EthernetInterfaces/1 returns a 404. --> this is not true anymore (2016/01/03)
         # The correct one should be /redfish/v1/Managers/1/EthernetInterfaces/1 --> correct by mockup return invalid content (not json)
         # Check more than 1 hour for this bug.... grrr....
         for link in self.links:
-            self.ethernet_interfaces_list.append(EthernetInterfaces(link, connection_parameters))
+            index = re.search(r'EthernetInterfaces/(\w+)', link)
+            self.ethernet_interfaces_dict[index.group(1)] = EthernetInterfaces(link, connection_parameters)
 
 
 class EthernetInterfaces(Base):
-    '''Class to manage redfish EthernetInterfaces data.'''
+    '''Class to manage redfish EthernetInterfaces.'''
     pass
