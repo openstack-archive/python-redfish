@@ -15,7 +15,7 @@ FILE_LOGGER_LEVEL = logging.DEBUG
 def initialize_logger(REDFISH_LOGFILE,
                       CONSOLE_LOGGER_LEVEL,
                       FILE_LOGGER_LEVEL,
-                      logger_name=""):
+                      logger_name=None):
     '''Initialize a global logger to track application behaviour
 
     :param redfish_logfile: Log filename

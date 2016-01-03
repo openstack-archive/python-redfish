@@ -303,7 +303,6 @@ if __name__ == '__main__':
         loglevel['tortilla'] = True
 
     # Initialize logger according to command line parameters
-    logger = None
     logger = redfish.config.initialize_logger(arguments['--debugfile'],
                                               loglevel['console_logger_level'],
                                               loglevel['file_logger_level'],

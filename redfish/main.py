@@ -160,9 +160,14 @@ class RedfishConnection(object):
                  verify_cert=True
                  ):
         """Initialize a connection to a Redfish service."""
+        # Specify a name for the logger as recommended by the logging
+        # documentation. However for strange reason requests logs are not
+        # anymore capture in the log file.
+        # TODO : Check strange behavior about requests logs.
         config.logger = config.initialize_logger(config.REDFISH_LOGFILE,
                                                  config.CONSOLE_LOGGER_LEVEL,
-                                                 config.FILE_LOGGER_LEVEL)
+                                                 config.FILE_LOGGER_LEVEL,
+                                                 __name__)
 
         config.logger.info("Initialize python-redfish")
 
