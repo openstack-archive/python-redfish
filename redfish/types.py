@@ -434,4 +434,38 @@ class EthernetInterfacesCollection(BaseCollection):
 
 class EthernetInterfaces(Base):
     '''Class to manage redfish EthernetInterfaces.'''
-    pass
+    def get_mac(self):
+        '''Get EthernetInterface MacAddress
+
+        :returns:  string -- interface macaddress or "Not available"
+
+        '''
+        try:
+            return self.data.MacAddress
+        except AttributeError:
+            return "Not available"
+
+    def get_fqdn(self):
+        '''Get EthernetInterface fqdn
+
+        :returns:  string -- interface fqdn or "Not available"
+
+        '''
+        try:
+            return self.data.FQDN
+        except AttributeError:
+            return "Not available"
+        
+#===============================================================================
+#     def get_ipv4(self):
+#         '''Get EthernetInterface ipv4 address
+# 
+#         :returns:  list -- interface ip addresses or "Not available"
+# 
+#         '''
+#         try:
+#             return self.data.IPv4Addresses
+#         except AttributeError:
+#             return "Not available"
+#===============================================================================
+
