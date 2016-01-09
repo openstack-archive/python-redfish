@@ -270,7 +270,39 @@ class Managers(Base):
         except AttributeError:
             return "Not available"
 
+    def get_managed_chassis(self):
+        '''Get managed chassis ids by the manager
 
+        :returns:  list -- chassis ids or "Not available"
+
+        '''
+        chassis_list = []
+        links = getattr(self.data, mapping.redfish_mapper.map_links(self.data))
+        
+        try:
+            for chassis in links.ManagerForChassis:
+                result = re.search(r'Chassis/(\w+)', chassis[mapping.redfish_mapper.map_links_ref(chassis)])
+                chassis_list.append(result.group(1))
+            return chassis_list
+        except AttributeError:
+            return "Not available"
+
+    def get_managed_systems(self):
+        '''Get managed systems ids by the manager
+
+        :returns:  list -- chassis ids or "Not available"
+
+        '''
+        systems_list = []
+        links = getattr(self.data, mapping.redfish_mapper.map_links(self.data))
+        
+        try:
+            for systems in links.ManagerForServers:
+                result = re.search(r'Systems/(\w+)', systems[mapping.redfish_mapper.map_links_ref(systems)])
+                systems_list.append(result.group(1))           
+            return systems_list
+        except AttributeError:
+            return "Not available"
 
 class ManagersCollection(BaseCollection):
     '''Class to manage redfish ManagersCollection data.'''
@@ -313,7 +345,7 @@ class Systems(Base):
                                      data=action
                                     )
         #TODO : treat response.
-        return response
+        return response  
 
     def get_bios_version(self):
         '''Get bios version of the system.

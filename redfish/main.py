@@ -209,9 +209,10 @@ class RedfishConnection(object):
 
         config.logger.info("API Version : %s", self.get_api_version())
         mapping.redfish_version = self.get_api_version()
+        mapping.redfish_root_name = self.Root.get_name()
 
-        # Instanciate a global mapping object to handle Redfish version variation
-        mapping.redfish_mapper = mapping.RedfishVersionMapping(self.get_api_version())
+        # Instantiate a global mapping object to handle Redfish version variation
+        mapping.redfish_mapper = mapping.RedfishVersionMapping(self.get_api_version(), self.Root.get_name())
 
         # Now we need to login otherwise we are not allowed to extract data
         if self.__simulator is False:
@@ -225,7 +226,7 @@ class RedfishConnection(object):
 
 
 
-        # Struture change with mockup 1.0.0, there is no links
+        # Structure change with mockup 1.0.0, there is no links
         # section anymore.
         # ===================================================================
         # TODO : Add a switch to allow the both structure
