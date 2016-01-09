@@ -456,16 +456,40 @@ class EthernetInterfaces(Base):
         except AttributeError:
             return "Not available"
         
-#===============================================================================
-#     def get_ipv4(self):
-#         '''Get EthernetInterface ipv4 address
-# 
-#         :returns:  list -- interface ip addresses or "Not available"
-# 
-#         '''
-#         try:
-#             return self.data.IPv4Addresses
-#         except AttributeError:
-#             return "Not available"
-#===============================================================================
+
+    def get_ipv4(self):
+        '''Get EthernetInterface ipv4 address
+ 
+        :returns:  list -- interface ip addresses or "Not available"
+ 
+        '''
+        
+        ipaddresses = []
+        
+        try:
+            for ip_settings in self.data.IPv4Addresses:
+                address = ip_settings['Address']
+                ipaddresses.append(address)
+            
+            return ipaddresses
+        except AttributeError:
+            return "Not available"
+
+    def get_ipv6(self):
+        '''Get EthernetInterface ipv6 address
+ 
+        :returns:  list -- interface ip addresses or "Not available"
+ 
+        '''
+        
+        ipaddresses = []
+        
+        try:
+            for ip_settings in self.data.IPv6Addresses:
+                address = ip_settings['Address']
+                ipaddresses.append(address)
+            
+            return ipaddresses
+        except AttributeError:
+            return "Not available"
 
