@@ -39,6 +39,7 @@ import docopt
 import logging
 import redfish
 import requests.packages.urllib3
+import jinja2
 
 
 class ConfigFile(object):
@@ -249,35 +250,9 @@ if __name__ == '__main__':
             sys.stderr.write(str(e.advices))
             sys.exit(1)
 
-        # Display manager information
-        # TODO : Use a templating system
-        print('Redfish API version : %s' % remote_mgmt.get_api_version())
-        print(remote_mgmt.Root.get_name())
-        print('\n')
-        print('Managers information :')
-        print('----------------------')
-        for manager_index in sorted(remote_mgmt.Managers.managers_dict):
-            manager = remote_mgmt.Managers.managers_dict[manager_index]
-            print('\nManager id {} :').format(manager_index)
-            print('UUID : {}').format(manager.get_uuid())
-            print('Type : {}').format(manager.get_type())
-            print('Firmware version : {}').format(manager.get_firmware_version())
-            print('State : {}').format(manager.get_status())
-            print manager.get_managed_chassis()
-            print manager.get_managed_systems()
-            print('Ethernet interfaces :')
-            try :
-                for ethernetinterface_index in sorted(manager.ethernet_interfaces_collection.ethernet_interfaces_dict):
-                    ei = manager.ethernet_interfaces_collection.ethernet_interfaces_dict[ethernetinterface_index]
-                    print('\nEthernet Interface id {} :').format(ethernetinterface_index)
-                    print(ei.get_name())
-                    print(ei.get_parameter('FQDN'))
-                    print ei.get_ipv4()
-                    print ei.get_ipv6()
-            except AttributeError:
-                # We don't have ethernet interfaces
-                pass
-        
+        # Display manager information using jinja2 template      
+        template = jinja2_env.get_template("manager_info.template")
+        print template.render(r=remote_mgmt)
 
 
     # Main program
@@ -348,6 +323,11 @@ if __name__ == '__main__':
 
     arguments['--conf_file'] = arguments['--conf_file'].replace('~', HOME)
     conf_file = ConfigFile(arguments['--conf_file'])
+    
+    # Initialize Template system (jinja2)
+    # TODO : set the template file location into cmd line default to /usr/share/python-redfish/templates ?
+    logger.debug("Initialize template system")
+    jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader("templates"))
 
     if arguments['config'] is True:
         logger.debug("Config commands")

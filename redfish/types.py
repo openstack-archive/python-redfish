@@ -218,11 +218,12 @@ class Managers(Base):
             #                                            )
         except exception.InvalidRedfishContentException:
             # This is to avoid invalid content from the mockup
-            pass
+            self.ethernet_interfaces_collection = None
         
         except AttributeError:
             # This means we don't have EthernetInterfaces
-            pass
+            self.ethernet_interfaces_collection = None
+            
 
     def get_firmware_version(self):
         '''Get firmware version of the manager
