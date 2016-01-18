@@ -117,7 +117,7 @@ Clients should always be prepared for:
 
 # coding=utf-8
 
-import sys
+
 import json
 from urlparse import urlparse
 import requests
@@ -126,21 +126,7 @@ import types
 import mapping
 import exception
 
-# Global variable definition
-redfish_logfile = "/var/log/python-redfish/python-redfish.log"
-
-# ===============================================================================
-# TODO : create method to set logging level and TORTILLADEBUG.
-# ===============================================================================
-
-
-def set_log_file(logfile):
-    global redfish_logfile
-    redfish_logfile = logfile
-    return True
-
-
-""" Function to wrap RedfishConnection """
+"""Function to wrap RedfishConnection"""
 
 
 def connect(
@@ -150,9 +136,8 @@ def connect(
         simulator=False,
         enforceSSL=True,
         verify_cert=True
-    ):
-    global redfish_logfile
-    config.initialize_logger(redfish_logfile)
+        ):
+
     return RedfishConnection(
         url,
         user,
@@ -173,9 +158,16 @@ class RedfishConnection(object):
                  simulator=False,
                  enforceSSL=True,
                  verify_cert=True
-                ):
+                 ):
         """Initialize a connection to a Redfish service."""
-        super(RedfishConnection, self).__init__()
+        # Specify a name for the logger as recommended by the logging
+        # documentation. However for strange reason requests logs are not
+        # anymore capture in the log file.
+        # TODO : Check strange behavior about requests logs.
+        config.logger = config.initialize_logger(config.REDFISH_LOGFILE,
+                                                 config.CONSOLE_LOGGER_LEVEL,
+                                                 config.FILE_LOGGER_LEVEL,
+                                                 __name__)
 
         config.logger.info("Initialize python-redfish")
 
@@ -217,9 +209,10 @@ class RedfishConnection(object):
 
         config.logger.info("API Version : %s", self.get_api_version())
         mapping.redfish_version = self.get_api_version()
+        mapping.redfish_root_name = self.Root.get_name()
 
-        # Instanciate a global mapping object to handle Redfish version variation
-        mapping.redfish_mapper = mapping.RedfishVersionMapping(self.get_api_version())
+        # Instantiate a global mapping object to handle Redfish version variation
+        mapping.redfish_mapper = mapping.RedfishVersionMapping(self.get_api_version(), self.Root.get_name())
 
         # Now we need to login otherwise we are not allowed to extract data
         if self.__simulator is False:
@@ -233,7 +226,7 @@ class RedfishConnection(object):
 
 
 
-        # Struture change with mockup 1.0.0, there is no links
+        # Structure change with mockup 1.0.0, there is no links
         # section anymore.
         # ===================================================================
         # TODO : Add a switch to allow the both structure
@@ -271,7 +264,7 @@ class RedfishConnection(object):
     #
     #     print self.systemCollection.Name
     #
-    # ======================================================================== 
+    # ========================================================================
     def get_api_version(self):
         """Return api version.
 
@@ -286,14 +279,15 @@ class RedfishConnection(object):
         url = self.Root.get_link_url(
                                     mapping.redfish_mapper.map_sessionservice()
                                     )
-        
-        # Handle login with redfish 1.00, url must be : 
+
+        # Handle login with redfish 1.00, url must be :
         # /rest/v1/SessionService/Sessions as specified by the specification
         if float(mapping.redfish_version) >= 1.00:
             url += '/Sessions'
 
         # Craft request body and header
         requestBody = {"UserName": self.connection_parameters.user_name  , "Password": self.connection_parameters.password}
+        config.logger.debug(requestBody)
         header = {'Content-type': 'application/json'}
         # =======================================================================
         # Tortilla seems not able to provide the header of a post request answer.
@@ -308,13 +302,16 @@ class RedfishConnection(object):
                              headers=header,
                              verify=self.connection_parameters.verify_cert
                             )
- 
+
         # =======================================================================
         # TODO : Manage exception with a class.
         # =======================================================================
         if auth.status_code != 201:
-            raise exception.AuthenticationFailureException("Login request return an invalid status code")
-            #sysraise "Error getting token", auth.status_code
+            try:
+                answer=auth.json()
+            except ValueError as e:
+                answer = ""
+            raise exception.AuthenticationFailureException("Login request return an invalid status code ", code=auth.status_code, queryAnswer=answer)
 
         self.connection_parameters.auth_token = auth.headers.get("x-auth-token")
         self.connection_parameters.user_uri = auth.headers.get("location")

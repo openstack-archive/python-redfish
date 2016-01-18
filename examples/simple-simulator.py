@@ -23,13 +23,22 @@ except IOError as e:
     print(e)
     sys.exit(1)
 
-URL = config["Nodes"]["default"]["url"]
-USER_NAME = config["Nodes"]["default"]["login"]
-PASSWORD = config["Nodes"]["default"]["password"]
+URL = config["Managers"]["default"]["url"]
+USER_NAME = config["Managers"]["default"]["login"]
+PASSWORD = config["Managers"]["default"]["password"]
 
 ''' remoteMgmt is a redfish.RedfishConnection object '''
-remote_mgmt = redfish.connect(URL, USER_NAME, PASSWORD,
-                             simulator=True, enforceSSL=False)
+try:
+    remote_mgmt = redfish.connect(URL,
+                                  USER_NAME,
+                                  PASSWORD,
+                                  simulator=True,
+                                  enforceSSL=False)
+except redfish.exception.RedfishException as e:
+    sys.stderr.write(e.message)
+    sys.stderr.write(e.advices)
+    sys.exit(1)
+
 
 print("Redfish API version : {} \n".format(remote_mgmt.get_api_version()))
 print("UUID : {} \n".format(remote_mgmt.Root.get_api_UUID()))

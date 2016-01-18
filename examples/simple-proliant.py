@@ -6,7 +6,7 @@ import os
 import sys
 import json
 import redfish
-from time import sleep
+
 
 # Get $HOME environment.
 HOME = os.getenv('HOME')
@@ -24,17 +24,26 @@ except IOError as e:
     print(e)
     sys.exit(1)
 
-URL = config["Nodes"]["default"]["url"]
-USER_NAME = config["Nodes"]["default"]["login"]
-PASSWORD = config["Nodes"]["default"]["password"]
+URL = config["Managers"]["default"]["url"]
+USER_NAME = config["Managers"]["default"]["login"]
+PASSWORD = config["Managers"]["default"]["password"]
 
 ''' remote_mgmt is a redfish.RedfishConnection object '''
-remote_mgmt = redfish.connect(URL, USER_NAME, PASSWORD, verify_cert=False)
+try:
+    remote_mgmt = redfish.connect(URL,
+                                  USER_NAME,
+                                  PASSWORD,
+                                  simulator=False,
+                                  verify_cert=False)
+except redfish.exception.RedfishException as e:
+    sys.stderr.write(str(e.message))
+    sys.stderr.write(str(e.advices))
+    sys.exit(1)
 
 print ("Redfish API version : %s \n" % remote_mgmt.get_api_version())
 
 # Uncomment following line to reset the blade !!!
-#remote_mgmt.Systems.systems_list[0].reset_system()
+# remote_mgmt.Systems.systems_list[0].reset_system()
 
 # TODO : create an attribute to link the managed system directly
 #        and avoid systems_list[0]
