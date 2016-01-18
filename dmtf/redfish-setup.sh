@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function start_apache {
-	[ -f "/run/apache2/apache2.pid" ] && rm "/run/apache2/apache2.pid"
+	[ -f "/run/apache2/apache2.pid" ] && rm -f "/run/apache2/apache2.pid"
 	echo "Launching apache2 in foreground with /usr/sbin/apache2ctl -DFOREGROUND -k start"
 	/usr/sbin/apache2ctl -DFOREGROUND -k start
 }
