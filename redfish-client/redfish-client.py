@@ -109,10 +109,12 @@ class ConfigFile(object):
 
         self.data['Managers'][manager_name] = {}
         self.data['Managers'][manager_name]['url'] = url
-        if login is not None:
-            self.data['Managers'][manager_name]['login'] = login
-        if password is not None:
-            self.data['Managers'][manager_name]['password'] = password
+        if login is None:
+            login = ''
+        if password is None:
+            password = ''
+        self.data['Managers'][manager_name]['login'] = login
+        self.data['Managers'][manager_name]['password'] = password
 
     def modify_manager(self, manager_name, parameter, parameter_value):
         '''Modify the manager settings
@@ -343,12 +345,12 @@ if __name__ == '__main__':
                                   arguments['<manager_url>'],
                                   arguments['<login>'],
                                   arguments['<password>'])
-            logger.debug(pprint.pprint(conf_file.data))
+            logger.debug(conf_file.data)
             conf_file.save()
         elif arguments['del'] is True:
             logger.debug('del command')
             conf_file.delete_manager(arguments['<manager_name>'])
-            logger.debug(pprint.pprint(conf_file.data))
+            logger.debug(conf_file.data)
             conf_file.save()
         elif arguments['modify'] is True:
             logger.debug('modify command')
@@ -368,7 +370,7 @@ if __name__ == '__main__':
                 conf_file.modify_manager(arguments['<manager_name>'],
                                          'manager_name',
                                          arguments['<changed_value>'])
-            logger.debug(pprint.pprint(conf_file.data))
+            logger.debug(conf_file.data)
             conf_file.save()
     if arguments['manager'] is True:
         logger.debug("Manager commands")
