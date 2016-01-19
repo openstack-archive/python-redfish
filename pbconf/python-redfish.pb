@@ -41,10 +41,11 @@ pbpackager python-redfish = Bruno Cornec <bruno@project-builder.org>
 # For delivery to a machine by SSH (potentially the FTP server)
 # Needs hostname, account and directory
 #
-#sshhost python-redfish = www.python-redfish.org
-#sshlogin python-redfish = bill
-#sshdir python-redfish = /python-redfish/ftp
-#sshport python-redfish = 22
+sshhost python-redfish = www.mondorescue.org
+sshlogin python-redfish = bruno
+sshdir python-redfish = /prj/ftp
+sshport python-redfish = 22
+#
 
 #
 # For Virtual machines management
