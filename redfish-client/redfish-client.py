@@ -20,7 +20,7 @@ Options:
   -h --help             Show this screen.
   --version             Show version.
   --conf_file FILE      Configuration file [default: ~/.redfish.conf]
-  --insecure            Check SSL certificats
+  --insecure            Ignore SSL certificates
   --debug LEVEL         Run in debug mode, LEVEL from 1 to 3 increase verbosity
                         Security warning LEVEL > 1 could reveal password into the logs
   --debugfile FILE      Specify the client debugfile [default: redfish-client.log]
