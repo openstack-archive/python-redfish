@@ -54,12 +54,10 @@ class Base(object):
     def get_link_url(self, link_type):
         '''Need to be explained.
 
-        :param redfish_logfile: redfish log
-        :type str
-        :returns:  True
-
+        :param parameter_name: name of the parameter
+        :returns:  string -- parameter value
         '''
-        self.links=[]
+        self.links = []
 
         # Manage standard < 1.0
         if float(mapping.redfish_version) < 1.00:

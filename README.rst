@@ -45,14 +45,12 @@ Developer setup
 ---------------
 
 To initialize a local development environment (eg, so you can run unit tests)
-you should run the following commands::
+you should run the following commands
 
 Contacts
 --------
 
 Distribution list : python-redfish@mondorescue.org
-
-
 
 Further References
 ------------------
@@ -62,3 +60,4 @@ The data model documentation can be found here:
 
 The overall protocol documentation can be found here:
   http://www.redfishspecification.org/
+

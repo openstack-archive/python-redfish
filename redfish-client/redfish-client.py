@@ -3,32 +3,32 @@
 # coding=utf-8
 
 '''
-redfish-client
+redfish-client ::
 
-Usage:
-  redfish-client.py [options] config add <manager_name> <manager_url> [<login>] [<password>]
-  redfish-client.py [options] config del <manager_name>
-  redfish-client.py [options] config modify <manager_name> (manager_name | url | login | password) <changed_value>
-  redfish-client.py [options] config show
-  redfish-client.py [options] config showall
-  redfish-client.py [options] manager getinfo [<manager_name>]
-  redfish-client.py (-h | --help)
-  redfish-client.py --version
-
-
-Options:
-  -h --help             Show this screen.
-  --version             Show version.
-  --conf_file FILE      Configuration file [default: ~/.redfish.conf]
-  --insecure            Ignore SSL certificates
-  --debug LEVEL         Run in debug mode, LEVEL from 1 to 3 increase verbosity
-                        Security warning LEVEL > 1 could reveal password into the logs
-  --debugfile FILE      Specify the client debugfile [default: redfish-client.log]
-  --libdebugfile FILE   Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
-
-config commands : manage the configuration file.
-manager commands : manage the manager (Ligh out management). If <manager_name>
-                   is not provided use the 'default' entry
+ Usage:
+   redfish-client.py [options] config add <manager_name> <manager_url> [<login>] [<password>]
+   redfish-client.py [options] config del <manager_name>
+   redfish-client.py [options] config modify <manager_name> (manager_name | url | login | password) <changed_value>
+   redfish-client.py [options] config show
+   redfish-client.py [options] config showall
+   redfish-client.py [options] manager getinfo [<manager_name>]
+   redfish-client.py (-h | --help)
+   redfish-client.py --version
+ 
+ 
+ Options:
+   -h --help             Show this screen.
+   --version             Show version.
+   --conf_file FILE      Configuration file [default: ~/.redfish.conf]
+   --insecure            Ignore SSL certificates
+   --debug LEVEL         Run in debug mode, LEVEL from 1 to 3 increase verbosity
+                         Security warning LEVEL > 1 could reveal password into the logs
+   --debugfile FILE      Specify the client debugfile [default: redfish-client.log]
+   --libdebugfile FILE   Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
+ 
+ config commands : manage the configuration file.
+ manager commands : manage the manager (Ligh out management). If <manager_name>
+                    is not provided use the 'default' entry
 '''
 
 import os
@@ -52,7 +52,7 @@ class ConfigFile(object):
 
         :param config_file: File name of the configuration file
                             default: ~/.redfish.conf
-        :type str
+        :type config-file: str
         :returns: Nothing
 
         '''
@@ -84,7 +84,7 @@ class ConfigFile(object):
         '''Check if the manager exists in configuration file
 
         :param manager_name: Name of the manager
-        :type str
+        :type manager_name: str
 
         '''
         try:
@@ -97,13 +97,13 @@ class ConfigFile(object):
         '''Add a manager to the configuration file
 
         :param manager_name: Name of the manager
-        :type str
+        :type manager_name: str
         :param url: Url of the manager
-        :type str
+        :type url: str
         :param login: Login of the manager
-        :type str
+        :type login: str
         :param password: Password of the manager
-        :type str
+        :type password: str
 
         '''
 
@@ -119,12 +119,12 @@ class ConfigFile(object):
     def modify_manager(self, manager_name, parameter, parameter_value):
         '''Modify the manager settings
 
-        :param manager name: Name of the manager
-        :type str
+        :param manager_name: Name of the manager
+        :type manager_name: str
         :param parameter: url | login | password
-        :type str
+        :type url: str
         :param parameter_value: Value of the parameter
-        :type str
+        :type parameter_value: str
         :returns: Nothing
 
         '''
@@ -157,8 +157,8 @@ class ConfigFile(object):
     def delete_manager(self, manager_name):
         '''Delete manager
 
-        :param manager name: Name of the manager
-        :type str
+        :param manager_name: Name of the manager
+        :type manager_name: str
         :returns: Nothing
 
         '''
@@ -172,7 +172,7 @@ class ConfigFile(object):
         '''Get manager configured
 
         :returns: Managers
-        :type list
+        :type returns: list
 
         '''
         managers = []
@@ -184,9 +184,9 @@ class ConfigFile(object):
         '''Show manager info (url, login, password)
 
         :param manager: Name of the manager
-        :type str
+        :type manager: str
         :returns: info containing url, login, password
-        :type dict
+        :type returns: dict
 
         '''
         info = {}
@@ -214,7 +214,7 @@ if __name__ == '__main__':
         '''Display manager info
 
         :param all: Add login and password info
-        :type bool
+        :type all: bool
         :returns: Nothing
 
         '''
