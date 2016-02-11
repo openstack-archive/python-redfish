@@ -428,11 +428,12 @@ class SystemsCollection(BaseCollection):
     '''Class to manage redfish SystemsCollection data.'''
     def __init__(self, url, connection_parameters):
         super(SystemsCollection, self).__init__(url, connection_parameters)
-
-        self.systems_list = []
-
+       
+        self.systems_dict = {}
+        
         for link in self.links:
-            self.systems_list.append(Systems(link, connection_parameters))
+            index = re.search(r'Systems/(\w+)', link)
+            self.systems_dict[index.group(1)] = Systems(link, connection_parameters)
 
 
 class Bios(Base):
