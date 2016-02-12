@@ -303,6 +303,27 @@ class Managers(Base):
         except AttributeError:
             return "Not available"
 
+    def reset(self):
+        '''Reset the manager.
+
+        :returns:  string -- http response of POST request
+
+        '''
+        # Craft the request
+        link = getattr(self.data.Actions, "#Manager.Reset")
+        link = link.target
+
+        reset_url = urljoin(self.url, link)
+
+        response = requests.post(
+            reset_url,
+            verify=self.connection_parameters.verify_cert,
+            headers={'x-auth-token': self.connection_parameters.auth_token,
+                     'Content-type': 'application/json'})
+        # TODO : treat response.
+        return response
+
+
 class ManagersCollection(BaseCollection):
     '''Class to manage redfish ManagersCollection data.'''
     def __init__(self, url, connection_parameters):
