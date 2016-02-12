@@ -4,6 +4,7 @@ Section: PBGRP
 Priority: optional
 Maintainer: PBPACKAGER
 Build-Depends: debhelper (>= 4.2.20), python-dev (>= 2.7), PBBDEP
+X-Python-Version: >= 2.7
 Standards-Version: PBDEBSTD
 Vcs-Svn: https://github.com/bcornec/PBPROJ
 Vcs-Browser: https://github.com/bcornec/PBPROJ
