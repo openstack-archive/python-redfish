@@ -15,6 +15,7 @@ Contents:
    installation
    usage
    contributing
+   classesdoc
 
 Indices and tables
 ==================

@@ -19,12 +19,12 @@ def initialize_logger(REDFISH_LOGFILE,
     '''Initialize a global logger to track application behaviour
 
     :param redfish_logfile: Log filename
-    :type str
+    :type redfish_logfile: str
     :param screen_logger_level: Console log level
                                 (logging.DEBUG, logging.ERROR, ..) or nolog
-    :type logging constant or string
+    :type screen_logger_level: logging constant or string
     :param file_logger_level: File log level
-    :type logging constant
+    :type file_logger_level: logging constant
     :returns:  logging object
 
     '''
