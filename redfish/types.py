@@ -23,7 +23,7 @@ class Base(object):
         self.api_url = tortilla.wrap(url, debug=config.TORTILLADEBUG)
 
         try:
-            if connection_parameters.auth_token == None:
+            if connection_parameters.auth_token is None:
                 self.data = self.api_url.get(verify=connection_parameters.verify_cert)
             else:
                 self.data = self.api_url.get(verify=connection_parameters.verify_cert,
@@ -63,11 +63,11 @@ class Base(object):
         if float(mapping.redfish_version) < 1.00:
             links = getattr(self.data, mapping.redfish_mapper.map_links())
             if link_type in links:
-                return  urljoin(self.url, links[link_type][mapping.redfish_mapper.map_links_ref()])
+                return urljoin(self.url, links[link_type][mapping.redfish_mapper.map_links_ref()])
         else:
             links = getattr(self.data, link_type)
             link = getattr(links, mapping.redfish_mapper.map_links_ref())
-            return  urljoin(self.url, link)
+            return urljoin(self.url, link)
 
     @property
     def url(self):
@@ -120,7 +120,7 @@ class Base(object):
             headers={'x-auth-token': self.connection_parameters.auth_token},
             data=action)
         return response
-    
+
     def get_name(self):
         '''Get root name
 
@@ -138,8 +138,7 @@ class BaseCollection(Base):
     def __init__(self, url, connection_parameters):
         super(BaseCollection, self).__init__(url, connection_parameters)
 
-        self.links=[]
-
+        self.links = []
 
         #linksmembers = self.data.Links.Members
         #linksmembers = self.data.links.Member
@@ -152,7 +151,6 @@ class BaseCollection(Base):
             #self.links.append(getattr(link,'@odata.id'))
             #self.links.append(getattr(link,'href'))
             self.links.append(urljoin(self.url, getattr(link, mapping.redfish_mapper.map_links_ref())))
-
 
         config.logger.debug(self.links)
 
@@ -189,7 +187,7 @@ class Root(Base):
         :returns:  string -- path
 
         '''
-        return getattr(self.root.Links.Systems, '@odata.id')   
+        return getattr(self.root.Links.Systems, '@odata.id')
 
 
 class SessionService(Base):
@@ -204,10 +202,10 @@ class Managers(Base):
         try:
             # New proliant firmware now respects Redfish v1.00, so seems to correct below statement
             # TODO : better handle exception and if possible support old firmware ?
-            self.ethernet_interfaces_collection = EthernetInterfacesCollection(
-                                                        self.get_link_url('EthernetInterfaces'),
-                                                        connection_parameters
-                                                        )
+            self.ethernet_interfaces_collection = \
+                EthernetInterfacesCollection(
+                    self.get_link_url('EthernetInterfaces'),
+                    connection_parameters)
 
             # Works on proliant, need to treat 095 vs 0.96 differences
             #self.ethernet_interfaces_collection = EthernetInterfacesCollection(
@@ -217,11 +215,10 @@ class Managers(Base):
         except exception.InvalidRedfishContentException:
             # This is to avoid invalid content from the mockup
             self.ethernet_interfaces_collection = None
-        
+
         except AttributeError:
             # This means we don't have EthernetInterfaces
             self.ethernet_interfaces_collection = None
-            
 
     def get_firmware_version(self):
         '''Get firmware version of the manager
@@ -257,7 +254,7 @@ class Managers(Base):
             return self.data.UUID
         except AttributeError:
             return "Not available"
-        
+
     def get_status(self):
         '''Get manager status
 
@@ -277,7 +274,7 @@ class Managers(Base):
         '''
         chassis_list = []
         links = getattr(self.data, mapping.redfish_mapper.map_links(self.data))
-        
+
         try:
             for chassis in links.ManagerForChassis:
                 result = re.search(r'Chassis/(\w+)', chassis[mapping.redfish_mapper.map_links_ref(chassis)])
@@ -294,11 +291,11 @@ class Managers(Base):
         '''
         systems_list = []
         links = getattr(self.data, mapping.redfish_mapper.map_links(self.data))
-        
+
         try:
             for systems in links.ManagerForServers:
                 result = re.search(r'Systems/(\w+)', systems[mapping.redfish_mapper.map_links_ref(systems)])
-                systems_list.append(result.group(1))           
+                systems_list.append(result.group(1))
             return systems_list
         except AttributeError:
             return "Not available"
@@ -365,7 +362,7 @@ class Systems(Base):
                                      data=action
                                     )
         #TODO : treat response.
-        return response  
+        return response
 
     def get_bios_version(self):
         '''Get bios version of the system.
@@ -449,9 +446,9 @@ class SystemsCollection(BaseCollection):
     '''Class to manage redfish SystemsCollection data.'''
     def __init__(self, url, connection_parameters):
         super(SystemsCollection, self).__init__(url, connection_parameters)
-       
+
         self.systems_dict = {}
-        
+
         for link in self.links:
             index = re.search(r'Systems/(\w+)', link)
             self.systems_dict[index.group(1)] = Systems(link, connection_parameters)
@@ -473,7 +470,8 @@ class Boot(Base):
 class EthernetInterfacesCollection(BaseCollection):
     '''Class to manage redfish EthernetInterfacesColkection data.'''
     def __init__(self, url, connection_parameters):
-        super(EthernetInterfacesCollection, self).__init__(url, connection_parameters)
+        super(EthernetInterfacesCollection,
+              self).__init__(url, connection_parameters)
 
         self.ethernet_interfaces_dict = {}
 
@@ -482,7 +480,8 @@ class EthernetInterfacesCollection(BaseCollection):
         # Check more than 1 hour for this bug.... grrr....
         for link in self.links:
             index = re.search(r'EthernetInterfaces/(\w+)', link)
-            self.ethernet_interfaces_dict[index.group(1)] = EthernetInterfaces(link, connection_parameters)
+            self.ethernet_interfaces_dict[index.group(1)] = \
+                EthernetInterfaces(link, connection_parameters)
 
 
 class EthernetInterfaces(Base):
@@ -508,40 +507,39 @@ class EthernetInterfaces(Base):
             return self.data.FQDN
         except AttributeError:
             return "Not available"
-        
 
     def get_ipv4(self):
         '''Get EthernetInterface ipv4 address
- 
+
         :returns:  list -- interface ip addresses or "Not available"
- 
+
         '''
-        
+
         ipaddresses = []
-        
+
         try:
             for ip_settings in self.data.IPv4Addresses:
                 address = ip_settings['Address']
                 ipaddresses.append(address)
-            
+
             return ipaddresses
         except AttributeError:
             return "Not available"
 
     def get_ipv6(self):
         '''Get EthernetInterface ipv6 address
- 
+
         :returns:  list -- interface ip addresses or "Not available"
- 
+
         '''
-        
+
         ipaddresses = []
-        
+
         try:
             for ip_settings in self.data.IPv6Addresses:
                 address = ip_settings['Address']
                 ipaddresses.append(address)
-            
+
             return ipaddresses
         except AttributeError:
             return "Not available"
