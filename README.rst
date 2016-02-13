@@ -41,23 +41,38 @@ are discouraged due to security.
 Python requirements are listed in requirements.txt; additional requirements for
 running the unit test suite are listed in test-requirements.txt.
 
-Developer setup
+Get the sources
 ---------------
 
-To initialize a local development environment (eg, so you can run unit tests)
-you should run the following commands
+The sources are available on github and can be retrieve using::
+
+    git clone https://github.com/uggla/python-redfish
+
+As python redefish is currently in heavy development we recommend to checkout the devel branch using::
+
+    cd python-redfish
+    git checkout devel
+
+Installation
+------------
+
+Please refer to the following link.
+
+http://pythonhosted.org/python-redfish/installation.html
 
 Contacts
 --------
 
-Distribution list : python-redfish@mondorescue.org
+Distribution list: python-redfish@mondorescue.org
 
 Further References
 ------------------
 
+The specification can be found here :
+ http://www.dmtf.org/sites/default/files/standards/documents/DSP0266_1.0.1.pdf
+
 The data model documentation can be found here:
-  http://www.redfishspecification.org/redfish-data-model-and-schema/
+ http://redfish.dmtf.org/schemas/
 
 The overall protocol documentation can be found here:
-  http://www.redfishspecification.org/
-
+ http://www.dmtf.org/standards/redfish

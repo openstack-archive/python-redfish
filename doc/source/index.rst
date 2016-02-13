@@ -14,8 +14,10 @@ Contents:
    readme
    installation
    usage
-   contributing
+   develsetup
    classesdoc
+   contributing
+   help
 
 Indices and tables
 ==================
