@@ -37,10 +37,10 @@ import json
 import pprint
 import docopt
 import logging
-import redfish
-import requests.packages.urllib3
+import ConfigParser
 import jinja2
-
+import requests.packages.urllib3
+import redfish
 
 class ConfigFile(object):
     '''redfisht-client configuration file management'''
@@ -253,7 +253,13 @@ if __name__ == '__main__':
             sys.exit(1)
 
         # Display manager information using jinja2 template      
-        template = jinja2_env.get_template("manager_info.template")
+        try:
+            template = jinja2_env.get_template("manager_info.template")
+        except jinja2.exceptions.TemplateNotFound as e:
+            print('Template "{}" not found in {}.'.format(e.message, jinja2_env.loader.searchpath[0]))
+            logger.debug('Template "%s" not found in %s.' % (e.message, jinja2_env.loader.searchpath[0]))
+            sys.exit(1)
+        
         print template.render(r=remote_mgmt)
 
 
@@ -314,23 +320,48 @@ if __name__ == '__main__':
     logger.info("Arguments parsed")
     logger.debug(arguments)
 
-    # Get $HOME environment.
+    # Get $HOME and $VIRTUAL_ENV environment variables.
     HOME = os.getenv('HOME')
+    VIRTUAL_ENV = os.getenv('VIRTUAL_ENV')
 
     if not HOME:
         print('$HOME environment variable not set, please check your system')
         logger.error('$HOME environment variable not set')
         sys.exit(1)
     logger.debug("Home directory : %s" % HOME)
+    
+    if VIRTUAL_ENV:
+        logger.debug("Virtual env : %s" % VIRTUAL_ENV)
+        
+    # Load master conf file
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+    logger.debug("Read master configuration file")
+    master_conf_file_path = "/etc/redfish-client.conf"
+    
+    if VIRTUAL_ENV:
+        logger.debug("Read master configuration file from virtual environment")
+        master_conf_file_path = VIRTUAL_ENV + master_conf_file_path
+        
+    if not os.path.isfile(master_conf_file_path):
+        print('Master configuration file not found at {}.'.format(master_conf_file_path))
+        logger.error('Master configuration file not found at %s.' % master_conf_file_path)
+        sys.exit(1)
+    
+    config.read(master_conf_file_path)
 
     arguments['--conf_file'] = arguments['--conf_file'].replace('~', HOME)
     conf_file = ConfigFile(arguments['--conf_file'])
     
     # Initialize Template system (jinja2)
     # TODO : set the template file location into cmd line default to /usr/share/python-redfish/templates ?
+    templates_path = config.get("redfish-client", "templates_path")
     logger.debug("Initialize template system")
-    jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader("templates"))
-
+    if VIRTUAL_ENV:
+        logger.debug("Read templates file from virtual environment")
+        templates_path = VIRTUAL_ENV + templates_path
+    jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_path))
+    
+    # Check cmd line parameters
     if arguments['config'] is True:
         logger.debug("Config commands")
         if arguments['show'] is True:
