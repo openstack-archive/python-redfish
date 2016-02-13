@@ -17,5 +17,10 @@ import pbr.version
 from redfish.main import *
 #import redfish.types
 
-
-__version__ = pbr.version.VersionInfo('redfish').version_string()
+try:
+    __version__ = pbr.version.VersionInfo('redfish').version_string()
+except Exception, e:
+    if "Versioning for this project requires either an sdist tarball" in e.message:
+        pass
+    else:
+        raise
