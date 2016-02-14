@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 # coding=utf-8
 import os
 import stat
@@ -7,7 +14,7 @@ from docker import Client
 from path import Path
 
 
-class DockerTest():
+class DockerTest(object):
     def __init__(self):
         self.cli = Client(base_url='unix://var/run/docker.sock')
 
