@@ -25,7 +25,7 @@ Using pip and virtualenv
 
  Fedora 22::
 
-    dnf install python-virtualenv.noarch python-virtualenvwrapper.noarch
+    dnf install python-virtualenv python-virtualenvwrapper
 
  Ubuntu 15.04::
 
@@ -69,7 +69,7 @@ The mechanism is based on `project builder <http://www.project-builder.org/>`_ t
 #. Follow `get the sources <http://pythonhosted.org/python-redfish/readme.html#get-the-sources>`_ section to retrieve the sources.
 #. Download project builder for your distribution from ftp://ftp.project-builder.org.
 #. Clone the project to your own github account.
-#. Create a .pbrc with the following containt::
+#. Create a .pbrc with the following content, replace "/wokspace/python/redfish" and "uggla" with your own directory and account::
 
     [uggla@ugglalaptop ~]$ cat .pbrc
     pbdefdir python-redfish = $ENV{'HOME'}/workspace
@@ -79,6 +79,10 @@ The mechanism is based on `project builder <http://www.project-builder.org/>`_ t
 #. Build the project::
 
     pb -p python-redfish sbx2pkg
+
+ or::
+
+    pb -p python-redfish sbx2pkg2ins
 
 #. All packages (srpm/rpm) should be available into the build directory, then install the package using rpm::
 
@@ -90,7 +94,7 @@ The mechanism is based on `project builder <http://www.project-builder.org/>`_ t
 Using deb package
 -----------------
 
-This installation in yet possible due to missing deb package dependencies. We are working on it.
+This installation in not yet possible due to missing deb package dependencies. We are working on it.
 
 In the meantime we recommend to use `Using pip`_ or `Using pip and virtualenv`_.
 
@@ -216,7 +220,7 @@ If you want to build the documentation in pdf.
 
 #. Get texlive full distribution, ex on Fedora::
 
-    dnf install texlive-scheme-full.noarch
+    dnf install texlive-scheme-full
 #. Build the documentation::
 
     make latexpdf

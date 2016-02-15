@@ -13,12 +13,12 @@ Example using a proliant
 
 example/simple-proliant.py provide a simple library usage to interact with a HP
 proliant BL460C G9 server. However this example should work on any server supplier following redfish
-standard. 
+standard.
 
-refish-client usage
--------------------
+redfish-client usage
+--------------------
 
-The clint usage can be display using::
+The client usage can be display using::
 
     redfish-client.py -h
 

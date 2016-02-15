@@ -20,14 +20,17 @@ Project Structure
 This project follows the same convention as OpenStack projects, eg. using pbr
 for build and test automation::
 
-    doc/            # documentation
-    doc/source      # the doc source files live here
-    doc/build/html  # output of building any docs will go here
+    doc/            # Documentation
+    doc/source      # The doc source files live here
+    doc/build/html  # Output of building any docs will go here
     dmtf            # Reference documents and mockup provided by the DMTF
-    examples/       # any sample code using this library, eg. for education
+    examples/       # Any sample code using this library, eg. for education
                     # should be put here
-    redfish/        # the redfish library
-    redfish/tests/  # python unit test suite
+    pbconf          # Project builder file to build rpm/deb packages for
+                    # distributions
+    redfish/        # The redfish library itself
+    redfish/tests/  # Python redfish unit test suite
+    redfish-client  # Client tool to manage redfish devices
 
 Requirements
 ------------
@@ -44,7 +47,7 @@ running the unit test suite are listed in test-requirements.txt.
 Get the sources
 ---------------
 
-The sources are available on github and can be retrieve using::
+The sources are available on github and can be retrieved using::
 
     git clone https://github.com/uggla/python-redfish
 
@@ -68,11 +71,4 @@ Distribution list: python-redfish@mondorescue.org
 Further References
 ------------------
 
-The specification can be found here :
- http://www.dmtf.org/sites/default/files/standards/documents/DSP0266_1.0.1.pdf
-
-The data model documentation can be found here:
- http://redfish.dmtf.org/schemas/
-
-The overall protocol documentation can be found here:
- http://www.dmtf.org/standards/redfish
+Please look at `dmtf/README.rst <further_ref.html>`_ file.
