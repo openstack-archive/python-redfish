@@ -11,4 +11,4 @@ simplejson>=3.8.1
 
 # Python3 compat
 future>=0.15.2
-configparser>=3.3.0
+configparser>=3.3.0; python_version < '3'
