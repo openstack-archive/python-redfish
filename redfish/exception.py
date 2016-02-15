@@ -39,16 +39,6 @@ class InvalidRedfishContentException(RedfishException):
             '   Most of the time you are not pointing to the rest API\n'
 
 
-class NonTrustedCertificatException(RedfishException):
-    def __init__(self, message, **kwargs):
-        super(NonTrustedCertificatException, self).__init__(message, **kwargs)
-        self.advices = \
-            '1- Check if the url is the correct one\n' + \
-            '2- Check if your device has a valid trusted certificat\n' + \
-            '   You can use openssl to validate it using the command :\n' + \
-            '   openssl s_client -showcerts -connect <server>:443\n'
-
-
 class AuthenticationFailureException(RedfishException):
     def __init__(self, message, **kwargs):
         super(AuthenticationFailureException, self).__init__(message, **kwargs)
