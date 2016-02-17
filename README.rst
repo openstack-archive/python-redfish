@@ -20,14 +20,17 @@ Project Structure
 This project follows the same convention as OpenStack projects, eg. using pbr
 for build and test automation::
 
-    doc/            # documentation
-    doc/source      # the doc source files live here
-    doc/build/html  # output of building any docs will go here
+    doc/            # Documentation
+    doc/source      # The doc source files live here
+    doc/build/html  # Output of building any docs will go here
     dmtf            # Reference documents and mockup provided by the DMTF
-    examples/       # any sample code using this library, eg. for education
+    examples/       # Any sample code using this library, eg. for education
                     # should be put here
-    redfish/        # the redfish library
-    redfish/tests/  # python unit test suite
+    pbconf          # Project builder file to build rpm/deb packages for
+                    # distributions
+    redfish/        # The redfish library itself
+    redfish/tests/  # Python redfish unit test suite
+    redfish-client  # Client tool to manage redfish devices
 
 Requirements
 ------------
@@ -41,23 +44,31 @@ are discouraged due to security.
 Python requirements are listed in requirements.txt; additional requirements for
 running the unit test suite are listed in test-requirements.txt.
 
-Developer setup
+Get the sources
 ---------------
 
-To initialize a local development environment (eg, so you can run unit tests)
-you should run the following commands
+The sources are available on github and can be retrieved using::
+
+    git clone https://github.com/uggla/python-redfish
+
+As python redefish is currently in heavy development we recommend to checkout the devel branch using::
+
+    cd python-redfish
+    git checkout devel
+
+Installation
+------------
+
+Please refer to the following link.
+
+http://pythonhosted.org/python-redfish/installation.html
 
 Contacts
 --------
 
-Distribution list : python-redfish@mondorescue.org
+Distribution list: python-redfish@mondorescue.org
 
 Further References
 ------------------
 
-The data model documentation can be found here:
-  http://www.redfishspecification.org/redfish-data-model-and-schema/
-
-The overall protocol documentation can be found here:
-  http://www.redfishspecification.org/
-
+Please look at `dmtf/README.rst <further_ref.html>`_ file.

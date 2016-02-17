@@ -247,8 +247,6 @@ class RedfishConnection(object):
                                                  self.connection_parameters
                                                  )
 
-        #for system in self.Systems.systems_list:
-            #config.logger.debug(system.data.links.ManagedBy)
 #         self.Chassis
 
 #         self.EventService

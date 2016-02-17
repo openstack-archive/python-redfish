@@ -130,7 +130,7 @@ defpkgdir python-redfish = .
 
 # List of files per pkg on which to apply filters
 # Files are mentioned relatively to pbroot/defpkgdir
-filteredfiles python-redfish = redfish-client/redfish-client.py
+filteredfiles python-redfish = redfish-client/redfish-client.py,doc/source/conf.py
 #supfiles python-redfish = python-redfish.init
 
 # For perl modules, names are different depending on distro
