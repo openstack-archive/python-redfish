@@ -12,6 +12,7 @@ redfish-client ::
    redfish-client [options] config show
    redfish-client [options] config showall
    redfish-client [options] manager getinfo [<manager_name>]
+   redfish-client [options] system getinfo [<manager_name>]
    redfish-client (-h | --help)
    redfish-client --version
  
@@ -263,8 +264,15 @@ if __name__ == '__main__':
 
     def display_manager_info(redfish_data):
         # Display manager information using jinja2 template
+        render_template("manager_info.template")
+
+    def display_system_info(redfish_data):
+        # Display system information using jinja2 template
+        render_template("system_info.template")
+
+    def render_template(template):
         try:
-            template = jinja2_env.get_template("manager_info.template")
+            template = jinja2_env.get_template(template)
         except jinja2.exceptions.TemplateNotFound as e:
             print('Template "{}" not found in {}.'
                   .format(e.message, jinja2_env.loader.searchpath[0]))
@@ -402,29 +410,33 @@ if __name__ == '__main__':
                                          arguments['<changed_value>'])
             logger.debug(inventory.data)
             inventory.save()
-    elif arguments['manager'] is True:
-        logger.debug("Manager commands")
-        if arguments['getinfo'] is True:
-            logger.debug('getinfo command')
-            # If manager is not defined set it to 'default'
-            if not arguments['<manager_name>']:
-                manager_name = 'default'
-            else:
-                manager_name = arguments['<manager_name>']
-            # Check if the default section is available in our conf file
-            inventory.check_manager(manager_name)
-            connection_parameters = inventory.get_manager_info(manager_name)
+    elif arguments['getinfo'] is True:
+        logger.debug('getinfo command')
+        # If manager is not defined set it to 'default'
+        if not arguments['<manager_name>']:
+            manager_name = 'default'
+        else:
+            manager_name = arguments['<manager_name>']
+        # Check if the default section is available in our conf file
+        inventory.check_manager(manager_name)
+        connection_parameters = inventory.get_manager_info(manager_name)
 
-            print('Gathering data from manager, please wait...\n')
-            # TODO : Add a rotating star showing program is running ?
-            #        Could be a nice exercice for learning python. :)
-            logger.info('Gathering data from manager')
+        print('Gathering data from manager, please wait...\n')
+        # TODO : Add a rotating star showing program is running ?
+        #        Could be a nice exercice for learning python. :)
+        logger.info('Gathering data from manager')
 
-            if arguments['--insecure'] is True:
-                redfish_data = get_redfish_data(connection_parameters, False)
-            else:
-                redfish_data = get_redfish_data(connection_parameters, True)
+        if arguments['--insecure'] is True:
+            redfish_data = get_redfish_data(connection_parameters, False)
+        else:
+            redfish_data = get_redfish_data(connection_parameters, True)
+        if arguments['manager'] is True:
+            logger.debug("Manager commands")
             display_manager_info(redfish_data)
-
+        elif arguments['system'] is True:
+            logger.debug("system commands")
+            display_system_info(redfish_data)
+        elif arguments['chassis'] is True:
+            pass
     logger.info("Client session terminated")
     sys.exit(0)
