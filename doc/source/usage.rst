@@ -20,7 +20,7 @@ redfish-client usage
 
 The client usage can be display using::
 
-    redfish-client.py -h
+    redfish-client -h
 
 This is also available at http://pythonhosted.org/python-redfish/redfish-client.html .
 

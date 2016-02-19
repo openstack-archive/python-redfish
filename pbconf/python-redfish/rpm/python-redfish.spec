@@ -33,7 +33,6 @@ make latexpdf
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 # This will go in a separate script later on to share with other distros
 %{__mkdir} -p %{buildroot}/%{_bindir}
-install -m 755 redfish-client/redfish-client.py %{buildroot}/%{_bindir}/redfish-client
 rm -fr %{buildroot}/%{python_sitelib}/redfish/old
 
 for i in 1; do

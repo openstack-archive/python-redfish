@@ -6,14 +6,14 @@
 redfish-client ::
 
  Usage:
-   redfish-client.py [options] config add <manager_name> <manager_url> [<login>] [<password>]
-   redfish-client.py [options] config del <manager_name>
-   redfish-client.py [options] config modify <manager_name> (manager_name | url | login | password) <changed_value>
-   redfish-client.py [options] config show
-   redfish-client.py [options] config showall
-   redfish-client.py [options] manager getinfo [<manager_name>]
-   redfish-client.py (-h | --help)
-   redfish-client.py --version
+   redfish-client [options] config add <manager_name> <manager_url> [<login>] [<password>]
+   redfish-client [options] config del <manager_name>
+   redfish-client [options] config modify <manager_name> (manager_name | url | login | password) <changed_value>
+   redfish-client [options] config show
+   redfish-client [options] config showall
+   redfish-client [options] manager getinfo [<manager_name>]
+   redfish-client (-h | --help)
+   redfish-client --version
  
  
  Options:
