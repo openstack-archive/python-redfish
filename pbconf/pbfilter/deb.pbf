@@ -11,7 +11,7 @@ filter PBGRP = utils
 filter PBLIC = ASL 2.0
 
 # PBDEP is replaced by the list of dependencies
-filter PBDEP = python-docopt, python-tortilla, python-jinja2
+filter PBDEP = python-docopt, python-tortilla, python-jinja2, python-pbr, python-docopt, python-simplejson
 
 # PBBDEP is replaced by the list of build dependencies
 filter PBBDEP = python-dev, python-setuptools, python-pbr, python-tortilla, python-jinja2, python-sphinx
