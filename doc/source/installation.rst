@@ -104,15 +104,15 @@ Host configuration file configuration
 
 #. Verify redfish-client is working correclty::
 
-    redfish-client.py -h
+    redfish-client -h
 
 #. Create a default entry to use the mockup::
 
-    redfish-client.py config add default default http://localhost:8000/redfish/v1
+    redfish-client config add default default http://localhost:8000/redfish/v1
 
 #. Verify the entry is correctly registered::
 
-    redfish-client.py config showall
+    redfish-client config showall
 
 ===================
 Mockup installation
@@ -146,11 +146,11 @@ Testing against the mockup
 #. Follow `Host configuration file configuration`_ and `Mockup installation`_ section.
 #. Run the following command::
 
-    redfish-client.py manager getinfo
+    redfish-client manager getinfo
 
 The result should be like this::
 
-    (pypi)[uggla@ugglalaptop dmtf]$ redfish-client.py manager getinfo
+    (pypi)[uggla@ugglalaptop dmtf]$ redfish-client manager getinfo
     Gathering data from manager, please wait...
 
     Redfish API version :  1.00
