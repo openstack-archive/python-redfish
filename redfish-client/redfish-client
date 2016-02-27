@@ -17,14 +17,15 @@ redfish-client ::
  
  
  Options:
-   -h --help             Show this screen.
-   --version             Show version.
-   --conf_file FILE      Configuration file [default: ~/.redfish.conf]
-   --insecure            Ignore SSL certificates
-   --debug LEVEL         Run in debug mode, LEVEL from 1 to 3 increase verbosity
-                         Security warning LEVEL > 1 could reveal password into the logs
-   --debugfile FILE      Specify the client debugfile [default: redfish-client.log]
-   --libdebugfile FILE   Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
+   -h --help            Show this screen.
+   --version            Show version.
+   -c --config FILE     Configuration file
+   -i --inventory FILE  Configuration file [default: $HOME/.redfish.conf]
+   --insecure           Ignore SSL certificates
+   --debug LEVEL        Run in debug mode, LEVEL from 1 to 3 increase verbosity
+                        Security warning LEVEL > 1 could reveal password into the logs
+   --debugfile FILE     Specify the client debugfile [default: redfish-client.log]
+   --libdebugfile FILE  Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
  
  config commands : manage the configuration file.
  manager commands : manage the manager (Ligh out management). If <manager_name>
@@ -42,24 +43,25 @@ import jinja2
 import requests.packages.urllib3
 import redfish
 
-class ConfigFile(object):
-    '''redfisht-client configuration file management'''
-    def __init__(self, config_file):
-        '''Initialize the configuration file
+
+class InventoryFile(object):
+    '''redfisht-client inventory file management'''
+    def __init__(self, inventory_file):
+        '''Initialize the inventory file
 
         Open and load configuration file data.
         If the file does not exist create an empty one ready to receive data
 
-        :param config_file: File name of the configuration file
+        :param inventory_file: File name of the configuration file
                             default: ~/.redfish.conf
         :type config-file: str
         :returns: Nothing
 
         '''
-        self._config_file = config_file
+        self._inventory_file = inventory_file
         # read json file
         try:
-            with open(self._config_file) as json_data:
+            with open(self._inventory_file) as json_data:
                 self.data = json.load(json_data)
                 json_data.close()
         except (ValueError, IOError):
@@ -68,7 +70,7 @@ class ConfigFile(object):
     def save(self):
         '''Save the configuration file data'''
         try:
-            with open(self._config_file, 'w') as json_data:
+            with open(self._inventory_file, 'w') as json_data:
                 json.dump(self.data, json_data)
                 json_data.close()
         except IOError as e:
@@ -141,7 +143,8 @@ class ConfigFile(object):
                 self.manager_incorect(e)
         elif parameter == 'password':
             try:
-                self.data['Managers'][manager_name]['password'] = parameter_value
+                self.data['Managers'][manager_name]['password'] \
+                    = parameter_value
             except KeyError as e:
                 self.manager_incorect(e)
         elif parameter == 'manager_name':
@@ -209,7 +212,6 @@ class RedfishClientException(Exception):
 if __name__ == '__main__':
     '''Main application redfish-client'''
     # Functions
-
     def show_manager(all=False):
         '''Display manager info
 
@@ -219,16 +221,19 @@ if __name__ == '__main__':
 
         '''
         print('Managers configured :')
-        for manager in conf_file.get_managers():
-            print(manager)
-            if all is True:
-                info = conf_file.get_manager_info(manager)
-                print('\tUrl : {}'.format(info['url']))
-                print('\tLogin : {}'.format(info['login']))
-                print('\tPassword : {}'.format(info['password']))
+        if(not inventory.get_managers()):
+            print("None")
+        else:
+            for manager in inventory.get_managers():
+                print(manager)
+                if all is True:
+                    info = inventory.get_manager_info(manager)
+                    print('\tUrl : {}'.format(info['url']))
+                    print('\tLogin : {}'.format(info['login']))
+                    print('\tPassword : {}'.format(info['password']))
 
     def get_manager_info(manager_name, check_SSL):
-        connection_parameters = conf_file.get_manager_info(manager_name)
+        connection_parameters = inventory.get_manager_info(manager_name)
         if not connection_parameters['login']:
             simulator = True
             enforceSSL = False
@@ -252,18 +257,21 @@ if __name__ == '__main__':
             sys.stderr.write(str(e.advices))
             sys.exit(1)
 
-        # Display manager information using jinja2 template      
+        # Display manager information using jinja2 template
         try:
             template = jinja2_env.get_template("manager_info.template")
         except jinja2.exceptions.TemplateNotFound as e:
-            print('Template "{}" not found in {}.'.format(e.message, jinja2_env.loader.searchpath[0]))
-            logger.debug('Template "%s" not found in %s.' % (e.message, jinja2_env.loader.searchpath[0]))
+            print('Template "{}" not found in {}.'
+                  .format(e.message, jinja2_env.loader.searchpath[0]))
+            logger.debug('Template "%s" not found in %s.'
+                         % (e.message, jinja2_env.loader.searchpath[0]))
             sys.exit(1)
-        
+
         print template.render(r=remote_mgmt)
 
-
+    #################################################################
     # Main program
+    #################################################################
     redfishclient_version = "redfish-client PBVER"
 
     # Parse and manage arguments
@@ -320,47 +328,43 @@ if __name__ == '__main__':
     logger.info("Arguments parsed")
     logger.debug(arguments)
 
-    # Get $HOME and $VIRTUAL_ENV environment variables.
+    # Get $HOME environment variables.
     HOME = os.getenv('HOME')
-    VIRTUAL_ENV = os.getenv('VIRTUAL_ENV')
 
-    if not HOME:
+    if(not HOME):
         print('$HOME environment variable not set, please check your system')
         logger.error('$HOME environment variable not set')
         sys.exit(1)
     logger.debug("Home directory : %s" % HOME)
-    
-    if VIRTUAL_ENV:
-        logger.debug("Virtual env : %s" % VIRTUAL_ENV)
-        
-    # Load master conf file
-    config = ConfigParser.ConfigParser(allow_no_value=True)
-    logger.debug("Read master configuration file")
-    master_conf_file_path = "/etc/redfish-client.conf"
-    
-    if VIRTUAL_ENV:
-        logger.debug("Read master configuration file from virtual environment")
-        master_conf_file_path = VIRTUAL_ENV + master_conf_file_path
-        
-    if not os.path.isfile(master_conf_file_path):
-        print('Master configuration file not found at {}.'.format(master_conf_file_path))
-        logger.error('Master configuration file not found at %s.' % master_conf_file_path)
-        sys.exit(1)
-    
-    config.read(master_conf_file_path)
 
-    arguments['--conf_file'] = arguments['--conf_file'].replace('~', HOME)
-    conf_file = ConfigFile(arguments['--conf_file'])
-    
+    # Load config
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+    logger.debug("Read configuration file")
+    configfile = 'PBCONFFILE'
+
+    if(arguments['--config']):
+        configfile = [arguments['--config']]
+        logger.debug("Overwrite configuration specified by user at %s"
+                     % configfile)
+
+    if(os.path.isfile(configfile)):
+        logger.debug('Configuration found at %s.' % configfile)
+        config.read(configfile)
+    else:
+        print('Configuration file not found at {}.'.format(configfile))
+        logger.error('Configuration file not found at %s.' % configfile)
+        sys.exit(1)
+
+    arguments['--inventory'] = arguments['--inventory'].replace('~', HOME)
+    arguments['--inventory'] = arguments['--inventory'].replace('$HOME', HOME)
+    inventory = InventoryFile(arguments['--inventory'])
+
     # Initialize Template system (jinja2)
-    # TODO : set the template file location into cmd line default to /usr/share/python-redfish/templates ?
     templates_path = config.get("redfish-client", "templates_path")
     logger.debug("Initialize template system")
-    if VIRTUAL_ENV:
-        logger.debug("Read templates file from virtual environment")
-        templates_path = VIRTUAL_ENV + templates_path
-    jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_path))
-    
+    jinja2_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_path))
+
     # Check cmd line parameters
     if arguments['config'] is True:
         logger.debug("Config commands")
@@ -372,37 +376,37 @@ if __name__ == '__main__':
             show_manager(True)
         elif arguments['add'] is True:
             logger.debug('add command')
-            conf_file.add_manager(arguments['<manager_name>'],
+            inventory.add_manager(arguments['<manager_name>'],
                                   arguments['<manager_url>'],
                                   arguments['<login>'],
                                   arguments['<password>'])
-            logger.debug(conf_file.data)
-            conf_file.save()
+            logger.debug(inventory.data)
+            inventory.save()
         elif arguments['del'] is True:
             logger.debug('del command')
-            conf_file.delete_manager(arguments['<manager_name>'])
-            logger.debug(conf_file.data)
-            conf_file.save()
+            inventory.delete_manager(arguments['<manager_name>'])
+            logger.debug(inventory.data)
+            inventory.save()
         elif arguments['modify'] is True:
             logger.debug('modify command')
             if arguments['url'] is not False:
-                conf_file.modify_manager(arguments['<manager_name>'],
+                inventory.modify_manager(arguments['<manager_name>'],
                                          'url',
                                          arguments['<changed_value>'])
             elif arguments['login'] is not False:
-                conf_file.modify_manager(arguments['<manager_name>'],
+                inventory.modify_manager(arguments['<manager_name>'],
                                          'login',
                                          arguments['<changed_value>'])
             elif arguments['password'] is not False:
-                conf_file.modify_manager(arguments['<manager_name>'],
+                inventory.modify_manager(arguments['<manager_name>'],
                                          'password',
                                          arguments['<changed_value>'])
             elif arguments['manager_name'] is not False:
-                conf_file.modify_manager(arguments['<manager_name>'],
+                inventory.modify_manager(arguments['<manager_name>'],
                                          'manager_name',
                                          arguments['<changed_value>'])
-            logger.debug(conf_file.data)
-            conf_file.save()
+            logger.debug(inventory.data)
+            inventory.save()
     if arguments['manager'] is True:
         logger.debug("Manager commands")
         if arguments['getinfo'] is True:
@@ -413,7 +417,7 @@ if __name__ == '__main__':
             else:
                 manager_name = arguments['<manager_name>']
             # Check if the default section is available in our conf file
-            conf_file.check_manager(manager_name)
+            inventory.check_manager(manager_name)
             if arguments['--insecure'] is True:
                 get_manager_info(manager_name, False)
             else:
