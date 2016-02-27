@@ -10,9 +10,11 @@ Use::
 
 Pip will install :
 
-1. The library and all dependencies into your site-packages directory
-2. Redfish client master conf file into /etc/redfish_client.conf
-3. Data file (templates) into /usr/share/redfish-client/templates
+1. The library and all dependencies into prefix/lib/pythonX.Y/site-packages directory
+2. Redfish client master conf file into prefix/etc/redfish_client.conf
+   Unless if prefix = '/usr', in that case force configuration file to be in /etc
+
+3. Data file (templates) into prefix/share/redfish-client/templates
 
 Point 2 and 3 above need root access to your system. If you don't have root
 access on your system, please follow `Using pip and virtualenv`_ section.
@@ -55,7 +57,7 @@ Using the sources
 #. Follow `get the sources <http://pythonhosted.org/python-redfish/readme.html#get-the-sources>`_ section to retrieve the sources.
 #. Install from the source using::
 
-    python setup.py install
+    python setup.py install --prefix="/usr/local"
 
 
 Using rpm package
