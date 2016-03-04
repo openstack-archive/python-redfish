@@ -151,7 +151,7 @@ class DataFilesHelper():
         dist.parse_config_files()
         try:
             dist.parse_command_line()
-        except distutils.errors.DistutilsArgError:
+        except (distutils.errors.DistutilsArgError, AttributeError):
             pass
         command = dist.get_command_obj('install')
         command.ensure_finalized()
