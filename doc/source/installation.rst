@@ -47,7 +47,7 @@ Using pip and virtualenv
 
 4. Install using pip::
 
-    pip install python-virtualenv
+    pip install python-redfish
 
  All files are installed under your virtualenv.
 

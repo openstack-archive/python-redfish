@@ -15,6 +15,7 @@ Contents:
    installation
    usage
    develsetup
+   testing
    classesdoc
    contributing
    help
