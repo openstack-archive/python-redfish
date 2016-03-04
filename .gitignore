@@ -41,6 +41,8 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+redfish-client/tests/Dockerfile
+redfish-client/tests/python-redfish.src.tar.gz
 
 # Translations
 *.mo

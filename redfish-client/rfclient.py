@@ -1,1 +1,1 @@
-redfish-client.py
+redfish-client
