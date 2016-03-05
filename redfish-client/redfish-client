@@ -345,7 +345,7 @@ if __name__ == '__main__':
     configfile = 'PBCONFFILE'
 
     if(arguments['--config']):
-        configfile = [arguments['--config']]
+        configfile = arguments['--config']
         logger.debug("Overwrite configuration specified by user at %s"
                      % configfile)
 
