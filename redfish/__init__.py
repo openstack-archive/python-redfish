@@ -25,7 +25,8 @@ from redfish.main import *
 try:
     __version__ = pbr.version.VersionInfo('redfish').release_string()
 except Exception as e:
-    if "Versioning for this project requires either an sdist tarball" in e.message:
+    if "Versioning for this project requires either an sdist tarball" \
+       in e.args[0]:
         pass
     else:
         raise
