@@ -8,6 +8,7 @@ Jinja2>=2.7.3
 Sphinx>=1.2.3
 docopt>=0.6.2
 simplejson>=3.8.1
+urllib3>=1.9
 
 # Python3 compat
 future>=0.15.2

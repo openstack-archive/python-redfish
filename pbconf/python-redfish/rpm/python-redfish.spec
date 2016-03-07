@@ -35,13 +35,10 @@ make latexpdf
 %files
 %doc README.rst examples/[a-z]*.py LICENSE
 %doc doc/build/latex/*.pdf
-%doc %{_docdir}/%{name}/html
-%doc %{_docdir}/%{name}/html/*.html
-%doc %{_docdir}/%{name}/html/_static
-%doc %{_docdir}/%{name}/html/_static/*
 %{_bindir}/redfish-client
-# add conf file
-# add template
+%dir %{_datadir}/redfish-client
+%{_datadir}/redfish-client/templates/*
+%config(noreplace) %{_sysconfdir}/redfish-client.conf
 %dir %{python_sitelib}/redfish
 %{python_sitelib}/redfish/*.py*
 %{python_sitelib}/redfish/tests/*.py*
