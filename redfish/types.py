@@ -18,6 +18,8 @@ from . import mapping
 from . import exception
 standard_library.install_aliases()
 
+standard_library.install_aliases()
+
 # Global variable
 
 
@@ -155,12 +157,54 @@ class BaseCollection(Base):
         config.logger.debug(self.links)
 
 
+class Device(Base):
+    '''Abstract class to add common methods between devices
+    (Chassis, Servers, System).
+    '''
+    def get_uuid(self):
+        '''Get device uuid
+
+        :returns: device uuid or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.UUID
+        except AttributeError:
+            return "Not available"
+
+    def get_status(self):
+        '''Get device status
+
+        :returns: device status or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.Status.State
+        except AttributeError:
+            return "Not available"
+
+    def get_type(self):
+        '''Get device type
+
+        :returns: device type or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.SystemType
+        except AttributeError:
+            return "Not available"
+
+
 class Root(Base):
     '''Class to manage redfish Root data.'''
     def get_api_version(self):
         '''Return api version.
 
-        :returns:  string -- version
+        :returns: api version
+        :rtype: string
         :raises: AttributeError
 
         '''
@@ -174,20 +218,13 @@ class Root(Base):
         return(version)
 
     def get_api_UUID(self):
-        '''Return UUID version.
+        '''Return api UUID.
 
-        :returns:  string -- UUID
+        :returns: api UUID
+        :rtype: string
 
         '''
         return self.data.UUID
-
-    def get_api_link_to_server(self):
-        '''Return api link to server.
-
-        :returns:  string -- path
-
-        '''
-        return getattr(self.root.Links.Systems, '@odata.id')
 
 
 class SessionService(Base):
@@ -195,7 +232,7 @@ class SessionService(Base):
     pass
 
 
-class Managers(Base):
+class Managers(Device):
     '''Class to manage redfish Managers.'''
     def __init__(self, url, connection_parameters):
         super(Managers, self).__init__(url, connection_parameters)
@@ -231,39 +268,6 @@ class Managers(Base):
         except AttributeError:
             # We are here because the attribute could be not defined.
             # This is the case with the mockup for manager 2 and 3
-            return "Not available"
-
-    def get_type(self):
-        '''Get manager type
-
-        :returns:  string -- manager type or "Not available"
-
-        '''
-        try:
-            return self.data.ManagerType
-        except AttributeError:
-            return "Not available"
-
-    def get_uuid(self):
-        '''Get manager type
-
-        :returns:  string -- manager uuid or "Not available"
-
-        '''
-        try:
-            return self.data.UUID
-        except AttributeError:
-            return "Not available"
-
-    def get_status(self):
-        '''Get manager status
-
-        :returns:  string -- manager status or "Not available"
-
-        '''
-        try:
-            return self.data.Status.State
-        except AttributeError:
             return "Not available"
 
     def get_managed_chassis(self):
@@ -331,7 +335,7 @@ class ManagersCollection(BaseCollection):
             self.managers_dict[index.group(1)] = Managers(link, connection_parameters)
 
 
-class Systems(Base):
+class Systems(Device):
     '''Class to manage redfish Systems data.'''
     # TODO : Need to discuss with Bruno the required method.
     #        Also to check with the ironic driver requirement.
@@ -366,32 +370,26 @@ class Systems(Base):
     def get_bios_version(self):
         '''Get bios version of the system.
 
-        :returns:  string -- bios version
+        :returns:  bios version or "Not available"
+        :rtype: string
 
         '''
         try:
-            # Returned by proliant
-            return self.data.Bios.Current.VersionString
-        except:
-            # Returned by mockup.
-            # Hopefully this kind of discrepencies will be fixed with
-            # Redfish 1.0 (August)
             return self.data.BiosVersion
+        except AttributeError:
+            return "Not available"
 
     def get_serial_number(self):
         '''Get serial number of the system.
 
-        :returns:  string -- serial number
+        :returns:  serial number or "Not available"
+        :rtype: string
 
         '''
         try:
-            # Returned by proliant
             return self.data.SerialNumber
-        except:
-            # Returned by mockup.
-            # Hopefully this kind of discrepencies will be fixed with
-            # Redfish 1.0 (August)
-            return ''
+        except AttributeError:
+            return "Not available"
 
     def get_power(self):
         '''Get power status of the system.
