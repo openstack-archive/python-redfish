@@ -28,9 +28,17 @@ redfish-client ::
    --libdebugfile FILE  Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
  
  config commands : manage the configuration file.
- manager commands : manage the manager (Ligh out management). If <manager_name>
+ manager commands : manage the manager (Light out management). If <manager_name>
                     is not provided use the 'default' entry
 '''
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 
 import os
 import sys
@@ -38,7 +46,7 @@ import json
 import pprint
 import docopt
 import logging
-import ConfigParser
+import configparser
 import jinja2
 import requests.packages.urllib3
 import redfish
@@ -268,7 +276,7 @@ if __name__ == '__main__':
                          % (e.message, jinja2_env.loader.searchpath[0]))
             sys.exit(1)
 
-        print template.render(r=remote_mgmt)
+        print(template.render(r=remote_mgmt))
 
     #################################################################
     # Main program
@@ -340,7 +348,7 @@ if __name__ == '__main__':
     logger.debug("Home directory : %s" % HOME)
 
     # Load config
-    config = ConfigParser.ConfigParser(allow_no_value=True)
+    config = configparser.ConfigParser(allow_no_value=True)
     logger.debug("Read configuration file")
     configfile = 'PBCONFFILE'
 

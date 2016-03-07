@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import config
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from . import config
 
 
 class RedfishException(Exception):
@@ -30,16 +37,6 @@ class InvalidRedfishContentException(RedfishException):
         self.advices = \
             '1- Check if the url is the correct one\n' + \
             '   Most of the time you are not pointing to the rest API\n'
-
-
-class NonTrustedCertificatException(RedfishException):
-    def __init__(self, message, **kwargs):
-        super(NonTrustedCertificatException, self).__init__(message, **kwargs)
-        self.advices = \
-            '1- Check if the url is the correct one\n' + \
-            '2- Check if your device has a valid trusted certificat\n' + \
-            '   You can use openssl to validate it using the command :\n' + \
-            '   openssl s_client -showcerts -connect <server>:443\n'
 
 
 class AuthenticationFailureException(RedfishException):

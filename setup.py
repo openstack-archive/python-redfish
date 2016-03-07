@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 #!/usr/bin/env python
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -19,7 +26,7 @@ import fileinput
 import re
 import pprint
 import distutils
-import ConfigParser
+import configparser
 import setuptools
 from setuptools import Distribution
 from setuptools.command.install import install
@@ -42,13 +49,13 @@ class OnlyGetScriptPath(install):
         self.distribution.install_scripts = self.install_scripts
 
 
-class DataFilesHelper():
+class DataFilesHelper(object):
     '''Class to help manage data files'''
     def __init__(self):
         '''Read setup.cfg and build the required data'''
         self.data = {}
         self.setupstruc = []
-        config = ConfigParser.ConfigParser()
+        config = configparser.ConfigParser()
         config.read('setup.cfg')
         for datafile in config.options('data_files_helper'):
             src, dst = config.get('data_files_helper', datafile).split(',')
@@ -65,7 +72,7 @@ class DataFilesHelper():
             self.data['script'] = {'src': src,
                                    'dst': 'bin',
                                    'fdst': self.calculatedst(src, 'bin')}
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             pass
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.data)

@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -114,17 +116,23 @@ Clients should always be prepared for:
 * headers the service returns
 
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
-# coding=utf-8
 
 
 import json
-from urlparse import urlparse
+from urllib.parse import urlparse
 import requests
-import config
-import types
-import mapping
-import exception
+from . import config
+from . import types
+from . import mapping
+from . import exception
 
 """Function to wrap RedfishConnection"""
 
@@ -196,13 +204,13 @@ class RedfishConnection(object):
         # Verify cert
         if self.connection_parameters.verify_cert is False:
             config.logger.info("Certificat is not checked, " +
-                        "this is insecure and can allow" +
-                        " a man in the middle attack")
+                               "this is insecure and can allow" +
+                               " a man in the middle attack")
 
-        config.logger.debug("Root url : %s", self.connection_parameters.rooturl)
+        config.logger.debug("Root url : %s",
+                            self.connection_parameters.rooturl)
         self.Root = types.Root(self.connection_parameters.rooturl,
-                         self.connection_parameters
-                        )
+                               self.connection_parameters)
         #self.api_url = tortilla.wrap(self.connection_parameters.rooturl,
         #                             debug=TORTILLADEBUG)
         #self.root = self.api_url.get(verify=self.connection_parameters.verify_cert)

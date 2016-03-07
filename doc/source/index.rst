@@ -18,6 +18,7 @@ Contents:
    testing
    classesdoc
    contributing
+   faq
    help
 
 Indices and tables

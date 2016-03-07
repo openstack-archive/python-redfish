@@ -1,14 +1,22 @@
 # coding=utf-8
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
 import pprint
 import re
-from urlparse import urljoin
+from urllib.parse import urljoin
 import requests
 import simplejson
 import tortilla
-import config
-import mapping
-import exception
+import ssl
+from . import config
+from . import mapping
+from . import exception
 
 # Global variable
 
@@ -24,15 +32,17 @@ class Base(object):
 
         try:
             if connection_parameters.auth_token is None:
-                self.data = self.api_url.get(verify=connection_parameters.verify_cert)
+                self.data = self.api_url.get(
+                    verify=connection_parameters.verify_cert)
             else:
-                self.data = self.api_url.get(verify=connection_parameters.verify_cert,
-                                             headers={'x-auth-token': connection_parameters.auth_token}
-                                             )
-        except requests.ConnectionError as e:
+                self.data = self.api_url.get(
+                    verify=connection_parameters.verify_cert,
+                    headers={
+                        'x-auth-token': connection_parameters.auth_token})
+        except (requests.ConnectionError, ssl.SSLError) as e:
             # Log and transmit the exception.
             config.logger.info('Raise a RedfishException to upper level')
-            msg = 'Connection error : {}\n'.format(e.message)
+            msg = 'Connection error : {}\n'.format(e)
             raise exception.ConnectionFailureException(msg)
         except simplejson.scanner.JSONDecodeError as e:
             # Log and transmit the exception.
@@ -41,14 +51,6 @@ class Base(object):
                 'Ivalid content : Content does not appear to be a valid ' + \
                 'Redfish json\n'
             raise exception.InvalidRedfishContentException(msg)
-        except TypeError as e:
-            # This happen connecting to a manager using non trusted
-            # SSL certificats.
-            # The exception is not what could be expected in such case but this
-            # is the one provided by Tortilla.
-            config.logger.info('Raise a RedfishException to upper level')
-            msg = 'Connection error\n'
-            raise exception.NonTrustedCertificatException(msg)
         config.logger.debug(self.data)
 
     def get_link_url(self, link_type):

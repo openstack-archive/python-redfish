@@ -9,10 +9,15 @@ NOTE::
 
     DRAFT - WORK IN PROGRESS
 
-    The current Redfish specification revision is 1.0.0 - Note that the mockup 
-    is still at version 0.99.0a and may not reflect what the standard provides 
+    The current Redfish specification revision is 1.0.0 - Note that the mockup
+    is still at version 0.99.0a and may not reflect what the standard provides
     fully
 
+Documentation
+-------------
+
+The full documentation is available at
+http://pythonhosted.org/python-redfish/installation.html
 
 Project Structure
 -------------------
@@ -35,7 +40,7 @@ for build and test automation::
 Requirements
 ------------
 
-To use the enclosed examples, you will need Python 2.7
+To use the enclosed examples, you will need Python 2.7 or Python 3.4
 (https://www.python.org/downloads/).  Note that Python 2.7.9 enforces greater
 SSL verification requiring server certificates be installed. Parameters to
 relax the requirements are available in the library, but these configurations
@@ -43,6 +48,9 @@ are discouraged due to security.
 
 Python requirements are listed in requirements.txt; additional requirements for
 running the unit test suite are listed in test-requirements.txt.
+
+Note: The program was tested with Python 2.7.10 and 3.4.2 however it might work
+as well with all Python 3 releases.
 
 Get the sources
 ---------------

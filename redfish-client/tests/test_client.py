@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 # coding=utf-8
 import os
 import stat
@@ -7,7 +14,7 @@ from docker import Client
 from path import Path
 
 
-class DockerTest():
+class DockerTest(object):
     def __init__(self):
         self.cli = Client(base_url='unix://var/run/docker.sock')
 
@@ -30,7 +37,7 @@ class DockerTest():
         self.cli.wait(container=container.get('Id'))
         response = self.cli.logs(container=container.get('Id'),
                                  stdout=True)
-        return(response)
+        return(response.decode('utf8'))
 
 
 def test_dockersocket():
@@ -49,7 +56,7 @@ def test_docker():
 
 def test_sources():
     output = subprocess.check_output(["python", "setup.py", "sdist"])
-    search = re.search(r"removing '(\S+)'", output)
+    search = re.search(r"removing '(\S+)'", str(output))
     filename = Path('dist/' + search.group(1) + '.tar.gz')
     filename.copy('redfish-client/tests/python-redfish.src.tar.gz')
     assert Path('redfish-client/tests/python-redfish.src.tar.gz').isfile()
@@ -57,20 +64,23 @@ def test_sources():
 
 def test_dockerbuild():
     docker = DockerTest()
+    # Warning :  Image tag is derived from file name, do not use uppercase !!!
     dockerfiles = ('redfish-client/tests/Dockerfile.ubuntu',
                    'redfish-client/tests/Dockerfile.debian',
                    'redfish-client/tests/Dockerfile.fedora',
+                   'redfish-client/tests/Dockerfile.fedorap3',
                    'redfish-client/tests/Dockerfile.fedorapip')
     for dockerfile in dockerfiles:
         print('Testing : {}'.format(dockerfile))
         response = docker.build(dockerfile)
-        status = response.pop()
+        status = str(response.pop())
         assert 'Successfully built' in status
 
 
 def test_install():
     docker = DockerTest()
-    images = ('rfubuntu', 'rfdebian', 'rffedora', 'rffedorapip')
+    images = ('rfubuntu', 'rfdebian',
+              'rffedora', 'rffedorap3', 'rffedorapip')
     for img in images:
         print('Testing : {}'.format(img))
         response = docker.run(img, 'redfish-client config showall')
@@ -80,10 +90,11 @@ def test_install():
 
 def test_versionformat():
     docker = DockerTest()
-    images = ('rfubuntu', 'rfdebian', 'rffedora', 'rffedorapip')
+    images = ('rfubuntu', 'rfdebian',
+              'rffedora', 'rffedorap3', 'rffedorapip')
     for img in images:
         print('Testing : {}'.format(img))
         response = docker.run(img, 'redfish-client --version')
         print(response)
-        assert (re.match('redfish-client \d+\.\d+', response))
+        assert (re.match(r'redfish-client \d+\.\d+', response))
 
