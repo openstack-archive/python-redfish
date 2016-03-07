@@ -24,7 +24,7 @@ redfish-client ::
    --insecure           Ignore SSL certificates
    --debug LEVEL        Run in debug mode, LEVEL from 1 to 3 increase verbosity
                         Security warning LEVEL > 1 could reveal password into the logs
-   --debugfile FILE     Specify the client debugfile [default: redfish-client.log]
+   --debugfile FILE     Specify the client debugfile [default: /var/log/python-redfish/redfish-client.log]
    --libdebugfile FILE  Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
  
  config commands : manage the configuration file.
@@ -253,6 +253,7 @@ if __name__ == '__main__':
                                           enforceSSL=enforceSSL
                                           )
         except redfish.exception.RedfishException as e:
+            logger.error(str(e.message))
             sys.stderr.write(str(e.message))
             sys.stderr.write(str(e.advices))
             sys.exit(1)
@@ -263,7 +264,7 @@ if __name__ == '__main__':
         except jinja2.exceptions.TemplateNotFound as e:
             print('Template "{}" not found in {}.'
                   .format(e.message, jinja2_env.loader.searchpath[0]))
-            logger.debug('Template "%s" not found in %s.'
+            logger.error('Template "%s" not found in %s.'
                          % (e.message, jinja2_env.loader.searchpath[0]))
             sys.exit(1)
 
@@ -332,7 +333,8 @@ if __name__ == '__main__':
     HOME = os.getenv('HOME')
 
     if(not HOME):
-        print('$HOME environment variable not set, please check your system')
+        print('ERROR: $HOME environment variable not set,' +
+              'please check your system')
         logger.error('$HOME environment variable not set')
         sys.exit(1)
     logger.debug("Home directory : %s" % HOME)
@@ -343,7 +345,7 @@ if __name__ == '__main__':
     configfile = 'PBCONFFILE'
 
     if(arguments['--config']):
-        configfile = [arguments['--config']]
+        configfile = arguments['--config']
         logger.debug("Overwrite configuration specified by user at %s"
                      % configfile)
 
@@ -423,5 +425,5 @@ if __name__ == '__main__':
             else:
                 get_manager_info(manager_name, True)
 
-    logger.info("Client session teminated")
+    logger.info("Client session terminated")
     sys.exit(0)

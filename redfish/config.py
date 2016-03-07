@@ -1,6 +1,9 @@
 # coding=utf-8
 
 import logging
+import sys
+import os
+import getpass
 from logging.handlers import RotatingFileHandler
 
 # Global variable definition
@@ -34,7 +37,15 @@ def initialize_logger(REDFISH_LOGFILE,
     formatter = logging.Formatter(
         '%(asctime)s :: %(levelname)s :: %(message)s'
         )
-    file_handler = RotatingFileHandler(REDFISH_LOGFILE, 'a', 1000000, 1)
+    try:
+        file_handler = RotatingFileHandler(REDFISH_LOGFILE, 'a', 1000000, 1)
+    except IOError:
+        print('ERROR: {} does not exist or is not writeable.\n'.format(REDFISH_LOGFILE))
+        print('1- Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('   using: sudo mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('2- Try to get the {} ownership'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('   using: sudo chown {} {}'.format(getpass.getuser(), os.path.dirname(REDFISH_LOGFILE)))
+        sys.exit(1)
 
     # First logger to file
     file_handler.setLevel(FILE_LOGGER_LEVEL)
