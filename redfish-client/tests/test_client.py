@@ -37,6 +37,7 @@ class DockerTest(object):
         self.cli.wait(container=container.get('Id'))
         response = self.cli.logs(container=container.get('Id'),
                                  stdout=True)
+        self.cli.remove_container(container=container.get('Id'))
         return(response.decode('utf8'))
 
 
