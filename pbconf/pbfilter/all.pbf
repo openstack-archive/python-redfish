@@ -66,3 +66,6 @@ filter PBURL = http://github.com/bcornec/python-redfish
 # PBLOG is replaced by the changelog if value is yes
 # and should be last as when used we need the %pb hash filled
 filter PBLOG = yes
+
+filter PBCONFFILE = /etc/redfish-client.conf
+filter PBTEMPLATEPATH = /usr/share/redfish-client/templates
