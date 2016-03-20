@@ -423,6 +423,24 @@ class Systems(Device):
         except:
             pass
 
+        try:
+            self.ethernet_interfaces_collection = \
+                EthernetInterfacesCollection(
+                    self.get_link_url('EthernetInterfaces'),
+                    connection_parameters)
+        except AttributeError:
+            # This means we don't have EthernetInterfaces
+            self.ethernet_interfaces_collection = None
+
+        try:
+            self.processors_collection = \
+                ProcessorsCollection(
+                    self.get_link_url('Processors'),
+                    connection_parameters)
+        except AttributeError:
+            # This means we don't have Processors detailed data
+            self.processors_collection = None
+
     def reset_system(self):
         '''Force reset of the system.
 
@@ -500,6 +518,42 @@ class Systems(Device):
         '''
         try:
             return self.data.Description
+        except AttributeError:
+            return "Not available"
+
+    def get_cpucount(self):
+        '''Get the number of cpu in the system.
+
+        :returns: number of cpu or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.ProcessorSummary.Count
+        except AttributeError:
+            return "Not available"
+
+    def get_cpumodel(self):
+        '''Get the cpu model available in the system.
+
+        :returns: cpu model or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.ProcessorSummary.Model
+        except AttributeError:
+            return "Not available"
+
+    def get_memory(self):
+        '''Get the memory available in the system.
+
+        :returns: memory available or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.MemorySummary.TotalSystemMemoryGiB
         except AttributeError:
             return "Not available"
 
@@ -690,3 +744,55 @@ class EthernetInterfaces(Base):
         except AttributeError:
             return "Not available"
 
+
+class ProcessorsCollection(BaseCollection):
+    '''Class to manage redfish ProcessorsColkection data.'''
+    def __init__(self, url, connection_parameters):
+        super(ProcessorsCollection,
+              self).__init__(url, connection_parameters)
+
+        self.processors_dict = {}
+
+        for link in self.links:
+            index = re.search(r'Processors/(\w+)', link)
+            self.processors_dict[index.group(1)] = \
+                Processors(link, connection_parameters)
+
+
+class Processors(Base):
+    '''Class to manage redfish Processors.'''
+    def get_speed(self):
+        '''Get processor speed
+
+        :returns: processor speed or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.MaxSpeedMHz
+        except AttributeError:
+            return "Not available"
+
+    def get_cores(self):
+        '''Get processor cores number
+
+        :returns: cores number or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.TotalCores
+        except AttributeError:
+            return "Not available"
+
+    def get_threads(self):
+        '''Get processor threads number
+
+        :returns: threads number or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.TotalThreads
+        except AttributeError:
+            return "Not available"

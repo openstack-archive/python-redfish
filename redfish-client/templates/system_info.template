@@ -14,12 +14,27 @@ SKU : {{ system.get_sku() }}
 Serial : {{ system.get_serial_number() }}
 Hostname : {{ system.get_hostname() }}
 Bios version : {{ system.get_bios_version() }}
-State : {{ system.get_status() }}
+CPU number : {{ system.get_cpucount() }}
+CPU model : {{ system.get_cpumodel() }}
+
+{%- if system.processors_collection %}
+CPU details :
+	{%- for cpu_index in system.processors_collection.processors_dict | sort %}
+	{%- set cpu = system.processors_collection.processors_dict[cpu_index] %}
+	Processor id {{ cpu_index }} :
+	Speed : {{ cpu.get_speed() }}
+	Cores : {{ cpu.get_cores() }}
+	Threads : {{ cpu.get_threads() }}
+	{% endfor %}
+{%- endif %}
+Available memory : {{ system.get_memory() }}
+Status : State : {{ system.get_status().Health }} / Health : {{ system.get_status().Health }}
 Power : {{ system.get_power() }}
 Description : {{ system.get_description() }}
 Chassis : {{ system.get_chassis() | join(', ') }}
 Managers : {{ system.get_managers() | join(', ') }}
-{#
+IndicatorLED : {{ system.get_indicatorled() }}
+
 Ethernet Interface :
 {%- if system.ethernet_interfaces_collection %}
 {%- for ethernetinterface_index in system.ethernet_interfaces_collection.ethernet_interfaces_dict | sort %}
@@ -34,10 +49,5 @@ Ethernet Interface :
 {%- else %}
     This system has no ethernet interface
 {%- endif %}
-Managed Chassis :
-	{{ system.get_managed_chassis() | join(', ') }}
-Managed System :
-	{{ system.get_managed_systems() | join(', ') }}
-----------------------------
-#}
+--------------------------------------------------------------------------------
 {% endfor %}
