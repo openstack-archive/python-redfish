@@ -8,8 +8,17 @@ Systems information :
 System id {{ system_index }}:
 UUID : {{ system.get_uuid() }}
 Type : {{ system.get_type() }}
+Manufacturer : {{ system.get_manufacturer() }}
+Model : {{ system.get_model() }}
+SKU : {{ system.get_sku() }}
+Serial : {{ system.get_serial_number() }}
+Hostname : {{ system.get_hostname() }}
 Bios version : {{ system.get_bios_version() }}
 State : {{ system.get_status() }}
+Power : {{ system.get_power() }}
+Description : {{ system.get_description() }}
+Chassis : {{ system.get_chassis() | join(', ') }}
+Managers : {{ system.get_managers() | join(', ') }}
 {#
 Ethernet Interface :
 {%- if system.ethernet_interfaces_collection %}

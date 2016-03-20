@@ -177,11 +177,11 @@ class Device(Base):
         '''Get device status
 
         :returns: device status or "Not available"
-        :rtype: string
+        :rtype: dict
 
         '''
         try:
-            return self.data.Status.State
+            return self.data.Status
         except AttributeError:
             return "Not available"
 
@@ -194,6 +194,78 @@ class Device(Base):
         '''
         try:
             return self.data.SystemType
+        except AttributeError:
+            return "Not available"
+
+    def get_model(self):
+        '''Get device model
+
+        :returns: device model or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.Model
+        except AttributeError:
+            return "Not available"
+
+    def get_manufacturer(self):
+        '''Get device manufacturer
+
+        :returns: device manufacturer or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.Manufacturer
+        except AttributeError:
+            return "Not available"
+
+    def get_serial_number(self):
+        '''Get serial number of the device.
+
+        :returns:  serial number or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.SerialNumber
+        except AttributeError:
+            return "Not available"
+
+    def get_asset_tag(self):
+        '''Get asset tag of the device.
+
+        :returns: asset tag or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.AssetTag
+        except AttributeError:
+            return "Not available"
+
+    def get_sku(self):
+        '''Get sku number of the device.
+
+        :returns: sku number or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.SKU
+        except AttributeError:
+            return "Not available"
+
+    def get_part_number(self):
+        '''Get part number of the device.
+
+        :returns: part number or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.PartNumber
         except AttributeError:
             return "Not available"
 
@@ -273,7 +345,8 @@ class Managers(Device):
     def get_managed_chassis(self):
         '''Get managed chassis ids by the manager
 
-        :returns:  list -- chassis ids or "Not available"
+        :returns: chassis ids or "Not available"
+        :rtype: list
 
         '''
         chassis_list = []
@@ -290,7 +363,8 @@ class Managers(Device):
     def get_managed_systems(self):
         '''Get managed systems ids by the manager
 
-        :returns:  list -- chassis ids or "Not available"
+        :returns: systems ids or "Not available"
+        :rtype: list
 
         '''
         systems_list = []
@@ -298,7 +372,9 @@ class Managers(Device):
 
         try:
             for systems in links.ManagerForServers:
-                result = re.search(r'Systems/(\w+)', systems[mapping.redfish_mapper.map_links_ref(systems)])
+                result = re.search(
+                    r'Systems/(\w+)',
+                    systems[mapping.redfish_mapper.map_links_ref(systems)])
                 systems_list.append(result.group(1))
             return systems_list
         except AttributeError:
@@ -370,7 +446,7 @@ class Systems(Device):
     def get_bios_version(self):
         '''Get bios version of the system.
 
-        :returns:  bios version or "Not available"
+        :returns: bios version or "Not available"
         :rtype: string
 
         '''
@@ -379,28 +455,93 @@ class Systems(Device):
         except AttributeError:
             return "Not available"
 
-    def get_serial_number(self):
-        '''Get serial number of the system.
+    def get_hostname(self):
+        '''Get hostname of the system.
 
-        :returns:  serial number or "Not available"
+        :returns: hostname or "Not available"
         :rtype: string
 
         '''
         try:
-            return self.data.SerialNumber
+            return self.data.HostName
+        except AttributeError:
+            return "Not available"
+
+    def get_indicatorled(self):
+        '''Get indicatorled of the system.
+
+        :returns: indicatorled status or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.IndicatorLED
         except AttributeError:
             return "Not available"
 
     def get_power(self):
         '''Get power status of the system.
 
-        :returns:  string -- power status or NULL if there is an issue
+        :returns: system power state or "Not available"
+        :rtype: string
 
         '''
         try:
-            return self.data.Power
-        except:
-            return ''
+            return self.data.PowerState
+        except AttributeError:
+            return "Not available"
+
+    def get_description(self):
+        '''Get description of the system.
+
+        :returns: system description or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.Description
+        except AttributeError:
+            return "Not available"
+
+    def get_chassis(self):
+        '''Get chassis ids used by the system
+
+        :returns: chassis ids or "Not available"
+        :rtype: list
+
+        '''
+        chassis_list = []
+        links = getattr(self.data, mapping.redfish_mapper.map_links(self.data))
+
+        try:
+            for chassis in links.Chassis:
+                result = re.search(
+                    r'Chassis/(\w+)',
+                    chassis[mapping.redfish_mapper.map_links_ref(chassis)])
+                chassis_list.append(result.group(1))
+            return chassis_list
+        except AttributeError:
+            return "Not available"
+
+    def get_managers(self):
+        '''Get manager ids used by the system
+
+        :returns: managers ids or "Not available"
+        :rtype: list
+
+        '''
+        managers_list = []
+        links = getattr(self.data, mapping.redfish_mapper.map_links(self.data))
+
+        try:
+            for manager in links.ManagedBy:
+                result = re.search(
+                    r'Managers/(\w+)',
+                    manager[mapping.redfish_mapper.map_links_ref(manager)])
+                managers_list.append(result.group(1))
+            return managers_list
+        except AttributeError:
+            return "Not available"
 
     def set_parameter_json(self, value):
         '''Generic function to set any system parameter using json structure
