@@ -127,7 +127,7 @@ from builtins import object
 
 
 import json
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 import requests
 from . import config
 from . import types
@@ -289,7 +289,7 @@ class RedfishConnection(object):
         # Handle login with redfish 1.00, url must be :
         # /rest/v1/SessionService/Sessions as specified by the specification
         if float(mapping.redfish_version) >= 1.00:
-            url += '/Sessions'
+            url = urljoin(url, "Sessions")
 
         # Craft request body and header
         requestBody = {"UserName": self.connection_parameters.user_name  , "Password": self.connection_parameters.password}
