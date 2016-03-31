@@ -1,17 +1,20 @@
 Redfish API version :  {{ r.get_api_version() }}
 {{ r.Root.get_name() }}
 
-Systems information :
+Chassis information :
 =====================
-{% for system_index in r.Systems.systems_dict | sort %}
-{%- set system = r.Systems.systems_dict[system_index] %}
-System id {{ system_index }}:
-UUID : {{ system.get_uuid() }}
-Type : {{ system.get_type() }}
-Manufacturer : {{ system.get_manufacturer() }}
-Model : {{ system.get_model() }}
-SKU : {{ system.get_sku() }}
-Serial : {{ system.get_serial_number() }}
+{% for chassis_index in r.Chassis.chassis_dict | sort %}
+{%- set chassis = r.Chassis.chassis_dict[chassis_index] %}
+Chassis id {{ chassis_index }}:
+Manufacturer : {{ chassis.get_manufacturer() }}
+Model : {{ chassis.get_model() }}
+Chassis Type : {{ chassis.get_chassis_type() }}
+PartNumber : {{ chassis.get_part_number() }}
+SKU : {{ chassis.get_sku() }}
+Serial : {{ chassis.get_serial_number() }}
+AssetTag : {{ chassis.get_asset_tag() }}
+Status : State : {{ chassis.get_status().Health }} / Health : {{ chassis.get_status().Health }}
+{#
 Hostname : {{ system.get_hostname() }}
 Bios version : {{ system.get_bios_version() }}
 CPU number : {{ system.get_cpucount() }}
@@ -27,7 +30,7 @@ CPU details :
 	Threads : {{ cpu.get_threads() }}
 	{% endfor %}
 {%- endif %}
-Available memory : {{ system.get_memory() }} GB
+Available memory : {{ system.get_memory() }}
 Status : State : {{ system.get_status().Health }} / Health : {{ system.get_status().Health }}
 Power : {{ system.get_power() }}
 Description : {{ system.get_description() }}
@@ -65,4 +68,5 @@ Simple Storage :
     This system has no simple storage
 {%- endif %}
 --------------------------------------------------------------------------------
+#}
 {% endfor %}

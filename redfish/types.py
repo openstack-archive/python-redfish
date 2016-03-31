@@ -846,3 +846,42 @@ class SimpleStorage(Base):
             return self.data.Devices
         except AttributeError:
             return "Not available"
+
+
+class ChassisCollection(BaseCollection):
+    '''Class to manage redfish ChassisCollection data.'''
+    def __init__(self, url, connection_parameters):
+        super(ChassisCollection, self).__init__(url, connection_parameters)
+
+        self.chassis_dict = {}
+
+        for link in self.links:
+            index = re.search(r'Chassis/(\w+)', link)
+            self.chassis_dict[index.group(1)] = Chassis(link, connection_parameters)
+
+
+class Chassis(Device):
+    '''Class to manage redfish Chassis data.'''
+    def __init__(self, url, connection_parameters):
+        '''Class constructor'''
+        super(Chassis, self).__init__(url, connection_parameters)
+
+#        try:
+#            self.ethernet_interfaces_collection = \
+#                EthernetInterfacesCollection(
+#                    self.get_link_url('EthernetInterfaces'),
+#                    connection_parameters)
+#        except AttributeError:
+#            # This means we don't have EthernetInterfaces
+#            self.ethernet_interfaces_collection = None
+    def get_chassis_type(self):
+        '''Get chassis type
+
+        :returns: chassis type or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.ChassisType
+        except AttributeError:
+            return "Not available"

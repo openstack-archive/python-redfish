@@ -12,6 +12,7 @@ redfish-client ::
    redfish-client [options] config show
    redfish-client [options] config showall
    redfish-client [options] manager getinfo [<manager_name>]
+   redfish-client [options] chassis getinfo [<manager_name>]
    redfish-client [options] system getinfo [<manager_name>]
    redfish-client (-h | --help)
    redfish-client --version
@@ -266,6 +267,10 @@ if __name__ == '__main__':
         # Display manager information using jinja2 template
         render_template("manager_info.template")
 
+    def display_chassis_info(redfish_data):
+        # Display system information using jinja2 template
+        render_template("chassis_info.template")
+
     def display_system_info(redfish_data):
         # Display system information using jinja2 template
         render_template("system_info.template")
@@ -437,6 +442,7 @@ if __name__ == '__main__':
             logger.debug("system commands")
             display_system_info(redfish_data)
         elif arguments['chassis'] is True:
-            pass
+            logger.debug("chassis commands")
+            display_chassis_info(redfish_data)
     logger.info("Client session terminated")
     sys.exit(0)

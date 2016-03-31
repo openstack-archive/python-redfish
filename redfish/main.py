@@ -254,7 +254,9 @@ class RedfishConnection(object):
                                                  self.connection_parameters
                                                  )
 
-#         self.Chassis
+        self.Chassis = types.ChassisCollection(self.Root.get_link_url("Chassis"),
+                                                 self.connection_parameters
+                                                 )
 
 #         self.EventService
 #         self.AccountService
