@@ -441,6 +441,15 @@ class Systems(Device):
             # This means we don't have Processors detailed data
             self.processors_collection = None
 
+        try:
+            self.simple_storage_collection = \
+                SimpleStorageCollection(
+                    self.get_link_url('SimpleStorage'),
+                    connection_parameters)
+        except AttributeError:
+            # This means we don't have Processors detailed data
+            self.simple_storage_collection = None
+
     def reset_system(self):
         '''Force reset of the system.
 
@@ -746,7 +755,7 @@ class EthernetInterfaces(Base):
 
 
 class ProcessorsCollection(BaseCollection):
-    '''Class to manage redfish ProcessorsColkection data.'''
+    '''Class to manage redfish ProcessorsCollection data.'''
     def __init__(self, url, connection_parameters):
         super(ProcessorsCollection,
               self).__init__(url, connection_parameters)
@@ -794,5 +803,46 @@ class Processors(Base):
         '''
         try:
             return self.data.TotalThreads
+        except AttributeError:
+            return "Not available"
+
+
+class SimpleStorageCollection(BaseCollection):
+    '''Class to manage redfish SimpleStorageCollection data.'''
+    def __init__(self, url, connection_parameters):
+        super(SimpleStorageCollection,
+              self).__init__(url, connection_parameters)
+
+        self.simple_storage_dict = {}
+
+        for link in self.links:
+            index = re.search(r'SimpleStorage/(\w+)', link)
+            self.simple_storage_dict[index.group(1)] = \
+                SimpleStorage(link, connection_parameters)
+
+
+class SimpleStorage(Base):
+    '''Class to manage redfish SimpleStorage'''
+    def get_status(self):
+        '''Get storage status
+
+        :returns: storage status or "Not available"
+        :rtype: dict
+
+        '''
+        try:
+            return self.data.Status
+        except AttributeError:
+            return "Not available"
+
+    def get_devices(self):
+        '''Get storage devices
+
+        :returns: storage devices or "Not available"
+        :rtype: list of dict
+
+        '''
+        try:
+            return self.data.Devices
         except AttributeError:
             return "Not available"

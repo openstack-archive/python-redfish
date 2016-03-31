@@ -49,5 +49,20 @@ Ethernet Interface :
 {%- else %}
     This system has no ethernet interface
 {%- endif %}
+
+Simple Storage :
+{%- if system.simple_storage_collection %}
+{%- for simplestorage_index in system.simple_storage_collection.simple_storage_dict | sort %}
+{%- set ss = system.simple_storage_collection.simple_storage_dict[simplestorage_index] %}
+    Simple Storage id {{ simplestorage_index }} :
+    {{ ss.get_name() }}
+    Status : State : {{ system.get_status().Health }} / Health : {{ system.get_status().Health }}
+	{%- for dev in ss.get_devices() %}
+	Device id {{ loop.index }} : {{ dev.Name }}  {{ dev.Manufacturer }}  {{ dev.Model }}
+	{%- endfor %}
+{%- endfor %}
+{%- else %}
+    This system has no simple storage
+{%- endif %}
 --------------------------------------------------------------------------------
 {% endfor %}
