@@ -15,7 +15,7 @@ filter PBLIC = ASL 2.0
 
 # PBBDEP is replaced by the list of build dependencies
 filter PBBDEP = python-devel,python-setuptools,python-pbr >= 0.8,python-sphinx >= 1.3.1,python-future >= 0.15.2
-filter PBDEP = python-docopt >= 0.6.2,python-tortilla >= 0.4.1,python-jinja2 >= 2.7.3,python-pbr >= 0.8,python-simplejson >= 3.8.1
+filter PBDEP = python-docopt >= 0.6.2,python-tortilla >= 0.4.1,python-jinja2 >= 2.7.3,python-pbr >= 0.8,python-simplejson >= 3.8.1,python-requests >= 2.9.1
 
 # PBSUF is replaced by the package suffix ($pb->{'suf'} in code)
 filter PBSUF = $pb->{'suf'}

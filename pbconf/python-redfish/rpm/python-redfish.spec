@@ -23,14 +23,15 @@ PBDESC
 
 %build
 %{__python} setup.py build
-# Deal with doc
+
+# Build minimal documentation
 cd doc
 make man
 make singlehtml
 make latexpdf
 
 %install
-./install.sh %{buildroot} %{python_sitelib} %{_prefix}
+./install.sh %{buildroot} %{python_sitelib} %{_prefix} #%{_logdir}
 
 %files
 %doc README.rst examples/[a-z]*.py LICENSE
@@ -44,5 +45,6 @@ make latexpdf
 %{python_sitelib}/redfish/tests/*.py*
 %{python_sitelib}/python_redfish*
 %{_mandir}/man1/*
+#%{_logdir}/PBREALPKG
 %changelog
 PBLOG
