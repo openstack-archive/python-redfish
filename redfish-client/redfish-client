@@ -20,7 +20,7 @@ redfish-client ::
    -h --help            Show this screen.
    --version            Show version.
    -c --config FILE     Configuration file
-   -i --inventory FILE  Configuration file [default: $HOME/.redfish.conf]
+   -i --inventory FILE  Configuration file [default: $HOME/.redfish/inventory]
    --insecure           Ignore SSL certificates
    --debug LEVEL        Run in debug mode, LEVEL from 1 to 3 increase verbosity
                         Security warning LEVEL > 1 could reveal password into the logs
@@ -61,7 +61,7 @@ class InventoryFile(object):
         If the file does not exist create an empty one ready to receive data
 
         :param inventory_file: File name of the configuration file
-                            default: ~/.redfish.conf
+                            default: ~/.redfish/inventory
         :type config-file: str
         :returns: Nothing
 

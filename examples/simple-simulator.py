@@ -21,7 +21,7 @@ if HOME == '':
     sys.exit(1)
 
 try:
-    with open(HOME + "/.redfish.conf") as json_data:
+    with open(HOME + "/.redfish/inventory") as json_data:
         config = json.load(json_data)
         json_data.close()
 except IOError as e:
