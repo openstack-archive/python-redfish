@@ -185,18 +185,6 @@ class Device(Base):
         except AttributeError:
             return "Not available"
 
-    def get_type(self):
-        '''Get device type
-
-        :returns: device type or "Not available"
-        :rtype: string
-
-        '''
-        try:
-            return self.data.SystemType
-        except AttributeError:
-            return "Not available"
-
     def get_model(self):
         '''Get device model
 
@@ -328,6 +316,18 @@ class Managers(Device):
         except AttributeError:
             # This means we don't have EthernetInterfaces
             self.ethernet_interfaces_collection = None
+
+    def get_type(self):
+        '''Get manager type
+
+        :returns: manager type or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.ManagerType
+        except AttributeError:
+            return "Not available"
 
     def get_firmware_version(self):
         '''Get firmware version of the manager
@@ -563,6 +563,18 @@ class Systems(Device):
         '''
         try:
             return self.data.MemorySummary.TotalSystemMemoryGiB
+        except AttributeError:
+            return "Not available"
+
+    def get_type(self):
+        '''Get system type
+
+        :returns: system type or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.SystemType
         except AttributeError:
             return "Not available"
 
@@ -870,15 +882,19 @@ class Chassis(Device):
         '''Class constructor'''
         super(Chassis, self).__init__(url, connection_parameters)
 
-#        try:
-#            self.ethernet_interfaces_collection = \
-#                EthernetInterfacesCollection(
-#                    self.get_link_url('EthernetInterfaces'),
-#                    connection_parameters)
-#        except AttributeError:
-#            # This means we don't have EthernetInterfaces
-#            self.ethernet_interfaces_collection = None
-    def get_chassis_type(self):
+        try:
+            self.thermal = Thermal(self.get_link_url('Thermal'),
+                                   connection_parameters)
+        except AttributeError:
+            self.thermal = None
+
+        try:
+            self.power = Power(self.get_link_url('Power'),
+                               connection_parameters)
+        except AttributeError:
+            self.Power = None
+
+    def get_type(self):
         '''Get chassis type
 
         :returns: chassis type or "Not available"
@@ -889,3 +905,43 @@ class Chassis(Device):
             return self.data.ChassisType
         except AttributeError:
             return "Not available"
+
+
+class Thermal(Base):
+    '''Class to manage redfish Thermal data.'''
+    def get_temperatures(self):
+        '''Get chassis sensors name and temparature
+
+        :returns: chassis sensor and temperature
+        :rtype: dict
+
+        '''
+        temperatures = {}
+
+        try:
+            for sensor in self.data.Temperatures:
+                temperatures[sensor.Name] = sensor.ReadingCelsius
+            return temperatures
+        except AttributeError:
+            return "Not available"
+
+    def get_fans(self):
+        '''Get chassis fan name and rpm
+
+        :returns: chassis fan and rpm
+        :rtype: dict
+
+        '''
+        fans = {}
+
+        try:
+            for fan in self.data.Fans:
+                fans[fan.FanName] = fan.ReadingRPM
+            return fans
+        except AttributeError:
+            return "Not available"
+
+
+class Power(Base):
+    '''Class to manage redfish Power data.'''
+    pass

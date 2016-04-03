@@ -8,12 +8,31 @@ Chassis information :
 Chassis id {{ chassis_index }}:
 Manufacturer : {{ chassis.get_manufacturer() }}
 Model : {{ chassis.get_model() }}
-Chassis Type : {{ chassis.get_chassis_type() }}
+Chassis Type : {{ chassis.get_type() }}
 PartNumber : {{ chassis.get_part_number() }}
 SKU : {{ chassis.get_sku() }}
 Serial : {{ chassis.get_serial_number() }}
 AssetTag : {{ chassis.get_asset_tag() }}
 Status : State : {{ chassis.get_status().Health }} / Health : {{ chassis.get_status().Health }}
+{%- if chassis.thermal %}
+Temperatures :
+{%- if chassis.thermal.get_temperatures() == 'Not available' %}
+	Not available
+{%- else %}
+{%- for sensor, temp in chassis.thermal.get_temperatures().items() | sort %}
+	{{ sensor }} : {{ temp }}
+{%- endfor %}
+{%- endif %}
+Fans :
+{%- if chassis.thermal.get_fans() == 'Not available' %}
+	Not available
+{%- else %}
+{%- for fan, rpm in chassis.thermal.get_fans().items() | sort %}
+	{{ fan }} : {{ rpm }}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+
 {#
 Hostname : {{ system.get_hostname() }}
 Bios version : {{ system.get_bios_version() }}
