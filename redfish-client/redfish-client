@@ -255,7 +255,7 @@ if __name__ == '__main__':
         if(not inventory.get_managers()):
             print("None")
         else:
-            for manager in inventory.get_managers():
+            for manager in sorted(inventory.get_managers()):
                 print(manager)
                 if all is True:
                     info = inventory.get_manager_info(manager)
