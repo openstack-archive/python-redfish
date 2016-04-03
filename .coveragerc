@@ -1,0 +1,8 @@
+[run]
+branch = True
+source = redfish
+		 redfish-client
+omit = redfish/tests/*,redfish-client/tests/*
+
+[report]
+#ignore-errors = True

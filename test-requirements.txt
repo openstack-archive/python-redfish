@@ -7,3 +7,4 @@ coverage>=3.6
 mock>=1.0.1
 docker-py>=1.1.0
 path.py>=5.2
+testrepository>=0.0.20
