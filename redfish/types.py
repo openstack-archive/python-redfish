@@ -702,9 +702,13 @@ class EthernetInterfaces(Base):
 
         '''
         try:
+            # Proliant firmware seems to not follow redfish systax
             return self.data.MacAddress
         except AttributeError:
-            return "Not available"
+            try:
+                return self.data.MACAddress
+            except AttributeError:
+                return "Not available"
 
     def get_fqdn(self):
         '''Get EthernetInterface fqdn
