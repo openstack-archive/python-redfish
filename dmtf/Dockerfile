@@ -1,6 +1,6 @@
 # Invoke with docker run -p 8000:80 <dockerimageid>
 # Then use by browsing http://localhost:8000
-FROM ubuntu:15.04
+FROM ubuntu:15.10
 MAINTAINER bruno.cornec@hpe.com
 ENV DEBIAN_FRONTEND noninterative
 # Install deps for Redfish mockup
