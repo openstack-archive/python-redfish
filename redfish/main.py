@@ -124,10 +124,9 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import object
 
-
-
 import json
-from urllib.parse import urlparse, urljoin
+import socket
+from urllib.parse import urlparse, urljoin, urlunparse
 import requests
 from . import config
 from . import types
@@ -207,13 +206,13 @@ class RedfishConnection(object):
                                "this is insecure and can allow" +
                                " a man in the middle attack")
 
+        # Show redfish standard headers
+        config.logger.debug(self.connection_parameters.headers)
+
         config.logger.debug("Root url : %s",
                             self.connection_parameters.rooturl)
         self.Root = types.Root(self.connection_parameters.rooturl,
                                self.connection_parameters)
-        #self.api_url = tortilla.wrap(self.connection_parameters.rooturl,
-        #                             debug=TORTILLADEBUG)
-        #self.root = self.api_url.get(verify=self.connection_parameters.verify_cert)
 
         config.logger.info("API Version : %s", self.get_api_version())
         mapping.redfish_version = self.get_api_version()
@@ -292,9 +291,10 @@ class RedfishConnection(object):
             url = urljoin(url, "Sessions")
 
         # Craft request body and header
-        requestBody = {"UserName": self.connection_parameters.user_name  , "Password": self.connection_parameters.password}
+        requestBody = {"UserName": self.connection_parameters.user_name,
+                       "Password": self.connection_parameters.password}
         config.logger.debug(requestBody)
-        header = {'Content-type': 'application/json'}
+        headers = self.connection_parameters.headers
         # =======================================================================
         # Tortilla seems not able to provide the header of a post request answer.
         # However this is required by redfish standard to get X-Auth-Token.
@@ -305,24 +305,28 @@ class RedfishConnection(object):
         # sessions = sessionsUrl.post(verify=self.verify_cert, data=requestBody)
         auth = requests.post(url,
                              data=json.dumps(requestBody),
-                             headers=header,
-                             verify=self.connection_parameters.verify_cert
-                            )
+                             headers=headers,
+                             verify=self.connection_parameters.verify_cert)
 
         # =======================================================================
         # TODO : Manage exception with a class.
         # =======================================================================
         if auth.status_code != 201:
             try:
-                answer=auth.json()
-            except ValueError as e:
+                answer = auth.json()
+            except ValueError:
                 answer = ""
-            raise exception.AuthenticationFailureException("Login request return an invalid status code ", code=auth.status_code, queryAnswer=answer)
+            raise exception.AuthenticationFailureException(
+                "Login request return an invalid status code ",
+                code=auth.status_code, queryAnswer=answer)
 
-        self.connection_parameters.auth_token = auth.headers.get("x-auth-token")
+        self.connection_parameters.auth_token = auth.headers.get(
+            "x-auth-token")
         self.connection_parameters.user_uri = auth.headers.get("location")
-        config.logger.debug("x-auth-token : %s", self.connection_parameters.auth_token)
-        config.logger.debug("user session : %s", self.connection_parameters.user_uri)
+        config.logger.debug("x-auth-token : %s",
+                            self.connection_parameters.auth_token)
+        config.logger.debug("user session : %s",
+                            self.connection_parameters.user_uri)
         return True
 
     def logout(self):
@@ -330,13 +334,11 @@ class RedfishConnection(object):
         url = self.connection_parameters.user_uri
 
         # Craft request header
-        header = {"Content-type": "application/json",
-                  "x-auth-token": self.connection_parameters.auth_token
-                 }
+        headers = self.connection_parameters.headers
 
-        logout = requests.delete(url, headers=header,
-                                 verify=self.connection_parameters.verify_cert
-                                )
+        logout = requests.delete(url,
+                                 headers=headers,
+                                 verify=self.connection_parameters.verify_cert)
 
         if logout.status_code == 200:
             config.logger.info("Logout successful")
@@ -406,3 +408,17 @@ class ConnectionParameters(object):
     @user_uri.setter
     def user_uri(self, user_uri):
         self.__user_uri = user_uri
+
+    @property
+    def headers(self):
+        # Host header is set by request or tortilla
+        url = urlparse(self.__rooturl)
+        origin = urlunparse((url.scheme, url.netloc, '', '', '', ''))
+        headers = {'OData-Version': '4.0',
+                   'Content-type': 'application/json',
+                   'Accept': 'application/json',
+                   'Origin': origin,
+                   'User-Agent': 'python-redfish'}
+        if self.auth_token:
+            headers.update({'x-auth-token': self.auth_token})
+        return headers

@@ -4,7 +4,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
 
 import pprint
@@ -17,6 +16,7 @@ import ssl
 from . import config
 from . import mapping
 from . import exception
+standard_library.install_aliases()
 
 # Global variable
 
@@ -30,15 +30,12 @@ class Base(object):
         self.url = url
         self.api_url = tortilla.wrap(url, debug=config.TORTILLADEBUG)
 
+        config.logger.debug(connection_parameters.headers)
+
         try:
-            if connection_parameters.auth_token is None:
-                self.data = self.api_url.get(
-                    verify=connection_parameters.verify_cert)
-            else:
-                self.data = self.api_url.get(
-                    verify=connection_parameters.verify_cert,
-                    headers={
-                        'x-auth-token': connection_parameters.auth_token})
+            self.data = self.api_url.get(
+                verify=connection_parameters.verify_cert,
+                headers=connection_parameters.headers)
         except (requests.ConnectionError, ssl.SSLError) as e:
             # Log and transmit the exception.
             config.logger.info('Raise a RedfishException to upper level')
@@ -119,7 +116,7 @@ class Base(object):
         config.logger.debug(self.api_url)
         response = self.api_url.patch(
             verify=self.connection_parameters.verify_cert,
-            headers={'x-auth-token': self.connection_parameters.auth_token},
+            headers=self.connection_parameters.headers,
             data=action)
         return response
 
@@ -317,8 +314,7 @@ class Managers(Base):
         response = requests.post(
             reset_url,
             verify=self.connection_parameters.verify_cert,
-            headers={'x-auth-token': self.connection_parameters.auth_token,
-                     'Content-type': 'application/json'})
+            headers=self.connection_parameters.headers)
         # TODO : treat response.
         return response
 
@@ -357,13 +353,13 @@ class Systems(Base):
         action['Action'] = 'Reset'
         action['ResetType'] = 'ForceRestart'
 
-        #Debug the url and perform the POST action
-        #print self.api_url
-        response = self.api_url.post(verify=self.connection_parameters.verify_cert,
-                                     headers={'x-auth-token': self.connection_parameters.auth_token},
-                                     data=action
-                                    )
-        #TODO : treat response.
+        # Debug the url and perform the POST action
+        # print self.api_url
+        response = self.api_url.post(
+            verify=self.connection_parameters.verify_cert,
+            headers=self.connection_parameters.headers,
+            data=action)
+        # TODO : treat response.
         return response
 
     def get_bios_version(self):
@@ -377,7 +373,8 @@ class Systems(Base):
             return self.data.Bios.Current.VersionString
         except:
             # Returned by mockup.
-            # Hopefully this kind of discrepencies will be fixed with Redfish 1.0 (August)
+            # Hopefully this kind of discrepencies will be fixed with
+            # Redfish 1.0 (August)
             return self.data.BiosVersion
 
     def get_serial_number(self):
@@ -391,7 +388,8 @@ class Systems(Base):
             return self.data.SerialNumber
         except:
             # Returned by mockup.
-            # Hopefully this kind of discrepencies will be fixed with Redfish 1.0 (August)
+            # Hopefully this kind of discrepencies will be fixed with
+            # Redfish 1.0 (August)
             return ''
 
     def get_power(self):
@@ -413,11 +411,12 @@ class Systems(Base):
 
         '''
         # perform the POST action
-        #print self.api_url.url()
-        response = requests.patch(self.api_url.url(),
-                                  verify=self.connection_parameters.verify_cert,
-                                  headers={'x-auth-token': self.connection_parameters.auth_token, 'Content-type': 'application/json'},
-                                  data=value)
+        # print self.api_url.url()
+        response = requests.patch(
+            self.api_url.url(),
+            verify=self.connection_parameters.verify_cert,
+            headers=self.connection_parameters.headers,
+            data=value)
         return response.reason
 
     def set_boot_source_override(self, target, enabled):
@@ -441,7 +440,9 @@ class Systems(Base):
             "Continuous"
         :returns:   string -- http response of PATCH request
         '''
-        return self.set_parameter_json('{"Boot": {"BootSourceOverrideTarget": "'+target+'"},{"BootSourceOverrideEnabled" : "'+enabled+'"}}')
+        return self.set_parameter_json(
+            '{"Boot": {"BootSourceOverrideTarget": "' +
+            target + '"},{"BootSourceOverrideEnabled" : "' + enabled + '"}}')
 
 
 class SystemsCollection(BaseCollection):
@@ -477,8 +478,11 @@ class EthernetInterfacesCollection(BaseCollection):
 
         self.ethernet_interfaces_dict = {}
 
-        # Url returned by the mock up is wrong /redfish/v1/Managers/EthernetInterfaces/1 returns a 404. --> this is not true anymore (2016/01/03)
-        # The correct one should be /redfish/v1/Managers/1/EthernetInterfaces/1 --> correct by mockup return invalid content (not json)
+        # Url returned by the mock up is wrong
+        # /redfish/v1/Managers/EthernetInterfaces/1 returns a 404.
+        # --> this is not true anymore (2016/01/03)
+        # The correct one should be /redfish/v1/Managers/1/EthernetInterfaces/1
+        # --> correct by mockup return invalid content (not json)
         # Check more than 1 hour for this bug.... grrr....
         for link in self.links:
             index = re.search(r'EthernetInterfaces/(\w+)', link)
