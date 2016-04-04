@@ -22,6 +22,8 @@ PBDESC
 %setup -q
 
 %build
+# Fix for now as long as setuptools isn't more recent in distributions
+PBPYTHON3FILTER
 %{__python} setup.py build
 
 # Build minimal documentation
