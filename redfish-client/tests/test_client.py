@@ -1,17 +1,18 @@
+# coding=utf-8
+
 from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
-# coding=utf-8
 import os
 import stat
 import subprocess
 import re
 from docker import Client
 from path import Path
+standard_library.install_aliases()
 
 
 class DockerTest(object):
@@ -68,6 +69,7 @@ def test_dockerbuild():
     # Warning :  Image tag is derived from file name, do not use uppercase !!!
     dockerfiles = ('redfish-client/tests/Dockerfile.ubuntu',
                    'redfish-client/tests/Dockerfile.debian',
+                   'redfish-client/tests/Dockerfile.centos',
                    'redfish-client/tests/Dockerfile.fedora',
                    'redfish-client/tests/Dockerfile.fedorap3',
                    'redfish-client/tests/Dockerfile.fedorapip')
@@ -80,7 +82,7 @@ def test_dockerbuild():
 
 def test_install():
     docker = DockerTest()
-    images = ('rfubuntu', 'rfdebian',
+    images = ('rfubuntu', 'rfdebian', 'rfcentos',
               'rffedora', 'rffedorap3', 'rffedorapip')
     for img in images:
         print('Testing : {}'.format(img))
@@ -91,7 +93,7 @@ def test_install():
 
 def test_versionformat():
     docker = DockerTest()
-    images = ('rfubuntu', 'rfdebian',
+    images = ('rfubuntu', 'rfdebian', 'rfcentos',
               'rffedora', 'rffedorap3', 'rffedorapip')
     for img in images:
         print('Testing : {}'.format(img))
