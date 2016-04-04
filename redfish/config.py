@@ -5,18 +5,36 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 import logging
 import sys
 import os
 import getpass
 from logging.handlers import RotatingFileHandler
+standard_library.install_aliases()
 
 # Global variable definition
 
 logger = None
 TORTILLADEBUG = True
-REDFISH_LOGFILE = "/var/log/python-redfish/python-redfish.log"
+HOME = os.getenv('HOME')
+if HOME is None:
+    print("$HOME environment variable not set, please check your system")
+    sys.exit(1)
+if HOME == '':
+    print("$HOME environment is set, but empty, please check your system")
+    sys.exit(1)
+
+REDFISH_HOME = os.path.join(HOME, ".redfish")
+if not os.path.exists(REDFISH_HOME):
+    try:
+        os.mkdir(REDFISH_HOME)
+    except IOError:
+        print('ERROR: can\'t create {}.\n'.format(REDFISH_HOME))
+        print('       Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('       using: mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        sys.exit(1)
+
+REDFISH_LOGFILE = os.path.join(REDFISH_HOME, "python-redfish.log")
 CONSOLE_LOGGER_LEVEL = logging.DEBUG
 FILE_LOGGER_LEVEL = logging.DEBUG
 
@@ -43,14 +61,13 @@ def initialize_logger(REDFISH_LOGFILE,
     formatter = logging.Formatter(
         '%(asctime)s :: %(levelname)s :: %(message)s'
         )
+
     try:
-        file_handler = RotatingFileHandler(REDFISH_LOGFILE, 'a', 1000000, 1)
+        file_handler = RotatingFileHandler(os.path.expandvars(REDFISH_LOGFILE), 'a', 1000000, 1)
     except IOError:
         print('ERROR: {} does not exist or is not writeable.\n'.format(REDFISH_LOGFILE))
-        print('1- Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
-        print('   using: sudo mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
-        print('2- Try to get the {} ownership'.format(os.path.dirname(REDFISH_LOGFILE)))
-        print('   using: sudo chown {} {}'.format(getpass.getuser(), os.path.dirname(REDFISH_LOGFILE)))
+        print('       Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('       using: mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
         sys.exit(1)
 
     # First logger to file

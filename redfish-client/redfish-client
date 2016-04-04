@@ -20,12 +20,12 @@ redfish-client ::
    -h --help            Show this screen.
    --version            Show version.
    -c --config FILE     Configuration file
-   -i --inventory FILE  Configuration file [default: $HOME/.redfish.conf]
+   -i --inventory FILE  Configuration file [default: $HOME/.redfish/inventory]
    --insecure           Ignore SSL certificates
    --debug LEVEL        Run in debug mode, LEVEL from 1 to 3 increase verbosity
                         Security warning LEVEL > 1 could reveal password into the logs
-   --debugfile FILE     Specify the client debugfile [default: /var/log/python-redfish/redfish-client.log]
-   --libdebugfile FILE  Specify python-redfish library log file [default: /var/log/python-redfish/python-redfish.log]
+   --debugfile FILE     Specify the client debugfile [default: $HOME/.redfish/redfish-client.log]
+   --libdebugfile FILE  Specify python-redfish library log file [default: $HOME/.redfish/python-redfish.log]
  
  config commands : manage the configuration file.
  manager commands : manage the manager (Light out management). If <manager_name>
@@ -61,7 +61,7 @@ class InventoryFile(object):
         If the file does not exist create an empty one ready to receive data
 
         :param inventory_file: File name of the configuration file
-                            default: ~/.redfish.conf
+                            default: ~/.redfish/inventory
         :type config-file: str
         :returns: Nothing
 
@@ -337,16 +337,6 @@ if __name__ == '__main__':
     logger.info("Arguments parsed")
     logger.debug(arguments)
 
-    # Get $HOME environment variables.
-    HOME = os.getenv('HOME')
-
-    if(not HOME):
-        print('ERROR: $HOME environment variable not set,' +
-              'please check your system')
-        logger.error('$HOME environment variable not set')
-        sys.exit(1)
-    logger.debug("Home directory : %s" % HOME)
-
     # Load config
     config = configparser.ConfigParser(allow_no_value=True)
     logger.debug("Read configuration file")
@@ -365,8 +355,7 @@ if __name__ == '__main__':
         logger.error('Configuration file not found at %s.' % configfile)
         sys.exit(1)
 
-    arguments['--inventory'] = arguments['--inventory'].replace('~', HOME)
-    arguments['--inventory'] = arguments['--inventory'].replace('$HOME', HOME)
+    arguments['--inventory'] = os.path.expandvars(arguments['--inventory'])
     inventory = InventoryFile(arguments['--inventory'])
 
     # Initialize Template system (jinja2)
