@@ -337,16 +337,6 @@ if __name__ == '__main__':
     logger.info("Arguments parsed")
     logger.debug(arguments)
 
-    # Get $HOME environment variables.
-    HOME = os.getenv('HOME')
-
-    if(not HOME):
-        print('ERROR: $HOME environment variable not set,' +
-              'please check your system')
-        logger.error('$HOME environment variable not set')
-        sys.exit(1)
-    logger.debug("Home directory : %s" % HOME)
-
     # Load config
     config = configparser.ConfigParser(allow_no_value=True)
     logger.debug("Read configuration file")
@@ -365,8 +355,7 @@ if __name__ == '__main__':
         logger.error('Configuration file not found at %s.' % configfile)
         sys.exit(1)
 
-    arguments['--inventory'] = arguments['--inventory'].replace('~', HOME)
-    arguments['--inventory'] = arguments['--inventory'].replace('$HOME', HOME)
+    arguments['--inventory'] = os.path.expandvars(arguments['--inventory'])
     inventory = InventoryFile(arguments['--inventory'])
 
     # Initialize Template system (jinja2)

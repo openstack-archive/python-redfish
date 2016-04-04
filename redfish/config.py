@@ -5,23 +5,26 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 import logging
 import sys
 import os
 import getpass
 from logging.handlers import RotatingFileHandler
+standard_library.install_aliases()
 
 # Global variable definition
 
 logger = None
 TORTILLADEBUG = True
 HOME = os.getenv('HOME')
-if HOME == '':
+if HOME is None:
     print("$HOME environment variable not set, please check your system")
     sys.exit(1)
+if HOME == '':
+    print("$HOME environment is set, but empty, please check your system")
+    sys.exit(1)
 
-REDFISH_HOME = HOME + "/.redfish"
+REDFISH_HOME = os.path.join(HOME, ".redfish")
 if not os.path.exists(REDFISH_HOME):
     try:
         os.mkdir(REDFISH_HOME)
@@ -31,7 +34,7 @@ if not os.path.exists(REDFISH_HOME):
         print('       using: mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
         sys.exit(1)
 
-REDFISH_LOGFILE = REDFISH_HOME + "/python-redfish.log"
+REDFISH_LOGFILE = os.path.join(REDFISH_HOME, "python-redfish.log")
 CONSOLE_LOGGER_LEVEL = logging.DEBUG
 FILE_LOGGER_LEVEL = logging.DEBUG
 
@@ -58,13 +61,13 @@ def initialize_logger(REDFISH_LOGFILE,
     formatter = logging.Formatter(
         '%(asctime)s :: %(levelname)s :: %(message)s'
         )
-    f = open(os.path.expandvars(REDFISH_LOGFILE), 'w')
-    f.close()
 
     try:
         file_handler = RotatingFileHandler(os.path.expandvars(REDFISH_LOGFILE), 'a', 1000000, 1)
     except IOError:
         print('ERROR: {} does not exist or is not writeable.\n'.format(REDFISH_LOGFILE))
+        print('       Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('       using: mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
         sys.exit(1)
 
     # First logger to file
