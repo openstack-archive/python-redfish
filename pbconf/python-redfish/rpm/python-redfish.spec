@@ -47,6 +47,8 @@ make latexpdf
 %{python_sitelib}/redfish/tests/*.py*
 %{python_sitelib}/python_redfish*
 %{_mandir}/man1/*
+%{_docdir}/PBREALPKG/html/_static/*
+%{_docdir}/PBREALPKG/html/index.html
 #%{_logdir}/PBREALPKG
 %changelog
 PBLOG
