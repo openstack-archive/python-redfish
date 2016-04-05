@@ -25,5 +25,9 @@ refish-client tests
 
 #. Run the test::
 
+    tox
+
+   or::
+
     py.test redfish-client
 
