@@ -66,6 +66,7 @@ class Base(object):
             links = getattr(self.data, mapping.redfish_mapper.map_links())
             if link_type in links:
                 return urljoin(self.url, links[link_type][mapping.redfish_mapper.map_links_ref()])
+            raise AttributeError
         else:
             links = getattr(self.data, link_type)
             link = getattr(links, mapping.redfish_mapper.map_links_ref())
