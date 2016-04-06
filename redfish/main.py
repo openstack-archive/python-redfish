@@ -125,7 +125,6 @@ standard_library.install_aliases()
 from builtins import object
 
 import json
-import socket
 from urllib.parse import urlparse, urljoin, urlunparse
 import requests
 from . import config
