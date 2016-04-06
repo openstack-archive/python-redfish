@@ -29,10 +29,8 @@ if not os.path.exists(REDFISH_HOME):
         os.mkdir(REDFISH_HOME)
     except IOError:
         print('ERROR: can\'t create {}.\n'.format(REDFISH_HOME))
-        print('       Try to create directory {}'.format(
-            os.path.dirname(REDFISH_LOGFILE)))
-        print('       using: mkdir -p {}'.format(
-            os.path.dirname(REDFISH_LOGFILE)))
+        print('       Try to create directory {}'.format(REDFISH_HOME))
+        print('       using: mkdir -p {}'.format(REDFISH_HOME))
         sys.exit(1)
 
 REDFISH_LOGFILE = os.path.join(REDFISH_HOME, "python-redfish.log")
