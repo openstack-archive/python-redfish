@@ -19,7 +19,7 @@ from __future__ import absolute_import
 from future import standard_library
 import pbr.version
 
-from redfish.main import *
+from redfish.main import connect
 standard_library.install_aliases()
 
 try:
