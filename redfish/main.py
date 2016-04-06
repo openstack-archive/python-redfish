@@ -205,9 +205,6 @@ class RedfishConnection(object):
                                "this is insecure and can allow" +
                                " a man in the middle attack")
 
-        # Show redfish standard headers
-        config.logger.debug(self.connection_parameters.headers)
-
         config.logger.debug("Root url : %s",
                             self.connection_parameters.rooturl)
         self.Root = types.Root(self.connection_parameters.rooturl,

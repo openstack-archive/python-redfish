@@ -32,7 +32,12 @@ class Base(object):
         self.url = url
         self.api_url = tortilla.wrap(url, debug=config.TORTILLADEBUG)
 
-        config.logger.debug(connection_parameters.headers)
+        config.logger.debug(
+            "------------------------------------------------------------")
+        config.logger.debug("Url: %s" % url)
+        config.logger.debug("Header: %s" % connection_parameters.headers)
+        config.logger.debug(
+            "------------------------------------------------------------")
 
         try:
             self.data = self.api_url.get(
@@ -50,7 +55,7 @@ class Base(object):
                 'Ivalid content : Content does not appear to be a valid ' + \
                 'Redfish json\n'
             raise exception.InvalidRedfishContentException(msg)
-        config.logger.debug(self.data)
+        config.logger.debug(pprint.PrettyPrinter(indent=4).pformat(self.data))
 
     def get_link_url(self, link_type):
         '''Need to be explained.
