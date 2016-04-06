@@ -38,7 +38,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
 
@@ -52,6 +51,7 @@ import configparser
 import jinja2
 import requests.packages.urllib3
 import redfish
+standard_library.install_aliases()
 
 
 class InventoryFile(object):

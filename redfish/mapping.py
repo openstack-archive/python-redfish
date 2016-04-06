@@ -4,12 +4,13 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
+standard_library.install_aliases()
 
 redfish_mapper = None
 redfish_version = None
 redfish_root_name = None
+
 
 class RedfishVersionMapping(object):
     '''Implements basic url path mapping beetween Redfish versions.'''
@@ -24,7 +25,7 @@ class RedfishVersionMapping(object):
         return 'SessionService'
 
     def map_links(self, data_dict=None):
-        if data_dict == None:
+        if data_dict is None:
             if self.__version == '0.95':
                 return 'links'
         else:
@@ -39,7 +40,7 @@ class RedfishVersionMapping(object):
         return 'Links'
 
     def map_links_ref(self, data_dict=None):
-        if data_dict == None:
+        if data_dict is None:
             if self.__version == '0.95':
                 return 'href'
         else:
@@ -49,10 +50,10 @@ class RedfishVersionMapping(object):
             try:
                 data_dict.href
                 return 'href'
-            except AttributeError:     
-                pass       
+            except AttributeError:
+                pass
         return '@odata.id'
-    
+
     def map_members(self):
         if self.__version == '0.95':
             return 'Member'

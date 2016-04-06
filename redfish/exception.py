@@ -5,9 +5,9 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from . import config
+standard_library.install_aliases()
 
 
 class RedfishException(Exception):
@@ -28,7 +28,8 @@ class ConnectionFailureException(RedfishException):
             '3- Check if your device has a valid trusted certificat\n' + \
             '   You can use openssl to validate it using the command :\n' + \
             '   openssl s_client -showcerts -connect <server>:443\n' + \
-            '4- Use option "--insecure" to connect without checking certificate\n'
+            '4- Use option "--insecure" to connect without checking' + \
+            '   certificate\n'
 
 
 class InvalidRedfishContentException(RedfishException):

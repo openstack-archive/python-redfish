@@ -28,7 +28,7 @@ class Base(object):
     def __init__(self, url, connection_parameters):
         '''Class constructor'''
         global TORTILLADEBUG
-        self.connection_parameters = connection_parameters # Uggly hack to check
+        self.connection_parameters = connection_parameters  # Uggly hack
         self.url = url
         self.api_url = tortilla.wrap(url, debug=config.TORTILLADEBUG)
 
@@ -69,7 +69,9 @@ class Base(object):
         if float(mapping.redfish_version) < 1.00:
             links = getattr(self.data, mapping.redfish_mapper.map_links())
             if link_type in links:
-                return urljoin(self.url, links[link_type][mapping.redfish_mapper.map_links_ref()])
+                return urljoin(
+                    self.url,
+                    links[link_type][mapping.redfish_mapper.map_links_ref()])
             raise AttributeError
         else:
             links = getattr(self.data, link_type)
@@ -147,17 +149,22 @@ class BaseCollection(Base):
 
         self.links = []
 
-        #linksmembers = self.data.Links.Members
-        #linksmembers = self.data.links.Member
+        # linksmembers = self.data.Links.Members
+        # linksmembers = self.data.links.Member
         if float(mapping.redfish_version) < 1.00:
-            linksmembers = getattr(self.data, mapping.redfish_mapper.map_links())
-            linksmembers = getattr(linksmembers, mapping.redfish_mapper.map_members())
+            linksmembers = getattr(
+                self.data, mapping.redfish_mapper.map_links())
+            linksmembers = getattr(
+                linksmembers, mapping.redfish_mapper.map_members())
         else:
-            linksmembers = getattr(self.data, mapping.redfish_mapper.map_members())
+            linksmembers = getattr(
+                self.data, mapping.redfish_mapper.map_members())
         for link in linksmembers:
-            #self.links.append(getattr(link,'@odata.id'))
-            #self.links.append(getattr(link,'href'))
-            self.links.append(urljoin(self.url, getattr(link, mapping.redfish_mapper.map_links_ref())))
+            # self.links.append(getattr(link,'@odata.id'))
+            # self.links.append(getattr(link,'href'))
+            self.links.append(urljoin(
+                self.url, getattr(
+                    link, mapping.redfish_mapper.map_links_ref())))
 
         config.logger.debug(self.links)
 
@@ -302,18 +309,20 @@ class Managers(Device):
     def __init__(self, url, connection_parameters):
         super(Managers, self).__init__(url, connection_parameters)
         try:
-            # New proliant firmware now respects Redfish v1.00, so seems to correct below statement
-            # TODO : better handle exception and if possible support old firmware ?
+            # New proliant firmware now respects Redfish v1.00, so seems to
+            # correct below statement
+            # TODO : better handle exception and if possible support
+            # old firmware ?
             self.ethernet_interfaces_collection = \
                 EthernetInterfacesCollection(
                     self.get_link_url('EthernetInterfaces'),
                     connection_parameters)
 
             # Works on proliant, need to treat 095 vs 0.96 differences
-            #self.ethernet_interfaces_collection = EthernetInterfacesCollection(
-            #                                            self.get_link_url('EthernetNICs'),
-            #                                            connection_parameters
-            #                                            )
+            # self.ethernet_interfaces_collection = \
+            #        EthernetInterfacesCollection(
+            #            self.get_link_url('EthernetNICs'),
+            #            connection_parameters)
         except exception.InvalidRedfishContentException:
             # This is to avoid invalid content from the mockup
             self.ethernet_interfaces_collection = None
@@ -359,7 +368,9 @@ class Managers(Device):
 
         try:
             for chassis in links.ManagerForChassis:
-                result = re.search(r'Chassis/(\w+)', chassis[mapping.redfish_mapper.map_links_ref(chassis)])
+                result = re.search(
+                    r'Chassis/(\w+)',
+                    chassis[mapping.redfish_mapper.map_links_ref(chassis)])
                 chassis_list.append(result.group(1))
             return chassis_list
         except AttributeError:
@@ -413,7 +424,8 @@ class ManagersCollection(BaseCollection):
         self.managers_dict = {}
         for link in self.links:
             index = re.search(r'Managers/(\w+)', link)
-            self.managers_dict[index.group(1)] = Managers(link, connection_parameters)
+            self.managers_dict[index.group(1)] = Managers(
+                link, connection_parameters)
 
 
 class Systems(Device):
@@ -674,14 +686,16 @@ class SystemsCollection(BaseCollection):
 
         for link in self.links:
             index = re.search(r'Systems/(\w+)', link)
-            self.systems_dict[index.group(1)] = Systems(link, connection_parameters)
+            self.systems_dict[index.group(1)] = Systems(
+                link, connection_parameters)
 
 
 class Bios(Base):
     '''Class to manage redfish Bios data.'''
     def __init__(self, url, connection_parameters):
         super(Bios, self).__init__(url, connection_parameters)
-        self.boot = Boot(re.findall('.+/Bios', url)[0] + '/Boot/Settings', connection_parameters)
+        self.boot = Boot(re.findall('.+/Bios', url)[0] +
+                         '/Boot/Settings', connection_parameters)
 
 
 class Boot(Base):
@@ -878,7 +892,8 @@ class ChassisCollection(BaseCollection):
 
         for link in self.links:
             index = re.search(r'Chassis/(\w+)', link)
-            self.chassis_dict[index.group(1)] = Chassis(link, connection_parameters)
+            self.chassis_dict[index.group(1)] = Chassis(
+                link, connection_parameters)
 
 
 class Chassis(Device):
