@@ -6,12 +6,12 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 
 import os
 import sys
 import json
 import redfish
+standard_library.install_aliases()
 
 # Get $HOME environment.
 HOME = os.getenv('HOME')
@@ -49,7 +49,8 @@ except redfish.exception.RedfishException as e:
 print("Redfish API version : {} \n".format(remote_mgmt.get_api_version()))
 print("UUID : {} \n".format(remote_mgmt.Root.get_api_UUID()))
 print("System 1 :\n")
-print("Bios version : {}\n".format(remote_mgmt.Systems.systems_dict["1"].get_bios_version()))
+print("Bios version : {}\n".format(
+    remote_mgmt.Systems.systems_dict["1"].get_bios_version()))
 print("System 2 :\n")
-print("Bios version : {}\n".format(remote_mgmt.Systems.systems_dict["2"].get_parameter("SerialNumber")))
-#print remoteMgmt.get_api_link_to_server()
+print("Bios version : {}\n".format(
+    remote_mgmt.Systems.systems_dict["2"].get_parameter("SerialNumber")))

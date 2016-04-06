@@ -12,6 +12,8 @@ redfish-client ::
    redfish-client [options] config show
    redfish-client [options] config showall
    redfish-client [options] manager getinfo [<manager_name>]
+   redfish-client [options] chassis getinfo [<manager_name>]
+   redfish-client [options] system getinfo [<manager_name>]
    redfish-client (-h | --help)
    redfish-client --version
  
@@ -36,7 +38,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 from builtins import object
 
@@ -50,6 +51,7 @@ import configparser
 import jinja2
 import requests.packages.urllib3
 import redfish
+standard_library.install_aliases()
 
 
 class InventoryFile(object):
@@ -87,7 +89,7 @@ class InventoryFile(object):
 
     def manager_incorect(self, exception):
         ''' Log and exit if manager name is incorect'''
-        logger.error('Incorect manager name : %s' % exception.args)
+        logger.error('Incorrect manager name : %s' % exception.args)
         sys.exit(1)
 
     def check_manager(self, manager_name):
@@ -220,6 +222,27 @@ class RedfishClientException(Exception):
 if __name__ == '__main__':
     '''Main application redfish-client'''
     # Functions
+    def get_redfish_data(connection_parameters, check_SSL):
+        if not connection_parameters['login']:
+            simulator = True
+            enforceSSL = False
+        else:
+            simulator = False
+            enforceSSL = True
+        try:
+            redfish_data = redfish.connect(connection_parameters['url'],
+                                           connection_parameters['login'],
+                                           connection_parameters['password'],
+                                           verify_cert=check_SSL,
+                                           simulator=simulator,
+                                           enforceSSL=enforceSSL)
+            return(redfish_data)
+        except redfish.exception.RedfishException as e:
+            logger.error(str(e.message))
+            sys.stderr.write(str(e.message))
+            sys.stderr.write(str(e.advices))
+            sys.exit(1)
+
     def show_manager(all=False):
         '''Display manager info
 
@@ -232,7 +255,7 @@ if __name__ == '__main__':
         if(not inventory.get_managers()):
             print("None")
         else:
-            for manager in inventory.get_managers():
+            for manager in sorted(inventory.get_managers()):
                 print(manager)
                 if all is True:
                     info = inventory.get_manager_info(manager)
@@ -240,35 +263,21 @@ if __name__ == '__main__':
                     print('\tLogin : {}'.format(info['login']))
                     print('\tPassword : {}'.format(info['password']))
 
-    def get_manager_info(manager_name, check_SSL):
-        connection_parameters = inventory.get_manager_info(manager_name)
-        if not connection_parameters['login']:
-            simulator = True
-            enforceSSL = False
-        else:
-            simulator = False
-            enforceSSL = True
-        try:
-            print('Gathering data from manager, please wait...\n')
-            # TODO : Add a rotating star showing program is running ?
-            #        Could be a nice exercice for learning python. :)
-            logger.info('Gathering data from manager')
-            remote_mgmt = redfish.connect(connection_parameters['url'],
-                                          connection_parameters['login'],
-                                          connection_parameters['password'],
-                                          verify_cert=check_SSL,
-                                          simulator=simulator,
-                                          enforceSSL=enforceSSL
-                                          )
-        except redfish.exception.RedfishException as e:
-            logger.error(str(e.message))
-            sys.stderr.write(str(e.message))
-            sys.stderr.write(str(e.advices))
-            sys.exit(1)
-
+    def display_manager_info(redfish_data):
         # Display manager information using jinja2 template
+        render_template("manager_info.template")
+
+    def display_chassis_info(redfish_data):
+        # Display system information using jinja2 template
+        render_template("chassis_info.template")
+
+    def display_system_info(redfish_data):
+        # Display system information using jinja2 template
+        render_template("system_info.template")
+
+    def render_template(template):
         try:
-            template = jinja2_env.get_template("manager_info.template")
+            template = jinja2_env.get_template(template)
         except jinja2.exceptions.TemplateNotFound as e:
             print('Template "{}" not found in {}.'
                   .format(e.message, jinja2_env.loader.searchpath[0]))
@@ -276,7 +285,7 @@ if __name__ == '__main__':
                          % (e.message, jinja2_env.loader.searchpath[0]))
             sys.exit(1)
 
-        print(template.render(r=remote_mgmt))
+        print(template.render(r=redfish_data))
 
     #################################################################
     # Main program
@@ -406,21 +415,34 @@ if __name__ == '__main__':
                                          arguments['<changed_value>'])
             logger.debug(inventory.data)
             inventory.save()
-    if arguments['manager'] is True:
-        logger.debug("Manager commands")
-        if arguments['getinfo'] is True:
-            logger.debug('getinfo command')
-            # If manager is not defined set it to 'default'
-            if not arguments['<manager_name>']:
-                manager_name = 'default'
-            else:
-                manager_name = arguments['<manager_name>']
-            # Check if the default section is available in our conf file
-            inventory.check_manager(manager_name)
-            if arguments['--insecure'] is True:
-                get_manager_info(manager_name, False)
-            else:
-                get_manager_info(manager_name, True)
+    elif arguments['getinfo'] is True:
+        logger.debug('getinfo command')
+        # If manager is not defined set it to 'default'
+        if not arguments['<manager_name>']:
+            manager_name = 'default'
+        else:
+            manager_name = arguments['<manager_name>']
+        # Check if the default section is available in our conf file
+        inventory.check_manager(manager_name)
+        connection_parameters = inventory.get_manager_info(manager_name)
 
+        print('Gathering data from manager, please wait...\n')
+        # TODO : Add a rotating star showing program is running ?
+        #        Could be a nice exercice for learning python. :)
+        logger.info('Gathering data from manager')
+
+        if arguments['--insecure'] is True:
+            redfish_data = get_redfish_data(connection_parameters, False)
+        else:
+            redfish_data = get_redfish_data(connection_parameters, True)
+        if arguments['manager'] is True:
+            logger.debug("Manager commands")
+            display_manager_info(redfish_data)
+        elif arguments['system'] is True:
+            logger.debug("system commands")
+            display_system_info(redfish_data)
+        elif arguments['chassis'] is True:
+            logger.debug("chassis commands")
+            display_chassis_info(redfish_data)
     logger.info("Client session terminated")
     sys.exit(0)

@@ -8,7 +8,6 @@ from future import standard_library
 import logging
 import sys
 import os
-import getpass
 from logging.handlers import RotatingFileHandler
 standard_library.install_aliases()
 
@@ -30,8 +29,8 @@ if not os.path.exists(REDFISH_HOME):
         os.mkdir(REDFISH_HOME)
     except IOError:
         print('ERROR: can\'t create {}.\n'.format(REDFISH_HOME))
-        print('       Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
-        print('       using: mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('       Try to create directory {}'.format(REDFISH_HOME))
+        print('       using: mkdir -p {}'.format(REDFISH_HOME))
         sys.exit(1)
 
 REDFISH_LOGFILE = os.path.join(REDFISH_HOME, "python-redfish.log")
@@ -59,15 +58,18 @@ def initialize_logger(REDFISH_LOGFILE,
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
-        '%(asctime)s :: %(levelname)s :: %(message)s'
-        )
+        '%(asctime)s :: %(levelname)s :: %(message)s')
 
     try:
-        file_handler = RotatingFileHandler(os.path.expandvars(REDFISH_LOGFILE), 'a', 1000000, 1)
+        file_handler = RotatingFileHandler(
+            os.path.expandvars(REDFISH_LOGFILE), 'a', 1000000, 1)
     except IOError:
-        print('ERROR: {} does not exist or is not writeable.\n'.format(REDFISH_LOGFILE))
-        print('       Try to create directory {}'.format(os.path.dirname(REDFISH_LOGFILE)))
-        print('       using: mkdir -p {}'.format(os.path.dirname(REDFISH_LOGFILE)))
+        print('ERROR: {} does not exist or is not writeable.\n'.format(
+            REDFISH_LOGFILE))
+        print('       Try to create directory {}'.format(os.path.dirname(
+            REDFISH_LOGFILE)))
+        print('       using: mkdir -p {}'.format(os.path.dirname(
+            REDFISH_LOGFILE)))
         sys.exit(1)
 
     # First logger to file

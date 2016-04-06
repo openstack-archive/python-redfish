@@ -9,7 +9,7 @@ Manager id {{ manager_index }}:
 UUID : {{ manager.get_uuid() }}
 Type : {{ manager.get_type() }}
 Firmware version : {{ manager.get_firmware_version() }}
-State : {{ manager.get_status() }}
+Status : State : {{ manager.get_status().Health }} / Health : {{ manager.get_status().Health }}
 Ethernet Interface :
 {%- if manager.ethernet_interfaces_collection %}
 {%- for ethernetinterface_index in manager.ethernet_interfaces_collection.ethernet_interfaces_dict | sort %}

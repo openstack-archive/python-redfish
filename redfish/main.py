@@ -29,8 +29,9 @@ resources.
 A URI should be treated by the client as opaque, and thus should not be
 attempted to be understood or deconstructed by the client.  Only specific top
 level URIs (any URI in this sample code) may be assumed, and even these may be
-absent based upon the implementation (e.g. there might be no /redfish/v1/Systems
-collection on something that doesn't have compute nodes.)
+absent based upon the implementation
+(e.g. there might be no /redfish/v1/Systems collection on something
+that doesn't have compute nodes.)
 
 The other URIs must be discovered dynamically by following href links.  This is
 because the API will eventually be implemented on a system that breaks any
@@ -125,7 +126,6 @@ standard_library.install_aliases()
 from builtins import object
 
 import json
-import socket
 from urllib.parse import urlparse, urljoin, urlunparse
 import requests
 from . import config
@@ -142,8 +142,7 @@ def connect(
         password,
         simulator=False,
         enforceSSL=True,
-        verify_cert=True
-        ):
+        verify_cert=True):
 
     return RedfishConnection(
         url,
@@ -206,9 +205,6 @@ class RedfishConnection(object):
                                "this is insecure and can allow" +
                                " a man in the middle attack")
 
-        # Show redfish standard headers
-        config.logger.debug(self.connection_parameters.headers)
-
         config.logger.debug("Root url : %s",
                             self.connection_parameters.rooturl)
         self.Root = types.Root(self.connection_parameters.rooturl,
@@ -218,8 +214,10 @@ class RedfishConnection(object):
         mapping.redfish_version = self.get_api_version()
         mapping.redfish_root_name = self.Root.get_name()
 
-        # Instantiate a global mapping object to handle Redfish version variation
-        mapping.redfish_mapper = mapping.RedfishVersionMapping(self.get_api_version(), self.Root.get_name())
+        # Instantiate a global mapping object to handle
+        # Redfish version variation
+        mapping.redfish_mapper = mapping.RedfishVersionMapping(
+            self.get_api_version(), self.Root.get_name())
 
         # Now we need to login otherwise we are not allowed to extract data
         if self.__simulator is False:
@@ -229,9 +227,8 @@ class RedfishConnection(object):
                 config.logger.info("Login successful")
             except "Error getting token":
                 config.logger.error("Login fail, fail to get auth token")
-                raise exception.AuthenticationFailureException("Fail to get an auth token.")
-
-
+                raise exception.AuthenticationFailureException(
+                    "Fail to get an auth token.")
 
         # Structure change with mockup 1.0.0, there is no links
         # section anymore.
@@ -241,27 +238,24 @@ class RedfishConnection(object):
 
         # Types
         self.SessionService = types.SessionService(
-                                        self.Root.get_link_url(
-                                            mapping.redfish_mapper.map_sessionservice()),
-                                        self.connection_parameters
-                                                   )
+            self.Root.get_link_url(
+                mapping.redfish_mapper.map_sessionservice()),
+            self.connection_parameters)
 
-        self.Managers = types.ManagersCollection(self.Root.get_link_url("Managers"),
-                                                 self.connection_parameters
-                                                 )
+        self.Managers = types.ManagersCollection(
+            self.Root.get_link_url("Managers"),
+            self.connection_parameters)
 
-        self.Systems = types.SystemsCollection(self.Root.get_link_url("Systems"),
-                                                 self.connection_parameters
-                                                 )
+        self.Systems = types.SystemsCollection(
+            self.Root.get_link_url("Systems"),
+            self.connection_parameters)
 
-#         self.Chassis
+        self.Chassis = types.ChassisCollection(
+            self.Root.get_link_url("Chassis"), self.connection_parameters)
 
 #         self.EventService
 #         self.AccountService
 #         self.Tasks
-
-
-
 
     # ========================================================================
     #     systemCollectionLink = getattr(self.root.Links.Systems,"@odata.id")
@@ -282,8 +276,7 @@ class RedfishConnection(object):
     def login(self):
         # Craft full url
         url = self.Root.get_link_url(
-                                    mapping.redfish_mapper.map_sessionservice()
-                                    )
+            mapping.redfish_mapper.map_sessionservice())
 
         # Handle login with redfish 1.00, url must be :
         # /rest/v1/SessionService/Sessions as specified by the specification
@@ -295,14 +288,17 @@ class RedfishConnection(object):
                        "Password": self.connection_parameters.password}
         config.logger.debug(requestBody)
         headers = self.connection_parameters.headers
-        # =======================================================================
-        # Tortilla seems not able to provide the header of a post request answer.
+        # ====================================================================
+        # Tortilla seems not able to provide the header of a post request
+        # answer.
         # However this is required by redfish standard to get X-Auth-Token.
         # So jump to "requests" library to get the required token.
         # TODO : Patch tortilla to handle this case.
-        # =======================================================================
-        # sessionsUrl = tortilla.wrap("https://10.3.222.104/rest/v1/Sessions", debug=TORTILLADEBUG)
-        # sessions = sessionsUrl.post(verify=self.verify_cert, data=requestBody)
+        # ====================================================================
+        # sessionsUrl = tortilla.wrap(
+        #     "https://10.3.222.104/rest/v1/Sessions", debug=TORTILLADEBUG)
+        # sessions = sessionsUrl.post(
+        #     verify=self.verify_cert, data=requestBody)
         auth = requests.post(url,
                              data=json.dumps(requestBody),
                              headers=headers,
