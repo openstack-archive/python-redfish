@@ -1,3 +1,5 @@
+# coding=utf-8
+#
 # Copyright 2014 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -27,8 +29,9 @@ resources.
 A URI should be treated by the client as opaque, and thus should not be
 attempted to be understood or deconstructed by the client.  Only specific top
 level URIs (any URI in this sample code) may be assumed, and even these may be
-absent based upon the implementation (e.g. there might be no /redfish/v1/Systems
-collection on something that doesn't have compute nodes.)
+absent based upon the implementation
+(e.g. there might be no /redfish/v1/Systems collection on something
+that doesn't have compute nodes.)
 
 The other URIs must be discovered dynamically by following href links.  This is
 because the API will eventually be implemented on a system that breaks any
@@ -114,33 +117,23 @@ Clients should always be prepared for:
 * headers the service returns
 
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
-# coding=utf-8
-
-import sys
 import json
-from urlparse import urlparse
+from urllib.parse import urlparse, urljoin, urlunparse
 import requests
-import config
-import types
-import mapping
-import exception
+from . import config
+from . import types
+from . import mapping
+from . import exception
 
-# Global variable definition
-redfish_logfile = "/var/log/python-redfish/python-redfish.log"
-
-# ===============================================================================
-# TODO : create method to set logging level and TORTILLADEBUG.
-# ===============================================================================
-
-
-def set_log_file(logfile):
-    global redfish_logfile
-    redfish_logfile = logfile
-    return True
-
-
-""" Function to wrap RedfishConnection """
+"""Function to wrap RedfishConnection"""
 
 
 def connect(
@@ -149,10 +142,8 @@ def connect(
         password,
         simulator=False,
         enforceSSL=True,
-        verify_cert=True
-    ):
-    global redfish_logfile
-    config.initialize_logger(redfish_logfile)
+        verify_cert=True):
+
     return RedfishConnection(
         url,
         user,
@@ -173,9 +164,16 @@ class RedfishConnection(object):
                  simulator=False,
                  enforceSSL=True,
                  verify_cert=True
-                ):
+                 ):
         """Initialize a connection to a Redfish service."""
-        super(RedfishConnection, self).__init__()
+        # Specify a name for the logger as recommended by the logging
+        # documentation. However for strange reason requests logs are not
+        # anymore capture in the log file.
+        # TODO : Check strange behavior about requests logs.
+        config.logger = config.initialize_logger(config.REDFISH_LOGFILE,
+                                                 config.CONSOLE_LOGGER_LEVEL,
+                                                 config.FILE_LOGGER_LEVEL,
+                                                 __name__)
 
         config.logger.info("Initialize python-redfish")
 
@@ -204,22 +202,22 @@ class RedfishConnection(object):
         # Verify cert
         if self.connection_parameters.verify_cert is False:
             config.logger.info("Certificat is not checked, " +
-                        "this is insecure and can allow" +
-                        " a man in the middle attack")
+                               "this is insecure and can allow" +
+                               " a man in the middle attack")
 
-        config.logger.debug("Root url : %s", self.connection_parameters.rooturl)
+        config.logger.debug("Root url : %s",
+                            self.connection_parameters.rooturl)
         self.Root = types.Root(self.connection_parameters.rooturl,
-                         self.connection_parameters
-                        )
-        #self.api_url = tortilla.wrap(self.connection_parameters.rooturl,
-        #                             debug=TORTILLADEBUG)
-        #self.root = self.api_url.get(verify=self.connection_parameters.verify_cert)
+                               self.connection_parameters)
 
         config.logger.info("API Version : %s", self.get_api_version())
         mapping.redfish_version = self.get_api_version()
+        mapping.redfish_root_name = self.Root.get_name()
 
-        # Instanciate a global mapping object to handle Redfish version variation
-        mapping.redfish_mapper = mapping.RedfishVersionMapping(self.get_api_version())
+        # Instantiate a global mapping object to handle
+        # Redfish version variation
+        mapping.redfish_mapper = mapping.RedfishVersionMapping(
+            self.get_api_version(), self.Root.get_name())
 
         # Now we need to login otherwise we are not allowed to extract data
         if self.__simulator is False:
@@ -229,11 +227,10 @@ class RedfishConnection(object):
                 config.logger.info("Login successful")
             except "Error getting token":
                 config.logger.error("Login fail, fail to get auth token")
-                raise exception.AuthenticationFailureException("Fail to get an auth token.")
+                raise exception.AuthenticationFailureException(
+                    "Fail to get an auth token.")
 
-
-
-        # Struture change with mockup 1.0.0, there is no links
+        # Structure change with mockup 1.0.0, there is no links
         # section anymore.
         # ===================================================================
         # TODO : Add a switch to allow the both structure
@@ -241,29 +238,24 @@ class RedfishConnection(object):
 
         # Types
         self.SessionService = types.SessionService(
-                                        self.Root.get_link_url(
-                                            mapping.redfish_mapper.map_sessionservice()),
-                                        self.connection_parameters
-                                                   )
+            self.Root.get_link_url(
+                mapping.redfish_mapper.map_sessionservice()),
+            self.connection_parameters)
 
-        self.Managers = types.ManagersCollection(self.Root.get_link_url("Managers"),
-                                                 self.connection_parameters
-                                                 )
+        self.Managers = types.ManagersCollection(
+            self.Root.get_link_url("Managers"),
+            self.connection_parameters)
 
-        self.Systems = types.SystemsCollection(self.Root.get_link_url("Systems"),
-                                                 self.connection_parameters
-                                                 )
+        self.Systems = types.SystemsCollection(
+            self.Root.get_link_url("Systems"),
+            self.connection_parameters)
 
-        #for system in self.Systems.systems_list:
-            #config.logger.debug(system.data.links.ManagedBy)
-#         self.Chassis
+        self.Chassis = types.ChassisCollection(
+            self.Root.get_link_url("Chassis"), self.connection_parameters)
 
 #         self.EventService
 #         self.AccountService
 #         self.Tasks
-
-
-
 
     # ========================================================================
     #     systemCollectionLink = getattr(self.root.Links.Systems,"@odata.id")
@@ -271,7 +263,7 @@ class RedfishConnection(object):
     #
     #     print self.systemCollection.Name
     #
-    # ======================================================================== 
+    # ========================================================================
     def get_api_version(self):
         """Return api version.
 
@@ -284,42 +276,53 @@ class RedfishConnection(object):
     def login(self):
         # Craft full url
         url = self.Root.get_link_url(
-                                    mapping.redfish_mapper.map_sessionservice()
-                                    )
-        
-        # Handle login with redfish 1.00, url must be : 
+            mapping.redfish_mapper.map_sessionservice())
+
+        # Handle login with redfish 1.00, url must be :
         # /rest/v1/SessionService/Sessions as specified by the specification
         if float(mapping.redfish_version) >= 1.00:
-            url += '/Sessions'
+            url = urljoin(url, "Sessions")
 
         # Craft request body and header
-        requestBody = {"UserName": self.connection_parameters.user_name  , "Password": self.connection_parameters.password}
-        header = {'Content-type': 'application/json'}
-        # =======================================================================
-        # Tortilla seems not able to provide the header of a post request answer.
+        requestBody = {"UserName": self.connection_parameters.user_name,
+                       "Password": self.connection_parameters.password}
+        config.logger.debug(requestBody)
+        headers = self.connection_parameters.headers
+        # ====================================================================
+        # Tortilla seems not able to provide the header of a post request
+        # answer.
         # However this is required by redfish standard to get X-Auth-Token.
         # So jump to "requests" library to get the required token.
         # TODO : Patch tortilla to handle this case.
-        # =======================================================================
-        # sessionsUrl = tortilla.wrap("https://10.3.222.104/rest/v1/Sessions", debug=TORTILLADEBUG)
-        # sessions = sessionsUrl.post(verify=self.verify_cert, data=requestBody)
+        # ====================================================================
+        # sessionsUrl = tortilla.wrap(
+        #     "https://10.3.222.104/rest/v1/Sessions", debug=TORTILLADEBUG)
+        # sessions = sessionsUrl.post(
+        #     verify=self.verify_cert, data=requestBody)
         auth = requests.post(url,
                              data=json.dumps(requestBody),
-                             headers=header,
-                             verify=self.connection_parameters.verify_cert
-                            )
- 
+                             headers=headers,
+                             verify=self.connection_parameters.verify_cert)
+
         # =======================================================================
         # TODO : Manage exception with a class.
         # =======================================================================
         if auth.status_code != 201:
-            raise exception.AuthenticationFailureException("Login request return an invalid status code")
-            #sysraise "Error getting token", auth.status_code
+            try:
+                answer = auth.json()
+            except ValueError:
+                answer = ""
+            raise exception.AuthenticationFailureException(
+                "Login request return an invalid status code ",
+                code=auth.status_code, queryAnswer=answer)
 
-        self.connection_parameters.auth_token = auth.headers.get("x-auth-token")
+        self.connection_parameters.auth_token = auth.headers.get(
+            "x-auth-token")
         self.connection_parameters.user_uri = auth.headers.get("location")
-        config.logger.debug("x-auth-token : %s", self.connection_parameters.auth_token)
-        config.logger.debug("user session : %s", self.connection_parameters.user_uri)
+        config.logger.debug("x-auth-token : %s",
+                            self.connection_parameters.auth_token)
+        config.logger.debug("user session : %s",
+                            self.connection_parameters.user_uri)
         return True
 
     def logout(self):
@@ -327,13 +330,11 @@ class RedfishConnection(object):
         url = self.connection_parameters.user_uri
 
         # Craft request header
-        header = {"Content-type": "application/json",
-                  "x-auth-token": self.connection_parameters.auth_token
-                 }
+        headers = self.connection_parameters.headers
 
-        logout = requests.delete(url, headers=header,
-                                 verify=self.connection_parameters.verify_cert
-                                )
+        logout = requests.delete(url,
+                                 headers=headers,
+                                 verify=self.connection_parameters.verify_cert)
 
         if logout.status_code == 200:
             config.logger.info("Logout successful")
@@ -403,3 +404,17 @@ class ConnectionParameters(object):
     @user_uri.setter
     def user_uri(self, user_uri):
         self.__user_uri = user_uri
+
+    @property
+    def headers(self):
+        # Host header is set by request or tortilla
+        url = urlparse(self.__rooturl)
+        origin = urlunparse((url.scheme, url.netloc, '', '', '', ''))
+        headers = {'OData-Version': '4.0',
+                   'Content-type': 'application/json',
+                   'Accept': 'application/json',
+                   'Origin': origin,
+                   'User-Agent': 'python-redfish'}
+        if self.auth_token:
+            headers.update({'x-auth-token': self.auth_token})
+        return headers

@@ -1,0 +1,30 @@
+# $Id$
+
+PYTHON-REDFISH CHANGES
+
+devel (2050-01-01)
+- TBD ()
+
+v0.2 (2015-12-08)
+- first rpm made using project-builder.org (Bruno Cornec)
+- Update the simple-simulator example (René Ribaud)
+- Update redfish-client (René Ribaud)
+- Add both UEFI parameters "Continuous" and "Once" as an example (Vincent Misson)
+- New function set_parameter and set_parameter_json on Systems Class (Vincent Misson)
+- New classes in types.py: Bios & Boot (Vincent Misson)
+- New function get_power() and generic function  get_parameter(parameter_name) for class Systems (Vincent Misson)
+- Create new function: get_serialnumber. Tested with Simulator (v1) + Redfish Proliant 0.9.5 and 1.0 (Vincent Misson)
+- Various doc updates (Bruno COrnec, René Ribaud)
+
+v0.1 (2015-09-09)
+- Uses tortilla lib to wrap the REST API (René Ribaud)
+- Uses python requests to manage login/logout (René Ribaud)
+- Provides 2 functional working examples with Redfish simulator and ProLiant server or Moonshot Server (René Ribaud)
+- Remove OpenStack deps as this code has to be usable outside of OpenStack (Bruno Cornec)
+- Provides a configuration file to handle credentials and connection URL (René Ribaud)
+- Provides a mapping class to handle multiple versions of Redfish (in this version, 0.95.0 for ProLiant and 1.0.0 for mockup) (René Ribaud)
+- Provides a first action reset_server to ... reset system The action is commented into simple-proliant.py to not do unexpected reset. (René Ribaud)
+- Provides a first retrieving function get_bios_version to get the BIOS version of a system. (René Ribaud)
+- Add basic logging capability (René Ribaud)
+- Change the documentation to reference Redfish specification. Remove HP and iLO specific references (Samer El-Haj-Mahmoud)
+- Initial content and Clean up to meet pep8 and doc strings (Devenanda van der Veen)

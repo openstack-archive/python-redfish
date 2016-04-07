@@ -1,0 +1,8 @@
+# Specific group for Mandriva for python-redfish
+# Cf: http://wiki.mandriva.com/en/Development/Packaging/Groups
+filter PBGRP = Development/Python 
+
+# PBLIC is replaced by the license of the application
+# Cf: http://wiki.mandriva.com/en/Development/Packaging/Licenses
+#filter PBLIC = GPL
+

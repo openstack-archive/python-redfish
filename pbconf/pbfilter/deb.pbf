@@ -1,0 +1,23 @@
+#
+# $Id$
+#
+# Filter for debian build
+#
+# PBGRP is replaced by the group of apps
+filter PBGRP = utils
+
+# PBLIC is replaced by the license of the application
+# Cf: http://www.debian.org/legal/licenses/
+filter PBLIC = ASL 2.0
+
+# PBDEP is replaced by the list of dependencies
+filter PBDEP = python-docopt, python-tortilla, python-jinja2, python-pbr, python-docopt, python-simplejson
+
+# PBBDEP is replaced by the list of build dependencies
+filter PBBDEP = python-dev, python-setuptools, python-pbr, python-tortilla, python-jinja2, python-sphinx
+
+# PBSUG is replaced by the list of suggestions
+#filter PBSUG =
+
+# PBREC is replaced by the list of recommandations
+#filter PBREC =

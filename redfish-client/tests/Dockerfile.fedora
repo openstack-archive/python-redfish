@@ -1,0 +1,10 @@
+FROM fedora:23
+RUN dnf install -y python-pip && \
+dnf install -y tar
+COPY python-redfish.src.tar.gz /python-redfish.src.tar.gz
+RUN mkdir /var/log/python-redfish
+RUN tar xvvf python-redfish.src.tar.gz
+RUN cd python-redfish* && \
+pip install -r requirements.txt && \
+python setup.py install
+CMD ["/bin/bash"]

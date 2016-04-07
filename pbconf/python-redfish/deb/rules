@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME=PBPKG
+export PYBUILD_AFTER_INSTALL_python3=rm -rf {destdir}/usr/bin
+
+%:
+		dh $@ --with python2,python3,sphinxdoc --buildsystem=pybuild
+		#dh $@ --with python2,python3 --buildsystem=python_distutils
+
+PYPI_DESC = PBSUMMARY
+DEB_UPSTREAM_VERSION=$(shell dpkg-parsechangelog | sed -rne 's,^Version: ([^-]+).*,\1,p')
+	help2man = PYTHONPATH=${CURDIR} help2man -N --version-string=${DEB_UPSTREAM_VERSION} \
+					-o $1 -n '$2' $(CURDIR)/debian/PBPKG/usr/bin/$(subst .1,,$1)

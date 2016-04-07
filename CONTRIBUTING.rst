@@ -1,16 +1,5 @@
-If you would like to contribute to the development of OpenStack,
-you must follow the steps in this page:
+If you would like to contribute to the development of this project.
 
-   http://docs.openstack.org/infra/manual/developers.html
+Submit your pull request and issues to https://github.com/bcornec/python-redfish.
 
-Once those steps have been completed, changes to OpenStack
-should be submitted for review via the Gerrit tool, following
-the workflow documented at:
-
-   http://docs.openstack.org/infra/manual/developers.html#development-workflow
-
-Pull requests submitted through GitHub will be ignored.
-
-Bugs should be filed on Launchpad, not GitHub:
-
-   https://bugs.launchpad.net/python-redfish
+You can also share and discuss on the mailing list as well at http://mondorescue.org/sympa/arc/python-redfish.

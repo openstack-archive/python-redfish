@@ -1,0 +1,8 @@
+#
+# $Id$
+#
+# Filter for pkg build
+#
+# Solaris package name (VENDOR : 4 letters in uppercase, SOFT : 8 letters in lowercase)
+filter PBSOLPKG = SUNWsoftware
+

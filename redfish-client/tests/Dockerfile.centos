@@ -1,0 +1,12 @@
+FROM centos:7
+RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+yum install -y python-pip
+COPY python-redfish.src.tar.gz /python-redfish.src.tar.gz
+RUN mkdir /var/log/python-redfish
+RUN tar xvvf python-redfish.src.tar.gz
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
+RUN cd python-redfish* && \
+pip install -r requirements.txt && \
+python setup.py install
+CMD ["/bin/bash"]
