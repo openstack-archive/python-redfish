@@ -1,13 +1,13 @@
-python-redfish
-==============
+The python-redfish project
+==========================
 
-This repository will be used to house the Redfish python library, a reference
+This repository will be used to house the python-redfish library, a reference
 implementation to enable Python developers to communicate with the Redfish API
 (http://www.dmtf.org/standards/redfish).
 
 NOTE::
 
-    DRAFT - WORK IN PROGRESS
+    STATUS: Work in progress, ready for proof of concept.
 
     The current Redfish specification revision is 1.0.0 - Note that the mockup
     is still at version 0.99.0a and may not reflect what the standard provides
@@ -20,7 +20,7 @@ The full documentation is available at
 http://pythonhosted.org/python-redfish/installation.html
 
 Project Structure
--------------------
+-----------------
 
 This project follows the same convention as OpenStack projects, eg. using pbr
 for build and test automation::
@@ -34,7 +34,7 @@ for build and test automation::
     pbconf          # Project builder file to build rpm/deb packages for
                     # distributions
     redfish/        # The redfish library itself
-    redfish/tests/  # Python redfish unit test suite
+    redfish/tests/  # python-redfish unit test suite
     redfish-client  # Client tool to manage redfish devices
 
 Requirements
@@ -49,17 +49,19 @@ are discouraged due to security.
 Python requirements are listed in requirements.txt; additional requirements for
 running the unit test suite are listed in test-requirements.txt.
 
+Note: Running tests requires Docker engine.
+
 Note: The program was tested with Python 2.7.10 and 3.4.2 however it might work
 as well with all Python 3 releases.
 
-Get the sources
----------------
+Get the source code
+-------------------
 
-The sources are available on github and can be retrieved using::
+The source code is available on github and can be retrieved using::
 
-    git clone https://github.com/uggla/python-redfish
+    git clone https://github.com/bcornec/python-redfish
 
-As python redefish is currently in heavy development we recommend to checkout the devel branch using::
+As python-redfish is currently in heavy development we recommend to checkout the devel branch using::
 
     cd python-redfish
     git checkout devel
