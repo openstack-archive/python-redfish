@@ -14,7 +14,7 @@ redfish-client tests
 #. Create your development environment following `Developer setup <develsetup.html>`_.
 #. Install docker using the `procedure <https://docs.docker.com/engine/installation/>`_.
 #. Ensure you can use docker with your current user.
-#. Jump into python-redfish directory containing the sources.
+#. Jump into the python-redfish directory containing the source code.
 #. Depending of your distribution, you may have to upgrade setuptools::
 
     pip install --upgrade setuptools

@@ -16,13 +16,13 @@ There are available at ftp://ftp.project-builder.org
 
 As an example for Fedora 23 use the following:
 
-As root get the repo file::
+1. As root get the repo file::
 
-   cd /etc/yum.repos.d && wget ftp://ftp.project-builder.org/fedora/23/x86_64/python-redfish.repo
+    cd /etc/yum.repos.d && wget ftp://ftp.project-builder.org/fedora/23/x86_64/python-redfish.repo
 
-Install using dnf::
+2. Install using dnf::
 
-   dnf install python-redfish
+    dnf install python-redfish
 
 
 ..
@@ -87,7 +87,7 @@ access on your system, please follow `Using pip and virtualenv`_ section.
 Using source code
 -----------------
 
-#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-sources>`_ section to retrieve it.
+#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-source-code>`_ section to retrieve it.
 #. Install from the source code using::
 
     python setup.py install --prefix="/usr/local"
@@ -100,7 +100,7 @@ Inside the project tree there is a mechanism to build rpm packages for distribut
 
 The mechanism is based on `project builder <http://www.project-builder.org/>`_ tool.
 
-#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-sources>`_ section to retrieve it.
+#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-source-code>`_ section to retrieve it.
 #. Download project builder for your distribution from ftp://ftp.project-builder.org.
 #. Clone the project to your own github account.
 #. Create a .pbrc with the following content, replace "/workspace/python/redfish" and "uggla" with your own directory and account::
@@ -114,10 +114,9 @@ The mechanism is based on `project builder <http://www.project-builder.org/>`_ t
 
     pb -p python-redfish sbx2pkg
 
- or::
+   or::
 
     pb -p python-redfish sbx2pkg2ins
-
 #. All packages (srpm/rpm) should be available into the build directory, then install the package using rpm::
 
     rpm -Uvh python-redfish/build/RPMS/python-redfish-devel20160213182552.rpm
@@ -145,8 +144,10 @@ Note: The inventory file is created in $HOME/.redfish
 Mockup installation
 ===================
 
-#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-sources>`_ section to retrieve it.
-#. Install docker using your distribution packages or the docker `procedure <https://docs.docker.com/engine/installation/>`_ (docker provides more recent packages)::
+#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-source-code>`_ section to retrieve it.
+#. Install docker using your distribution packages or the docker `procedure <https://docs.docker.com/engine/installation/>`_ (docker provides more recent packages):
+
+As an example for Fedora 23 use the following::
 
     dnf install docker
     systemctl enable docker.service
@@ -170,14 +171,14 @@ Note : in the above screenshot, firefox JSON-handle extension is used. If you wa
 Testing against the mockup
 ==========================
 
-#. Follow `Host configuration file configuration`_ and `Mockup installation`_ section.
+#. Follow `Inventory file configuration`_ and `Mockup installation`_ section.
 #. Run the following command::
 
     redfish-client manager getinfo
 
 The result should be like this::
 
-    (pypi)[uggla@ugglalaptop dmtf]$ redfish-client manager getinfo
+    $ redfish-client manager getinfo
     Gathering data from manager, please wait...
 
     Redfish API version :  1.00
@@ -231,10 +232,10 @@ The result should be like this::
 Building local documentation
 ============================
 
-Building the html documentation locally
+Building the html documentation locally.
 
 
-#. Follow `get the sources <http://pythonhosted.org/python-redfish/readme.html#get-the-sources>`_ section to retrieve the sources.
+#. Follow `get the source code <http://pythonhosted.org/python-redfish/readme.html#get-the-source-code>`_ section to retrieve it.
 #. Jump in the doc directory::
 
     cd doc
@@ -245,7 +246,7 @@ Building the html documentation locally
 
 If you want to build the documentation in pdf.
 
-#. Get texlive full distribution, ex on Fedora::
+#. Get texlive full distribution, e.g. on Fedora 23::
 
     dnf install texlive-scheme-full
 #. Build the documentation::

@@ -1,5 +1,5 @@
-python-redfish
-==============
+The python-redfish project
+==========================
 
 This repository will be used to house the python-redfish library, a reference
 implementation to enable Python developers to communicate with the Redfish API
@@ -20,7 +20,7 @@ The full documentation is available at
 http://pythonhosted.org/python-redfish/installation.html
 
 Project Structure
--------------------
+-----------------
 
 This project follows the same convention as OpenStack projects, eg. using pbr
 for build and test automation::
@@ -54,10 +54,10 @@ Note: Running tests requires Docker engine.
 Note: The program was tested with Python 2.7.10 and 3.4.2 however it might work
 as well with all Python 3 releases.
 
-Get the sources
----------------
+Get the source code
+-------------------
 
-The sources are available on github and can be retrieved using::
+The source code is available on github and can be retrieved using::
 
     git clone https://github.com/bcornec/python-redfish
 
