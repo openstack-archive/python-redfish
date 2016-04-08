@@ -80,7 +80,7 @@ popd
 %config(noreplace) %{_sysconfdir}/redfish-client.conf
 %dir %{python_sitelib}/redfish
 %{python_sitelib}/redfish/*.py*
-%{python_sitelib}/redfish/tests/*.py*
+#%{python_sitelib}/redfish/tests/*.py*
 %{python_sitelib}/python_redfish*
 # Needs improvement to host all .1 man pages but not the py3 ones
 %{_mandir}/man1/PBREALPKG.1*
@@ -91,8 +91,8 @@ popd
 %dir %{python3_sitelib}/redfish
 %{python3_sitelib}/redfish/*.py*
 %{python3_sitelib}/redfish/__pycache__/*.py*
-%{python3_sitelib}/redfish/tests/*.py*
-%{python3_sitelib}/redfish/tests/__pycache__/*.py*
+#%{python3_sitelib}/redfish/tests/*.py*
+#%{python3_sitelib}/redfish/tests/__pycache__/*.py*
 %{python3_sitelib}/python_redfish*
 %{_mandir}/man1/*-py3.1*
 
