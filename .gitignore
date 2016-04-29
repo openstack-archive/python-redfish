@@ -22,6 +22,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+AUTHORS
+ChangeLog
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -57,9 +59,12 @@ docs/_build/
 # PyBuilder
 target/
 
-# Project-Builder.org
-delivery/
-build/
+# Project-Builder.org 0.14.1
+pbdelivery/
+pbbuild/
+
+# ctags
+tags
 
 # Pydev
 .project

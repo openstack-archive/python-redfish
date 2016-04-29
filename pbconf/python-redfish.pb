@@ -133,7 +133,5 @@ defpkgdir python-redfish = .
 filteredfiles python-redfish = redfish-client/redfish-client,doc/source/conf.py,redfish-client/etc/redfish-client.conf,install.sh
 #supfiles python-redfish = python-redfish.init
 
-# For perl modules, names are different depending on distro
-# Here perl-xxx for RPMs, libxxx-perl for debs, ...
-# So the package name is indeed virtual
-#namingtype python-redfish = perl
+# We use pbr to generate sources
+pbpbr python-redfish = 1
