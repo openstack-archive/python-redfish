@@ -11,17 +11,17 @@ export pkg=$5
 
 # Documentation installation only
 if [ $python = "doc" ]; then
-	install -d 755 $rootdir/$prefix/share/doc/$5/html/_static
-	install -m 644 doc/build/singlehtml/*.html $rootdir/$prefix/share/doc/$5/html
-	install -m 644 doc/build/singlehtml/_static/* $rootdir/$prefix/share/doc/$5/html/_static
-	install -m 644 doc/build/latex/*.pdf $rootdir/$prefix/share/doc/$5/
+	install -d 755 $rootdir/$prefix/share/doc/$5/manual/html/_static
+	install -m 644 doc/build/singlehtml/*.html $rootdir/$prefix/share/doc/$5/manual/html
+	install -m 644 doc/build/singlehtml/_static/* $rootdir/$prefix/share/doc/$5/manual/html/_static
+	install -m 644 doc/build/latex/*.pdf $rootdir/$prefix/share/doc/$5/manual/
 	exit 0
 fi
 
 pyver=`$python --version 2>&1 | perl -p -e 's|.* ([2-3])\..*|$1|'`
 $python setup.py install --skip-build --root=$rootdir --prefix=$prefix
 
-rm -rf $rootdir/$sitelib/redfish/old
+rm -rf $rootdir/$sitelib/redfish/old $rootdir/$prefix/share/doc/$5/html $rootdir/$prefix/share/doc/$5/*.pdf
 
 # Hardcoded for now to solve the delivery of the conf file still not correct with setup.py
 mkdir -p $rootdir/etc
