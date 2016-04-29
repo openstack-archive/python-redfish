@@ -6,3 +6,5 @@ filter PBGRP = Development/Python
 # Cf: http://wiki.mandriva.com/en/Development/Packaging/Licenses
 #filter PBLIC = GPL
 
+filter PB2PYTHON2BDEP = python-pkg-resources >= 18, texlive-dist
+filter PB2PYTHON3BDEP = python3-pkg-resources >= 18, texlive-dist

@@ -24,3 +24,5 @@ filter PBSUF = %{dist}
 # PBOBS is replaced by the Obsolete line
 #filter PBOBS =
 
+filter PB2PYTHON2BDEP = texlive-multirow,texlive-upquote,texlive-wrapfig,texlive-threepartttble,texlive-titlesec
+filter PB2PYTHON3BDEP = texlive-multirow,texlive-upquote,texlive-wrapfig,texlive-threepartttble,texlive-titlesec
