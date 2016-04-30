@@ -20,7 +20,7 @@ pburl python-redfish = git+ssh://git@github.com/bcornec/python-redfish.git
 # Repository
 pbrepo python-redfish = ftp://ftp.mondorescue.org
 pbml python-redfish = python-redfish@mondorescue.org
-#pbsmtp python-redfish = localhost
+pbsmtp python-redfish = localhost
 # For distro supporting it, which area is used
 #projcomponent python-redfish = main
 
