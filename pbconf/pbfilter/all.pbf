@@ -70,3 +70,5 @@ filter PBLOG = yes
 filter PBCONFFILE = /etc/redfish-client.conf
 filter PBTEMPLATEPATH = /usr/share/redfish-client/templates
 filter PBPYTHON3FILTER = perl -pi -e "s|configparser>=3.3.0; python_version < '3'|configparser>=3.3.0|" requirements.txt
+# By default build for python3
+filter PBWITHPY3 = 1

@@ -55,7 +55,7 @@ sshport python-redfish = 22
 # a .vmtype extension will be added to the resulting string
 # a QEMU rhel-3-i286 here means that the VM will be named rhel-3-i386.qemu
 #
-vmlist python-redfish = rhel-6-i386,opensuse-12.3-i386,sles-11-i386,gentoo-nover-i386,debian-8-i386,ubuntu-14.04-i386,ubuntu-15.10-i386,mageia-4-i386,mageia-5-i386,mageia-4-x86_64,mageia-5-x86_64,fedora-22-x86_64,fedora-23-x86_64,rhel-6-x86_64,rhel-7-x86_64,opensuse-12.3-i386,sles-10-x86_64,sles-11-x86_64,sles-12-x86_64,gentoo-nover-x86_64,debian-8-x86_64,ubuntu-14.04-x86_64,ubuntu-15.10-x86_64
+vmlist python-redfish = opensuse-12.3-i386,debian-8-i386,ubuntu-16.04-i386,mageia-5-i386,mageia-5-x86_64,fedora-23-x86_64,rhel-7-x86_64,opensuse-12.3-x86_64,sles-12-x86_64,debian-8-x86_64,ubuntu-16.04-x86_64
 
 #
 # Valid values for vmtype are
@@ -99,7 +99,7 @@ vetype python-redfish = docker
 #
 # Global version/tag for the project
 #
-projver python-redfish = 0.3
+projver python-redfish = 0.4
 projtag python-redfish = 1
 
 # Hash of valid version names
@@ -110,9 +110,9 @@ projtag python-redfish = 1
 #version python-redfish = devel,stable
 
 # Is it a test version or a production version
-#testver python-redfish = true
+testver python-redfish = true
 # Which upper target dir for delivery
-delivery python-redfish =
+delivery python-redfish = test
 
 # Additional repository to add at build time
 # addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/centos/5/pb.repo
