@@ -128,7 +128,7 @@ import json
 from urllib.parse import urlparse, urljoin, urlunparse
 import requests
 from . import config
-from . import types
+from . import standard
 from . import mapping
 from . import exception
 standard_library.install_aliases()
@@ -207,7 +207,7 @@ class RedfishConnection(object):
 
         config.logger.debug("Root url : %s",
                             self.connection_parameters.rooturl)
-        self.Root = types.Root(self.connection_parameters.rooturl,
+        self.Root = standard.Root(self.connection_parameters.rooturl,
                                self.connection_parameters)
 
         config.logger.info("API Version : %s", self.get_api_version())
@@ -236,21 +236,21 @@ class RedfishConnection(object):
         # TODO : Add a switch to allow the both structure
         # ===================================================================
 
-        # Types
-        self.SessionService = types.SessionService(
+        # standard
+        self.SessionService = standard.SessionService(
             self.Root.get_link_url(
                 mapping.redfish_mapper.map_sessionservice()),
             self.connection_parameters)
 
-        self.Managers = types.ManagersCollection(
+        self.Managers = standard.ManagersCollection(
             self.Root.get_link_url("Managers"),
             self.connection_parameters)
 
-        self.Systems = types.SystemsCollection(
+        self.Systems = standard.SystemsCollection(
             self.Root.get_link_url("Systems"),
             self.connection_parameters)
 
-        self.Chassis = types.ChassisCollection(
+        self.Chassis = standard.ChassisCollection(
             self.Root.get_link_url("Chassis"), self.connection_parameters)
 
 #         self.EventService
