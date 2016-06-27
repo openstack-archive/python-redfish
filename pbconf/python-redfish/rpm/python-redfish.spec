@@ -3,7 +3,6 @@
 #
 %global with_python3 PBWITHPY3
 
-
 Name:           PBREALPKG
 Version:        PBVER
 Release:        PBTAGPBSUF
@@ -42,7 +41,7 @@ PBDESC
 Documentation
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}PBEXTDIR
 # Fix for now as long as setuptools isn't more recent in distributions
 %if %{?with_python3}
 PBPYTHON3FILTER
@@ -89,6 +88,7 @@ popd
 %exclude %{_docdir}/PBREALPKG/html
 %exclude %{_docdir}/PBREALPKG/*.pdf
 %{_bindir}/redfish-client
+%{_bindir}/redfish-check-cartridge
 %dir %{_datadir}/redfish-client
 %{_datadir}/redfish-client/templates/*
 %config(noreplace) %{_sysconfdir}/redfish-client.conf

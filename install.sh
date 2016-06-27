@@ -11,7 +11,7 @@ export pkg=$5
 
 # Documentation installation only
 if [ $python = "doc" ]; then
-	install -d 755 $rootdir/$prefix/share/doc/$5/manual/html/_static
+	install -m 755 -d $rootdir/$prefix/share/doc/$5/manual/html/_static
 	install -m 644 doc/build/singlehtml/*.html $rootdir/$prefix/share/doc/$5/manual/html
 	install -m 644 doc/build/singlehtml/_static/* $rootdir/$prefix/share/doc/$5/manual/html/_static
 	install -m 644 doc/build/latex/*.pdf $rootdir/$prefix/share/doc/$5/manual/

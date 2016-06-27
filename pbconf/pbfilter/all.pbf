@@ -8,12 +8,10 @@
 filter PBREPO = $pb->{'repo'}
 
 # PBSRC is replaced by the source package location after the repo
-filter PBSRC = src/%{name}-%{version}.tar.gz
-# Used if virtual name != real name (perl, ...)
-#filter PBSRC = src/%{srcname}-%{version}.tar.gz
+filter PBSRC = src/%{name}-%{version}$pb->{'extdir'}.tar.gz
 
 # PBVER is replaced by the version ($pb->{'ver'} in code)
-filter PBVER = $pb->{'ver'}$pb->{'extdir'}
+filter PBVER = $pb->{'ver'}
 
 # PBDATE is replaced by the date ($pb->{'date'} in code)
 filter PBDATE = $pb->{'date'}
