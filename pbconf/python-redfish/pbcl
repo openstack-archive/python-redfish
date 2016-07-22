@@ -2,8 +2,22 @@
 
 PYTHON-REDFISH CHANGES
 
-devel (2050-01-01)
+v0.4 (2050-01-01)
 - TBD ()
+
+v0.3 (2016-04-30)
+- First version usable for PoC (Team)
+- Support for lots of Redfish configuration items added (René Ribaud)
+- Support for OEM subtrees (René Ribaud)
+- Use the correct headers for requests (René Ribaud)
+- Examples reviewed to take advantage of these extensions (René Ribaud)
+- Usage of jinja2 templates for redfish-client (René Ribaud)
+- Updated client (René Ribaud)
+- Usage of a $HOME/.redfish directory for storing configuration and logs (Bruno Cornec)
+- Adds test with multiple docker containers (René Ribaud)
+- Documentation review and extension (René Ribaud/Bruno Cornec)
+- Update DMTF documentation to 1.0.1 (Bruno Cornec)
+- First packages for Mageia 5 and Fedora 23 using project-builder.org py2 and py3 (Bruno Cornec)
 
 v0.2 (2015-12-08)
 - first rpm made using project-builder.org (Bruno Cornec)
@@ -14,7 +28,7 @@ v0.2 (2015-12-08)
 - New classes in types.py: Bios & Boot (Vincent Misson)
 - New function get_power() and generic function  get_parameter(parameter_name) for class Systems (Vincent Misson)
 - Create new function: get_serialnumber. Tested with Simulator (v1) + Redfish Proliant 0.9.5 and 1.0 (Vincent Misson)
-- Various doc updates (Bruno COrnec, René Ribaud)
+- Various doc updates (Bruno Cornec/René Ribaud)
 
 v0.1 (2015-09-09)
 - Uses tortilla lib to wrap the REST API (René Ribaud)
