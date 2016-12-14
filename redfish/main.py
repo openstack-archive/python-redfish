@@ -122,7 +122,6 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
 
 import json
@@ -132,6 +131,7 @@ from . import config
 from . import types
 from . import mapping
 from . import exception
+standard_library.install_aliases()
 
 """Function to wrap RedfishConnection"""
 

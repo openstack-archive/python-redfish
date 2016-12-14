@@ -28,13 +28,13 @@ try:
 except ImportError:
     check_call(["pip", "install", "future"])
     from future import standard_library
-standard_library.install_aliases()
 from builtins import object
 import distutils
 import configparser
 import setuptools
 from setuptools import Distribution
 from setuptools.command.install import install
+standard_library.install_aliases()
 
 # In python < 2.7.4, a lazy loading of package `pbr` will break
 # setuptools if some other modules registered functions in `atexit`.
@@ -208,6 +208,7 @@ def getversion():
     s = re.search(r'\nVersion:\s+(\S+)', output)
     return(s.group(1))
 
+
 ##########################################
 # START
 ##########################################
@@ -232,4 +233,3 @@ if('install' in sys.argv):
         print('Update : {}'.format(file))
         replaceAll(file, 'PBCONFFILE', datafiles.data['conf']['fdst'][0])
         replaceAll(file, 'PBVER', getversion())
-
