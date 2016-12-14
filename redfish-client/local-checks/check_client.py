@@ -100,4 +100,3 @@ def test_versionformat():
         response = docker.run(img, 'redfish-client --version')
         print(response)
         assert (re.match(r'redfish-client \d+\.\d+', response))
-
