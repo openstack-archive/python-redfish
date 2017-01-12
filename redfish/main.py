@@ -196,7 +196,7 @@ class RedfishConnection(object):
         # Enforce ssl
         if self.connection_parameters.enforceSSL is True:
             config.logger.debug("Enforcing SSL")
-            rooturl = rooturl._replace(scheme="https")
+            rooturl = rooturl._replace(scheme=type(rooturl.scheme)("https"))
             self.connection_parameters.rooturl = rooturl.geturl()
 
         # Verify cert
