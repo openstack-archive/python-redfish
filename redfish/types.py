@@ -674,7 +674,7 @@ class Systems(Device):
         '''
         return self.set_parameter_json(
             '{"Boot": {"BootSourceOverrideTarget": "' +
-            target + '"},{"BootSourceOverrideEnabled" : "' + enabled + '"}}')
+            target + '", "BootSourceOverrideEnabled" : "' + enabled + '"}}')
 
 
 class SystemsCollection(BaseCollection):
