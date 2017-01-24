@@ -242,16 +242,26 @@ class RedfishConnection(object):
                 mapping.redfish_mapper.map_sessionservice()),
             self.connection_parameters)
 
-        self.Managers = standard.ManagersCollection(
-            self.Root.get_link_url("Managers"),
-            self.connection_parameters)
+        # Moonshot m510 cartridge has neither Managers nor Chassis, so handle
+        # this case in the code.
+        # Note : m510 ilo firmware is in an early stage, this state could be
+        # temporary.
+        try:
+            self.Managers = standard.ManagersCollection(
+                self.Root.get_link_url("Managers"),
+                self.connection_parameters)
+        except AttributeError:
+            self.Managers = None
 
         self.Systems = standard.SystemsCollection(
             self.Root.get_link_url("Systems"),
             self.connection_parameters)
 
-        self.Chassis = standard.ChassisCollection(
-            self.Root.get_link_url("Chassis"), self.connection_parameters)
+        try:
+            self.Chassis = standard.ChassisCollection(
+                self.Root.get_link_url("Chassis"), self.connection_parameters)
+        except AttributeError:
+            self.Chassis = None
 
 #         self.EventService
 #         self.AccountService
@@ -283,6 +293,7 @@ class RedfishConnection(object):
         if float(mapping.redfish_version) >= 1.00:
             url = urljoin(url, "Sessions")
 
+        config.logger.debug("Login URL : %s" % url)
         # Craft request body and header
         requestBody = {"UserName": self.connection_parameters.user_name,
                        "Password": self.connection_parameters.password}
