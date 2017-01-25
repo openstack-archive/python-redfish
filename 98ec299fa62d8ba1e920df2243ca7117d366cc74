@@ -1,0 +1,8 @@
+Code-Review+2: ribaudr <rene.ribaud@hpe.com>
+Workflow+1: ribaudr <rene.ribaud@hpe.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 25 Jan 2017 15:17:01 +0000
+Reviewed-on: https://review.openstack.org/420465
+Project: openstack/python-redfish
+Branch: refs/heads/master
