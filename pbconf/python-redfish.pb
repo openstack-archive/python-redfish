@@ -15,7 +15,7 @@
 #pburl python-redfish = ftp://ftp.python-redfish.org/src/python-redfish-devel.tar.gz
 #pburl python-redfish = file:///src/python-redfish-devel.tar.gz
 #pburl python-redfish = dir:///src/python-redfish-devel
-pburl python-redfish = git+ssh://git@github.com/bcornec/python-redfish.git
+pburl python-redfish = git+https://review.openstack.org/p/openstack/python-redfish.git
 
 # Repository
 pbrepo python-redfish = ftp://ftp.mondorescue.org

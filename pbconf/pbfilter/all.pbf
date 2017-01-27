@@ -61,7 +61,7 @@ filter PBDESC = The Redfish API supports dialoging with a Redfish compliant$/sys
 filter PBSUMMARY = Redfish python library
 
 # PBURL contains the URL of the Web site of the project
-filter PBURL = http://github.com/bcornec/python-redfish
+filter PBURL = https://review.openstack.org/#/q/project:openstack/python-redfish
 
 # PBLOG is replaced by the changelog if value is yes
 # and should be last as when used we need the %pb hash filled
