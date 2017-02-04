@@ -125,13 +125,13 @@ from future import standard_library
 from builtins import object
 
 import json
-from urllib.parse import urlparse, urljoin, urlunparse
 import requests
 from . import config
 from . import standard
 from . import mapping
 from . import exception
 standard_library.install_aliases()
+from urllib.parse import urlparse, urljoin, urlunparse  # noqa: E402
 
 """Function to wrap RedfishConnection"""
 
