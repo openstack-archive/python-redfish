@@ -10,6 +10,7 @@ import os
 import stat
 import subprocess
 import re
+import pytest
 from docker import Client
 from path import Path
 standard_library.install_aliases()
@@ -21,7 +22,7 @@ class DockerTest(object):
 
     def build(self, dockerfile):
         dockerfile = Path(dockerfile)
-        tag = 'rf' + dockerfile.basename().replace('Dockerfile.', '')
+        tag = 'rf-' + dockerfile.basename().replace('.dkf', '')
         dockerfile.copy('redfish-client/tests/Dockerfile')
         response = [line for line in self.cli.build(
             path='redfish-client/tests',
@@ -42,20 +43,31 @@ class DockerTest(object):
         return(response.decode('utf8'))
 
 
-def test_dockersocket():
-    mode = os.stat('/var/run/docker.sock').st_mode
+def local_docker_available():
+    try:
+        mode = os.stat('/var/run/docker.sock').st_mode
+    except OSError:
+        return False
     isSocket = stat.S_ISSOCK(mode)
-    assert isSocket, 'Make sure docker services are running'
+    if not isSocket:
+        print('Make sure docker services are running')
+        return False
 
-
-def test_docker():
     cli = Client(base_url='unix://var/run/docker.sock')
     response = cli.containers()
-    assert isinstance(response, list), 'Ensure you have sufficiant' + \
-                                       'credentials to use docker with' + \
-                                       'your current user'
+    if not isinstance(response, list):
+        print('Ensure you have sufficiant' +
+              'credentials to use docker with' +
+              'your current user')
+        return False
+    return True
 
 
+local_docker = pytest.mark.skipif(
+    not local_docker_available(), reason="Docker is not available locally")
+
+
+@local_docker
 def test_sources():
     output = subprocess.check_output(["python", "setup.py", "sdist"])
     search = re.search(r"removing '(\S+)'", str(output))
@@ -64,15 +76,17 @@ def test_sources():
     assert Path('redfish-client/tests/python-redfish.src.tar.gz').isfile()
 
 
+@local_docker
 def test_dockerbuild():
     docker = DockerTest()
     # Warning :  Image tag is derived from file name, do not use uppercase !!!
-    dockerfiles = ('redfish-client/tests/Dockerfile.ubuntu',
-                   'redfish-client/tests/Dockerfile.debian',
-                   'redfish-client/tests/Dockerfile.centos',
-                   'redfish-client/tests/Dockerfile.fedora',
-                   'redfish-client/tests/Dockerfile.fedorap3',
-                   'redfish-client/tests/Dockerfile.fedorapip')
+    #            because docker image tags can not use uppercase so far.
+    dockerfiles = ('redfish-client/tests/ubuntu-16.04-src-p2.dkf',
+                   'redfish-client/tests/debian-8-src-p2.dkf',
+                   'redfish-client/tests/centos-7-src-p2.dkf',
+                   'redfish-client/tests/fedora-25-src-p2.dkf',
+                   'redfish-client/tests/fedora-25-src-p3.dkf',
+                   'redfish-client/tests/fedora-25-pip-p2.dkf',)
     for dockerfile in dockerfiles:
         print('Testing : {}'.format(dockerfile))
         response = docker.build(dockerfile)
@@ -80,10 +94,15 @@ def test_dockerbuild():
         assert 'Successfully built' in status
 
 
+@local_docker
 def test_install():
     docker = DockerTest()
-    images = ('rfubuntu', 'rfdebian', 'rfcentos',
-              'rffedora', 'rffedorap3', 'rffedorapip')
+    images = ('rf-ubuntu-16.04-src-p2',
+              'rf-debian-8-src-p2',
+              'rf-centos-7-src-p2',
+              'rf-fedora-25-src-p2',
+              'rf-fedora-25-src-p3',
+              'rf-fedora-25-pip-p2')
     for img in images:
         print('Testing : {}'.format(img))
         response = docker.run(img, 'redfish-client config showall')
@@ -91,10 +110,15 @@ def test_install():
         assert ('Managers configured' in response and 'None' in response)
 
 
+@local_docker
 def test_versionformat():
     docker = DockerTest()
-    images = ('rfubuntu', 'rfdebian', 'rfcentos',
-              'rffedora', 'rffedorap3', 'rffedorapip')
+    images = ('rf-ubuntu-16.04-src-p2',
+              'rf-debian-8-src-p2',
+              'rf-centos-7-src-p2',
+              'rf-fedora-25-src-p2',
+              'rf-fedora-25-src-p3',
+              'rf-fedora-25-pip-p2')
     for img in images:
         print('Testing : {}'.format(img))
         response = docker.run(img, 'redfish-client --version')
