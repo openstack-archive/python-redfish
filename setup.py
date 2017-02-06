@@ -30,11 +30,17 @@ except ImportError:
     from future import standard_library
 from builtins import object
 import distutils
-import configparser
 import setuptools
 from setuptools import Distribution
 from setuptools.command.install import install
 standard_library.install_aliases()
+
+# Trick to allow pip installation
+major, minor = sys.version_info[:2]
+if major == 2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
 # In python < 2.7.4, a lazy loading of package `pbr` will break
 # setuptools if some other modules registered functions in `atexit`.
