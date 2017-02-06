@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 
+import json
 import re
 from urllib.parse import urljoin
 import requests
@@ -244,15 +245,14 @@ class Systems(Device):
         '''
         # Craft the request
         action = dict()
-        action['Action'] = 'Reset'
         action['ResetType'] = 'ForceRestart'
-
-        # Debug the url and perform the POST action
-        # print self.api_url
-        response = self.api_url.post(
+        reset_url = self.data['Actions'][u'#ComputerSystem.Reset']['target']
+        url = urljoin(self.api_url.url(), reset_url)
+        response = requests.post(
+            url,
             verify=self.connection_parameters.verify_cert,
             headers=self.connection_parameters.headers,
-            data=action)
+            data=json.dumps(action))
         # TODO : treat response.
         return response
 
