@@ -22,18 +22,10 @@ import sys
 import fileinput
 import re
 import pprint
-from subprocess import check_call
-try:
-    from future import standard_library
-except ImportError:
-    check_call(["pip", "install", "future"])
-    from future import standard_library
-from builtins import object
 import distutils
 import setuptools
 from setuptools import Distribution
 from setuptools.command.install import install
-standard_library.install_aliases()
 
 # Trick to allow pip installation
 major, minor = sys.version_info[:2]
