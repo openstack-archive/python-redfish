@@ -224,10 +224,12 @@ if('install' in sys.argv):
     # Update conf files
     for file in datafiles.data['conf']['fdst']:
         print('Update : {}'.format(file))
-        replaceAll(file, 'PBTEMPLATEPATH',
-                   os.path.dirname(datafiles.data['templates']['fdst'][0]))
+        replaceAll(file, 'PBSHAREPATH',
+                   os.path.dirname(datafiles.data['rfcusage']['fdst'][0]))
     # Update script files
     for file in datafiles.data['script']['fdst']:
         print('Update : {}'.format(file))
         replaceAll(file, 'PBCONFFILE', datafiles.data['conf']['fdst'][0])
         replaceAll(file, 'PBVER', getversion())
+        replaceAll(file, 'PBSHAREPATH',
+                   os.path.dirname(datafiles.data['rfcusage']['fdst'][0]))

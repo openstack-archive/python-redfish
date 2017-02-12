@@ -222,8 +222,7 @@ if __name__ == '__main__':
 
     # Parse and manage arguments
     try:
-        usagefp = os.path.dirname(sys.argv[0]) + \
-            "/redfish-check-cartridge_usage.txt"
+        usagefp = 'PBSHAREPATH' + "/redfish-check-cartridge_usage.txt"
         with open(usagefp) as usagefile:
             usage = usagefile.read()
             usagefile.close()
