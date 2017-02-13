@@ -59,12 +59,7 @@ Get the source code
 
 The source code is available on github and can be retrieved using::
 
-    git clone https://github.com/bcornec/python-redfish
-
-As python-redfish is currently in heavy development we recommend to checkout the devel branch using::
-
-    cd python-redfish
-    git checkout devel
+    git clone https://github.com/openstack/python-redfish.git
 
 Installation
 ------------
