@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'python-redfish'
-copyright = u'2015-2016, Bruno Cornec, Vincent Misson, René Ribaud'
+copyright = u'2015-now, Bruno Cornec, Vincent Misson, René Ribaud'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -186,6 +186,9 @@ htmlhelp_basename = 'python-redfishdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
+  'classoptions': ',openany,oneside',
+  'babel': '\\usepackage[english]{babel}'
+
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
 

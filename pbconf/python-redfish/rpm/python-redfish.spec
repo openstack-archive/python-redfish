@@ -33,8 +33,7 @@ Python3 version.
 
 %package -n PBREALPKG-doc
 Summary: %{summary} / Documentation
-BuildRequires:  PBPYTHON2BDEP,PB2PYTHON2BDEP
-Requires:       PBPYTHON2DEP
+BuildRequires:  PBPYTHONDOCBDEP
 
 %description -n PBREALPKG-doc
 PBDESC
@@ -86,7 +85,7 @@ popd
 
 ./install.sh %{__python} %{buildroot} %{python_sitelib} %{_prefix} PBPKG
 
-./install.sh doc %{buildroot} %{python_sitelib} %{_prefix} PBPKG
+./install.sh %{_docdir} %{buildroot} %{python_sitelib} %{_prefix} PBPKG
 
 for i in `ls %{buildroot}/%{_mandir}/man1/*-py2.1*`; do
 	j=`echo $i | perl -p -e 's|-py2||'`

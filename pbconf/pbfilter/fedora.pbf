@@ -24,5 +24,6 @@ filter PBSUF = %{dist}
 # PBOBS is replaced by the Obsolete line
 #filter PBOBS =
 
-filter PB2PYTHON2BDEP = texlive-multirow,texlive-upquote,texlive-wrapfig,texlive-threeparttable,texlive-titlesec
-filter PB2PYTHON3BDEP = texlive-multirow,texlive-upquote,texlive-wrapfig,texlive-threeparttable,texlive-titlesec
+filter PB2PYTHON2BDEP = python-sphinx >= 1.2.3
+filter PB2PYTHON3BDEP = python3-sphinx >= 1.2.3
+filter PBPYTHONDOCBDEP = texlive-multirow,texlive-upquote,texlive-wrapfig,texlive-threeparttable,texlive-titlesec,texlive-framed,texlive-capt-of,texlive-latex-bin,texlive-hyphen-base,texlive-cm,texlive-cmap,texlive-ec,texlive-langcode,texlive-babel-english,texlive-fancyhdr,texlive-fancybox,texlive-mdwtools,texlive-parskip,texlive-eqparbox,texlive-times,texlive-helvetic,texlive-courier,texlive-gsftopk-bin,texlive-dvips,texlive-mfware-bin

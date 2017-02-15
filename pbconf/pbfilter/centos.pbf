@@ -24,6 +24,10 @@ filter PBSUF = %{dist}
 # PBOBS is replaced by the Obsolete line
 #filter PBOBS =
 
-filter PB2PYTHON2BDEP = texlive-framed
-filter PB2PYTHON3BDEP = 
+filter PB2PYTHON2BDEP = python-sphinx >= 1.2.3
+filter PB2PYTHON3BDEP = python3-sphinx >= 1.2.3
+# Needed as pb doesn't interpret spec macros
+filter PBPYTHON3BDEP = 
+filter PBPYTHON3DEP = 
+filter PBPYTHONDOCBDEP = python2-sphinx-theme-alabaster,python-snowballstemmer,texlive-multirow,texlive-upquote,texlive-wrapfig,texlive-threeparttable,texlive-titlesec,texlive-framed,,texlive-latex-bin,texlive-hyphen-base,texlive-cm,texlive-cmap,texlive-ec,texlive-fancyhdr,texlive-fancybox,texlive-mdwtools,texlive-parskip
 filter PBWITHPY3 = 0

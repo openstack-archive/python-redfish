@@ -86,7 +86,9 @@ vmlist python-redfish = opensuse-12.3-i386,debian-8-i386,ubuntu-16.04-i386,magei
 # a .vetype extension will be added to the resulting string
 # a chroot rhel-3-i286 here means that the VE will be named rhel-3-i386.chroot
 #
-#velist python-redfish = fedora-7-i386
+#
+# Supported distribution for python-redfish
+velist python-redfish = opensuse-42.2-x86_64,centos-7-x86_64,fedora-25-x86_64,debian-8-x86_64,mageia-5-x86_64,ubuntu-16.04-x86_64
 
 # VE params
 vetype python-redfish = docker
@@ -104,9 +106,6 @@ projtag python-redfish = 1
 
 # Hash of valid version names
 
-# Additional repository to add at build time
-# addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/centos/5/pb.repo
-# addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/centos/5/pb.repo
 #version python-redfish = devel,stable
 
 # Is it a test version or a production version
@@ -117,6 +116,11 @@ delivery python-redfish = test
 # Additional repository to add at build time
 # addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/centos/5/pb.repo
 # addrepo centos-4-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.x86_64.rpm,ftp://ftp.project-builder.org/centos/4/pb.repo
+# This will allow usage of python-simplejson 1.8.1
+addrepo fedora-25-x86_64 = ftp://ftp.project-builder.org/fedora/25/x86_64/pb.repo
+addrepo centos-7-x86_64 = https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm,ftp://ftp.project-builder.org/centos/7/x86_64/pb.repo
+addrepo mageia-5-x86_64 = ftp://ftp.project-builder.org/mageia/5/x86_64/pb.addmedia
+addrepo opensuse-42.2-x86_64 = ftp://ftp.project-builder.org/opensuse/42.2/x86_64/pb.repo,http://download.opensuse.org/repositories/devel:languages:python3/openSUSE_Leap_42.2/devel:languages:python3.repo,http://download.opensuse.org/repositories/Virtualization:containers/openSUSE_Leap_42.2/Virtualization:containers.repo,http://download.opensuse.org/repositories/devel:languages:python/openSUSE_Leap_42.2/devel:languages:python.repo
 
 # Adapt to your needs:
 # Optional if you need to overwrite the global values above
@@ -130,7 +134,7 @@ defpkgdir python-redfish = .
 
 # List of files per pkg on which to apply filters
 # Files are mentioned relatively to pbroot/defpkgdir
-filteredfiles python-redfish = redfish-client/redfish-client,doc/source/conf.py,redfish-client/etc/redfish-client.conf,install.sh,redfish-client/redfish-check-cartridge
+filteredfiles python-redfish = redfish-client/redfish-client,redfish-client/redfish-check-cartridge,doc/source/conf.py,redfish-client/etc/redfish-client.conf,install.sh
 #supfiles python-redfish = python-redfish.init
 
 # We use pbr to generate sources

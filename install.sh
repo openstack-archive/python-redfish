@@ -10,11 +10,12 @@ export prefix=$4
 export pkg=$5
 
 # Documentation installation only
-if [ $python = "doc" ]; then
-	install -m 755 -d $rootdir/$prefix/share/doc/$5/manual/html/_static
-	install -m 644 doc/build/singlehtml/*.html $rootdir/$prefix/share/doc/$5/manual/html
-	install -m 644 doc/build/singlehtml/_static/* $rootdir/$prefix/share/doc/$5/manual/html/_static
-	install -m 644 doc/build/latex/*.pdf $rootdir/$prefix/share/doc/$5/manual/
+echo $python | grep -q "/doc"
+if [ $? -eq 0 ]; then
+	install -m 755 -d $rootdir/$python/$5/manual/html/_static
+	install -m 644 doc/build/singlehtml/*.html $rootdir/$python/$5/manual/html
+	install -m 644 doc/build/singlehtml/_static/* $rootdir/$python/$5/manual/html/_static
+	install -m 644 doc/build/latex/*.pdf $rootdir/$python/$5/manual/
 	exit 0
 fi
 
