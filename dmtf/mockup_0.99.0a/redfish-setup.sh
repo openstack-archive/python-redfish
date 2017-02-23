@@ -16,7 +16,6 @@ trap stop_apache HUP INT QUIT KILL TERM
 
 
 # Main
-[ -f /run/apache2/apache2.pid ] &&  rm -rf /run/apache2/apache2.pid # Avoid pb to restart container if brutally killed
 cd /var/www/html
 unzip -q -o /tmp/DSP2043_0.99.0a.zip
 chmod 755 DSP2043_0.99.0a
