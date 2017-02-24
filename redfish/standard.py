@@ -234,7 +234,7 @@ class Systems(Device):
                 self.smart_storage = None
         except AttributeError:
             # This means we don't have oem data
-            pass
+            self.data.Oem = None
 
     def reset_system(self):
         '''Force reset of the system.
