@@ -11,7 +11,7 @@ Tests are not functional for the redfish module yet.
 redfish-client tests
 --------------------
 
-#. Create your development environment following `Developer setup <develsetup.html>`_.
+#. Create your development environment following `Developer setup <http://pythonhosted.org/python-redfish/installation.html>`_.
 #. Install docker using the `procedure <https://docs.docker.com/engine/installation/>`_.
 #. Ensure you can use docker with your current user.
 #. Jump into the python-redfish directory containing the source code.
