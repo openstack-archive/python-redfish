@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 
+import json
 import re
 from urllib.parse import urljoin
 import requests
@@ -236,26 +237,6 @@ class Systems(Device):
             # This means we don't have oem data
             self.data.Oem = None
 
-    def reset_system(self):
-        '''Force reset of the system.
-
-        :returns:  string -- http response of POST request
-
-        '''
-        # Craft the request
-        action = dict()
-        action['Action'] = 'Reset'
-        action['ResetType'] = 'ForceRestart'
-
-        # Debug the url and perform the POST action
-        # print self.api_url
-        response = self.api_url.post(
-            verify=self.connection_parameters.verify_cert,
-            headers=self.connection_parameters.headers,
-            data=action)
-        # TODO : treat response.
-        return response
-
     def get_bios_version(self):
         '''Get bios version of the system.
 
@@ -403,6 +384,33 @@ class Systems(Device):
             return managers_list
         except AttributeError:
             return "Not available"
+
+    def reset_system(self, reset_action):
+        '''Reset the system with specified action.
+
+        :param reset_action: the reset action
+        :returns:  string -- http response of POST request
+
+        '''
+
+        reset_dict = self.data['Actions'][u'#ComputerSystem.Reset']
+        allowed_actions = reset_dict['ResetType@Redfish.AllowableValues']
+        if reset_action not in allowed_actions:
+            return ("unsupported action for this node, the available action"
+                    "is in %s") % allowed_actions
+
+        reset_target = reset_dict['target']
+        url = urljoin(self.api_url.url(), reset_target)
+        action = dict()
+        action['ResetType'] = reset_action
+
+        response = requests.post(
+            url,
+            verify=self.connection_parameters.verify_cert,
+            headers=self.connection_parameters.headers,
+            data=json.dumps(action))
+        # TODO : treat response.
+        return response
 
     def set_parameter_json(self, value):
         '''Generic function to set any system parameter using json structure
