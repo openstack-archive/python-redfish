@@ -126,10 +126,10 @@ from builtins import object
 
 import json
 import requests
-from . import config
-from . import standard
-from . import mapping
-from . import exception
+from redfish import config
+from redfish import standard
+from redfish import mapping
+from redfish import exception
 standard_library.install_aliases()
 from urllib.parse import urlparse, urljoin, urlunparse  # noqa: E402
 
