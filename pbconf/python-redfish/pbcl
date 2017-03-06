@@ -2,8 +2,18 @@
 
 PYTHON-REDFISH CHANGES
 
-v0.4 (2050-01-01)
+v0.5 (2050-01-01)
 - TBD ()
+
+v0.4 (2017-03-01)
+- Adds redfish-client tests with Docker (not activated on gerrit) with multiple distributions (René Ribaud)
+- Fix #1662225 Remove future module dependencies and Do not use pip in setup.py (René Ribaud)
+- Update documentation to the fact python-redfish is an OpenStack project (Bruno Cornec)
+- Adds Moonshot support (fixes for m510 and redfish-check-cartridge script) (René Ribaud) 
+- Adds support for Oem data structure (mandatiry ti get MAC address with some implementation as of now) (René Ribaud)
+- Update DMTF docs (Bruno Cornec)
+- Avoid TypeError after _replace when user post a str url and Fix wrong payload in set boot source (Zhang Yufei)
+- This version provides packaging support for Mageia 5, Fedora 25, CentOS 7 and OpenSUSE 42.2 using project-builder.org 0.14.2+ with a new python-redfish-data package in order to share common content between python2 and python3 packages (Bruno Cornec)
 
 v0.3 (2016-04-30)
 - First version usable for PoC (Team)
