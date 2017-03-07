@@ -70,11 +70,19 @@ class DataFilesHelper(object):
             self.update_setupstruc(src, dst)
         try:
             # Create an entry for scripts if available
+            self.data['script'] = {'src': [],
+                                   'fdst': [],
+                                   'dst': 'bin'}
             src = config.get('files', 'scripts').split('\n')
-            src = [self.refinesrc(file)[0] for file in src if file]
-            self.data['script'] = {'src': src,
-                                   'dst': 'bin',
-                                   'fdst': self.calculatedst(src, 'bin')}
+            # print("List handled: {}\n".format(src))
+            listsrc = []
+            for s in src:
+                if not s:
+                    continue
+                # print("Source handled: {}".format(s))
+                listsrc.append(s)
+            self.data['script']['src'] = listsrc
+            self.data['script']['fdst'] = self.calculatedst(listsrc, "bin")
         except configparser.NoOptionError:
             pass
         pp = pprint.PrettyPrinter(indent=4)
@@ -117,7 +125,7 @@ class DataFilesHelper(object):
             return(file)
 
     def calculatedst(self, src, dst):
-        '''Calculate the full destination path accordind to source and
+        '''Calculate the full destination path according to source and
            destination
 
         :param src: source files
