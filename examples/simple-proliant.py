@@ -47,7 +47,7 @@ except redfish.exception.RedfishException as e:
     sys.stderr.write(str(e.advices))
     sys.exit(1)
 
-print ("Redfish API version : %s \n" % remote_mgmt.get_api_version())
+print("Redfish API version : %s \n" % remote_mgmt.get_api_version())
 
 # Uncomment following line to reset the blade !!!
 # remote_mgmt.Systems.systems_dict["1"].reset_system()
