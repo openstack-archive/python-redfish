@@ -25,7 +25,7 @@ class ConnectionFailureException(RedfishException):
         self.advices = \
             '1- Check if the url is the correct one\n' + \
             '2- Check if your device is answering on the network\n' + \
-            '3- Check if your device has a valid trusted certificat\n' + \
+            '3- Check if your device has a valid trusted certificate.\n' + \
             '   You can use openssl to validate it using the command :\n' + \
             '   openssl s_client -showcerts -connect <server>:443\n' + \
             '4- Use option "--insecure" to connect without checking' + \
