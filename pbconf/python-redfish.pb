@@ -101,7 +101,7 @@ vetype python-redfish = docker
 #
 # Global version/tag for the project
 #
-projver python-redfish = 0.4
+projver python-redfish = 0.4.1
 projtag python-redfish = 1
 
 # Hash of valid version names
@@ -109,9 +109,9 @@ projtag python-redfish = 1
 #version python-redfish = devel,stable
 
 # Is it a test version or a production version
-testver python-redfish = true
+testver python-redfish =
 # Which upper target dir for delivery
-delivery python-redfish = test
+delivery python-redfish =
 
 # Additional repository to add at build time
 # addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/centos/5/pb.repo
