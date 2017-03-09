@@ -15,27 +15,27 @@ standard_library.install_aliases()
 
 logger = None
 TORTILLADEBUG = True
-HOME = os.getenv('HOME')
-if HOME is None:
-    print("$HOME environment variable not set, please check your system")
-    sys.exit(1)
-if HOME == '':
-    print("$HOME environment is set, but empty, please check your system")
-    sys.exit(1)
-
-REDFISH_HOME = os.path.join(HOME, ".redfish")
-if not os.path.exists(REDFISH_HOME):
-    try:
-        os.mkdir(REDFISH_HOME)
-    except IOError:
-        print('ERROR: can\'t create {}.\n'.format(REDFISH_HOME))
-        print('       Try to create directory {}'.format(REDFISH_HOME))
-        print('       using: mkdir -p {}'.format(REDFISH_HOME))
-        sys.exit(1)
-
-REDFISH_LOGFILE = os.path.join(REDFISH_HOME, "python-redfish.log")
-CONSOLE_LOGGER_LEVEL = logging.DEBUG
-FILE_LOGGER_LEVEL = logging.DEBUG
+# HOME = os.getenv('HOME')
+# if HOME is None:
+#     print("$HOME environment variable not set, please check your system")
+#     sys.exit(1)
+# if HOME == '':
+#     print("$HOME environment is set, but empty, please check your system")
+#     sys.exit(1)
+#
+# REDFISH_HOME = os.path.join(HOME, ".redfish")
+# if not os.path.exists(REDFISH_HOME):
+#     try:
+#         os.mkdir(REDFISH_HOME)
+#     except IOError:
+#         print('ERROR: can\'t create {}.\n'.format(REDFISH_HOME))
+#         print('       Try to create directory {}'.format(REDFISH_HOME))
+#         print('       using: mkdir -p {}'.format(REDFISH_HOME))
+#         sys.exit(1)
+#
+# REDFISH_LOGFILE = os.path.join(REDFISH_HOME, "python-redfish.log")
+# CONSOLE_LOGGER_LEVEL = logging.DEBUG
+# FILE_LOGGER_LEVEL = logging.DEBUG
 
 
 def initialize_logger(REDFISH_LOGFILE,

@@ -1,8 +1,10 @@
 [run]
 branch = True
 source = redfish
-		 redfish-client
-omit = redfish/tests/*,redfish-client/tests/*
+omit = redfish/tests/*
 
 [report]
-#ignore-errors = True
+ignore_errors = True
+
+[html]
+directory = cover

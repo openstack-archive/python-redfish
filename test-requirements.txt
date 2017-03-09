@@ -2,9 +2,9 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-pytest>=2.6.4
-coverage>=3.6
-mock>=1.0.1
+pytest>=2.6.4 # MIT
+pytest-cov>=2.4.0 # MIT
+mock>=2.0 # BSD
 # docker-py has a lot of naming changes coming with 2.0 so stick with 1.x
 # the library 2.0 will be called docker instead of docker-py
 docker-py>=1.8.1 # Apache-2.0
