@@ -22,7 +22,12 @@ import logging
 import configparser
 import jinja2
 import requests.packages.urllib3
+
 import redfish
+# TODO: Manage to bundle the config.py file along with binary distribution
+# OR copy-paste the config.py file contents here itself.
+from config import config
+
 standard_library.install_aliases()
 
 
@@ -307,14 +312,14 @@ if __name__ == '__main__':
         loglevel['tortilla'] = True
 
     # Initialize logger according to command line parameters
-    logger = redfish.config.initialize_logger(arguments['--debugfile'],
-                                              loglevel['console_logger_level'],
-                                              loglevel['file_logger_level'],
-                                              __name__)
-    redfish.config.REDFISH_LOGFILE = arguments['--libdebugfile']
-    redfish.config.TORTILLADEBUG = loglevel['tortilla']
-    redfish.config.CONSOLE_LOGGER_LEVEL = loglevel['lib_console_logger_level']
-    redfish.config.FILE_LOGGER_LEVEL = loglevel['lib_file_logger_level']
+    logger = config.initialize_logger(arguments['--debugfile'],
+                                      loglevel['console_logger_level'],
+                                      loglevel['file_logger_level'],
+                                      __name__)
+    config.REDFISH_LOGFILE = arguments['--libdebugfile']
+    config.TORTILLADEBUG = loglevel['tortilla']
+    config.CONSOLE_LOGGER_LEVEL = loglevel['lib_console_logger_level']
+    config.FILE_LOGGER_LEVEL = loglevel['lib_file_logger_level']
     # Avoid warning messages from request / urllib3
     # SecurityWarning: Certificate has no `subjectAltName`, falling back
     # to check for a `commonName` for now. This feature is being removed

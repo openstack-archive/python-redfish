@@ -6,35 +6,43 @@ from __future__ import absolute_import
 from future import standard_library
 from builtins import object
 
+import logging
+
 import pprint
-from urllib.parse import urljoin
+
+# python 2to3 compatibility reasons
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
+
 import requests
 import simplejson
 import tortilla
 import ssl
-from . import config
 from . import mapping
 from . import exception
 standard_library.install_aliases()
 
+logger = logging.getLogger(__name__)
 
 # Global variable
+TORTILLADEBUG = True
 
 
 class Base(object):
     '''Abstract class to manage types (Chassis, Servers etc...).'''
     def __init__(self, url, connection_parameters):
         '''Class constructor'''
-        global TORTILLADEBUG
         self.connection_parameters = connection_parameters  # Uggly hack
         self.url = url
-        self.api_url = tortilla.wrap(url, debug=config.TORTILLADEBUG)
+        self.api_url = tortilla.wrap(url, debug=TORTILLADEBUG)
 
-        config.logger.debug(
+        logger.debug(
             "------------------------------------------------------------")
-        config.logger.debug("Url: %s" % url)
-        config.logger.debug("Header: %s" % connection_parameters.headers)
-        config.logger.debug(
+        logger.debug("Url: %s" % url)
+        logger.debug("Header: %s" % connection_parameters.headers)
+        logger.debug(
             "------------------------------------------------------------")
 
         try:
@@ -43,17 +51,17 @@ class Base(object):
                 headers=connection_parameters.headers)
         except (requests.ConnectionError, ssl.SSLError) as e:
             # Log and transmit the exception.
-            config.logger.info('Raise a RedfishException to upper level')
+            logger.info('Raise a RedfishException to upper level')
             msg = 'Connection error : {}\n'.format(e)
             raise exception.ConnectionFailureException(msg)
         except simplejson.scanner.JSONDecodeError as e:
             # Log and transmit the exception.
-            config.logger.info('Raise a RedfishException to upper level')
+            logger.info('Raise a RedfishException to upper level')
             msg = \
                 'Ivalid content : Content does not appear to be a valid ' + \
                 'Redfish json\n'
             raise exception.InvalidRedfishContentException(msg)
-        config.logger.debug(pprint.PrettyPrinter(indent=4).pformat(self.data))
+        logger.debug(pprint.PrettyPrinter(indent=4).pformat(self.data))
 
     def get_link_url(self, link_type, data_subset=None):
         '''Need to be explained.
@@ -123,10 +131,10 @@ class Base(object):
         # Craft the request
         action = dict()
         action[parameter_name] = value
-        config.logger.debug(action)
+        logger.debug(action)
 
         # Perform the POST action
-        config.logger.debug(self.api_url)
+        logger.debug(self.api_url)
         response = self.api_url.patch(
             verify=self.connection_parameters.verify_cert,
             headers=self.connection_parameters.headers,
@@ -169,7 +177,7 @@ class BaseCollection(Base):
                 self.url, getattr(
                     link, mapping.redfish_mapper.map_links_ref())))
 
-        config.logger.debug(self.links)
+        logger.debug(self.links)
 
 
 class Device(Base):

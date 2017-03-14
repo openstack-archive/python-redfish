@@ -44,6 +44,9 @@ def initialize_logger(REDFISH_LOGFILE,
                       logger_name=None):
     '''Initialize a global logger to track application behaviour
 
+    It also sets the same the configuration for redfish lib logger,
+    termed as ``redfish_lib_logger`` here.
+
     :param redfish_logfile: Log filename
     :type redfish_logfile: str
     :param screen_logger_level: Console log level
@@ -55,10 +58,14 @@ def initialize_logger(REDFISH_LOGFILE,
 
     '''
 
+    redfish_lib_logger = logging.getLogger('redfish')
     logger = logging.getLogger(logger_name)
+
     logger.setLevel(logging.DEBUG)
+    redfish_lib_logger.setLevel(logging.DEBUG)
+
     formatter = logging.Formatter(
-        '%(asctime)s :: %(levelname)s :: %(message)s')
+        '%(asctime)s :: %(levelname)s :: %(name)s :: %(message)s')
 
     try:
         file_handler = RotatingFileHandler(
@@ -75,11 +82,15 @@ def initialize_logger(REDFISH_LOGFILE,
     # First logger to file
     file_handler.setLevel(FILE_LOGGER_LEVEL)
     file_handler.setFormatter(formatter)
+
     logger.addHandler(file_handler)
+    redfish_lib_logger.addHandler(file_handler)
 
     # Second logger to console
     if CONSOLE_LOGGER_LEVEL != "nolog":
         steam_handler = logging.StreamHandler()
         steam_handler.setLevel(CONSOLE_LOGGER_LEVEL)
+
         logger.addHandler(steam_handler)
+        redfish_lib_logger.addHandler(steam_handler)
     return logger

@@ -19,6 +19,8 @@ from __future__ import absolute_import
 from future import standard_library
 import pbr.version
 
+import logging
+
 from redfish.main import connect  # noqa: F401
 standard_library.install_aliases()
 
@@ -30,3 +32,7 @@ except Exception as e:
         pass
     else:
         raise
+
+
+# See: https://docs.python.org/3/howto/logging.html#library-config
+logging.getLogger(__name__).addHandler(logging.NullHandler())

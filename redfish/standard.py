@@ -6,7 +6,13 @@ from __future__ import absolute_import
 from future import standard_library
 
 import re
-from urllib.parse import urljoin
+
+# python 2to3 compatibility reasons
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
+
 import requests
 from .types import Base, BaseCollection, Device
 from . import mapping

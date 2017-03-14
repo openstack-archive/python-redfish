@@ -117,6 +117,7 @@ Clients should always be prepared for:
 * headers the service returns
 
 """
+
 from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
@@ -124,14 +125,17 @@ from __future__ import absolute_import
 from future import standard_library
 from builtins import object
 
+import logging
+
 import json
 import requests
-from . import config
 from . import standard
 from . import mapping
 from . import exception
 standard_library.install_aliases()
 from urllib.parse import urlparse, urljoin, urlunparse  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 """Function to wrap RedfishConnection"""
 
@@ -166,16 +170,19 @@ class RedfishConnection(object):
                  verify_cert=True
                  ):
         """Initialize a connection to a Redfish service."""
-        # Specify a name for the logger as recommended by the logging
-        # documentation. However for strange reason requests logs are not
+        # A name for the logger as recommended by the logging documentation
+        # has already been provided at the beginning of this file. This logger
+        # adopts the application logging which tries to use this redfish
+        # library.
+        # However for strange reason requests logs are not
         # anymore capture in the log file.
         # TODO : Check strange behavior about requests logs.
-        config.logger = config.initialize_logger(config.REDFISH_LOGFILE,
-                                                 config.CONSOLE_LOGGER_LEVEL,
-                                                 config.FILE_LOGGER_LEVEL,
-                                                 __name__)
-
-        config.logger.info("Initialize python-redfish")
+        # Most probably,  requests library adds its own handlers other than
+        # NullHandler to its library’s loggers; and when you add handlers
+        # 'under the hood', you might well interfere with the consuming
+        # application's ability to deliver logs (and/or to carry out unit
+        # tests) thus not suiting the consumer's requirements at times.
+        logger.info("Initialize python-redfish")
 
         self.connection_parameters = ConnectionParameters()
         self.connection_parameters.rooturl = url
@@ -195,22 +202,21 @@ class RedfishConnection(object):
 
         # Enforce ssl
         if self.connection_parameters.enforceSSL is True:
-            config.logger.debug("Enforcing SSL")
+            logger.debug("Enforcing SSL")
             rooturl = rooturl._replace(scheme=type(rooturl.scheme)("https"))
             self.connection_parameters.rooturl = rooturl.geturl()
 
         # Verify cert
         if self.connection_parameters.verify_cert is False:
-            config.logger.info("Certificat is not checked, " +
-                               "this is insecure and can allow" +
-                               " a man in the middle attack")
+            logger.info("Certificate is not checked, " +
+                        "this is insecure and can allow" +
+                        " a man in the middle attack")
 
-        config.logger.debug("Root url : %s",
-                            self.connection_parameters.rooturl)
+        logger.debug("Root url : %s", self.connection_parameters.rooturl)
         self.Root = standard.Root(self.connection_parameters.rooturl,
                                   self.connection_parameters)
 
-        config.logger.info("API Version : %s", self.get_api_version())
+        logger.info("API Version : %s", self.get_api_version())
         mapping.redfish_version = self.get_api_version()
         mapping.redfish_root_name = self.Root.get_name()
 
@@ -222,11 +228,11 @@ class RedfishConnection(object):
         # Now we need to login otherwise we are not allowed to extract data
         if self.__simulator is False:
             try:
-                config.logger.info("Login to %s", rooturl.netloc)
+                logger.info("Login to %s", rooturl.netloc)
                 self.login()
-                config.logger.info("Login successful")
+                logger.info("Login successful")
             except "Error getting token":
-                config.logger.error("Login fail, fail to get auth token")
+                logger.error("Login fail, fail to get auth token")
                 raise exception.AuthenticationFailureException(
                     "Fail to get an auth token.")
 
@@ -293,11 +299,11 @@ class RedfishConnection(object):
         if float(mapping.redfish_version) >= 1.00:
             url = urljoin(url, "Sessions")
 
-        config.logger.debug("Login URL : %s" % url)
+        logger.debug("Login URL : %s" % url)
         # Craft request body and header
         requestBody = {"UserName": self.connection_parameters.user_name,
                        "Password": self.connection_parameters.password}
-        config.logger.debug(requestBody)
+        logger.debug(requestBody)
         headers = self.connection_parameters.headers
         # ====================================================================
         # Tortilla seems not able to provide the header of a post request
@@ -330,10 +336,10 @@ class RedfishConnection(object):
         self.connection_parameters.auth_token = auth.headers.get(
             "x-auth-token")
         self.connection_parameters.user_uri = auth.headers.get("location")
-        config.logger.debug("x-auth-token : %s",
-                            self.connection_parameters.auth_token)
-        config.logger.debug("user session : %s",
-                            self.connection_parameters.user_uri)
+        logger.debug("x-auth-token : %s",
+                     self.connection_parameters.auth_token)
+        logger.debug("user session : %s",
+                     self.connection_parameters.user_uri)
         return True
 
     def logout(self):
@@ -348,9 +354,9 @@ class RedfishConnection(object):
                                  verify=self.connection_parameters.verify_cert)
 
         if logout.status_code == 200:
-            config.logger.info("Logout successful")
+            logger.info("Logout successful")
         else:
-            config.logger.error("Logout failed")
+            logger.error("Logout failed")
             raise exception.LogoutFailureException("Fail to logout properly.")
 
 

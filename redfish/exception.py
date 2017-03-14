@@ -6,8 +6,12 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 from builtins import str
-from . import config
+
+import logging
+
 standard_library.install_aliases()
+
+logger = logging.getLogger(__name__)
 
 
 class RedfishException(Exception):
@@ -16,7 +20,7 @@ class RedfishException(Exception):
         self.kwargs = kwargs
         self.message = message
         self.advices = None
-        config.logger.error(message)
+        logger.error(message)
 
 
 class ConnectionFailureException(RedfishException):
