@@ -1,0 +1,9 @@
+Code-Review+1: Mathieu Losmede <m.losmede@gmail.com>
+Code-Review+2: ribaudr <rene.ribaud@hpe.com>
+Workflow+1: ribaudr <rene.ribaud@hpe.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 22 Mar 2017 21:23:49 +0000
+Reviewed-on: https://review.openstack.org/448787
+Project: openstack/python-redfish
+Branch: refs/heads/master
