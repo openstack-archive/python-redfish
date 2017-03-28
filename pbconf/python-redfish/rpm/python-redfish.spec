@@ -127,6 +127,7 @@ done
 
 %files -n PBREALPKG-data
 %config(noreplace) %{_sysconfdir}/redfish-client.conf
+%config(noreplace) %{_sysconfdir}/bash_completion.d/redfish-client.bash
 %dir %{_datadir}/redfish-client
 %{_datadir}/redfish-client/templates/*
 %{_datadir}/redfish-client/*.txt

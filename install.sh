@@ -25,8 +25,10 @@ $python setup.py install --skip-build --root=$rootdir --prefix=$prefix
 rm -rf $rootdir/$sitelib/redfish/old $rootdir/$prefix/share/doc/$5/html $rootdir/$prefix/share/doc/$5/*.pdf
 
 # Hardcoded for now to solve the delivery of the conf file still not correct with setup.py
-mkdir -p $rootdir/etc
+install -d 755 $rootdir/etc
 mv $rootdir/$prefix/etc/redfish-client.conf $rootdir/etc/redfish-client.conf
+install -d 755 $rootdir/etc/bash_completion.d
+install -m 644 redfish-client/etc/bash_completion.d/redfish-client.bash $rootdir/etc/bash_completion.d
 
 # Man pages installation
 for i in 1; do
