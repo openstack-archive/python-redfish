@@ -1,0 +1,8 @@
+Code-Review+2: Bruno Cornec <bruno.cornec@hpe.com>
+Workflow+1: Bruno Cornec <bruno.cornec@hpe.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 28 Feb 2018 10:40:18 +0000
+Reviewed-on: https://review.openstack.org/548528
+Project: openstack/python-redfish
+Branch: refs/heads/master
