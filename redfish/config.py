@@ -13,7 +13,6 @@ standard_library.install_aliases()
 
 # Global variable definition
 
-logger = None
 TORTILLADEBUG = True
 HOME = os.getenv('HOME')
 if HOME is None:
