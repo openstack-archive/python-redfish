@@ -1,4 +1,4 @@
 python-redfish Style Commandments
-===============================================
+=================================
 
-Read the OpenStack Style Commandments https://docs.openstack.org/developer/hacking/latest/
+Read the OpenStack Style Commandments https://docs.openstack.org/hacking/latest/
