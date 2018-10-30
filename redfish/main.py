@@ -131,7 +131,7 @@ from . import standard
 from . import mapping
 from . import exception
 standard_library.install_aliases()
-from urllib.parse import urlparse, urljoin, urlunparse  # noqa: E402
+from six.moves.urllib.parse import urlparse, urljoin, urlunparse  # noqa: E402
 
 """Function to wrap RedfishConnection"""
 
