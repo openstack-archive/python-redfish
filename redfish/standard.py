@@ -25,10 +25,10 @@ class Root(Base):
         :raises: AttributeError
 
         '''
-        try:
-            version = self.data.RedfishVersion
-        except AttributeError:
-            version = self.data.ServiceVersion
+		if (getattr(self.data, "RedfishVersion", None)):
+		    version = self.data.RedfishVersion
+		else:
+		    version = self.data.ServiceVersion
 
         version = version.replace('.', '')
         version = version[0] + '.' + version[1:]
@@ -83,10 +83,10 @@ class Managers(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.ManagerType
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "ManagerType", None)):
+		    return self.data.ManagerType
+		else:
+		    return "Not available"
 
     def get_firmware_version(self):
         '''Get firmware version of the manager
@@ -94,12 +94,10 @@ class Managers(Device):
         :returns:  string -- bios version or "Not available"
 
         '''
-        try:
-            return self.data.FirmwareVersion
-        except AttributeError:
-            # We are here because the attribute could be not defined.
-            # This is the case with the mockup for manager 2 and 3
-            return "Not available"
+		if (getattr(self.data, "FirmwareVersion", None)):
+		    return self.data.FirmwareVersion
+		else:
+		    return "Not available"
 
     def get_managed_chassis(self):
         '''Get managed chassis ids by the manager
