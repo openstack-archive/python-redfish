@@ -25,10 +25,10 @@ class Root(Base):
         :raises: AttributeError
 
         '''
-        try:
-            version = self.data.RedfishVersion
-        except AttributeError:
-            version = self.data.ServiceVersion
+		if (getattr(self.data, "RedfishVersion", None)):
+		    version = self.data.RedfishVersion
+		else:
+		    version = self.data.ServiceVersion
 
         version = version.replace('.', '')
         version = version[0] + '.' + version[1:]
@@ -83,10 +83,10 @@ class Managers(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.ManagerType
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "ManagerType", None)):
+		    return self.data.ManagerType
+		else:
+		    return "Not available"
 
     def get_firmware_version(self):
         '''Get firmware version of the manager
@@ -94,12 +94,10 @@ class Managers(Device):
         :returns:  string -- bios version or "Not available"
 
         '''
-        try:
-            return self.data.FirmwareVersion
-        except AttributeError:
-            # We are here because the attribute could be not defined.
-            # This is the case with the mockup for manager 2 and 3
-            return "Not available"
+		if (getattr(self.data, "FirmwareVersion", None)):
+		    return self.data.FirmwareVersion
+		else:
+		    return "Not available"
 
     def get_managed_chassis(self):
         '''Get managed chassis ids by the manager
@@ -263,10 +261,10 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.BiosVersion
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "BiosVersion", None)):
+		    return self.data.BiosVersion
+		else:
+		    return "Not available"
 
     def get_hostname(self):
         '''Get hostname of the system.
@@ -275,10 +273,10 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.HostName
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "HostName", None)):
+		    return self.data.HostName
+		else:
+		    return "Not available"
 
     def get_indicatorled(self):
         '''Get indicatorled of the system.
@@ -287,10 +285,10 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.IndicatorLED
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "IndicatorLED", None)):
+		    return self.data.IndicatorLED
+		else:
+		    return "Not available"
 
     def get_power(self):
         '''Get power status of the system.
@@ -299,10 +297,10 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.PowerState
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "PowerState", None)):
+		    return self.data.PowerState
+		else:
+		    return "Not available"
 
     def get_description(self):
         '''Get description of the system.
@@ -311,10 +309,10 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.Description
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "Description", None)):
+		    return self.data.Description
+		else:
+		    return "Not available"
 
     def get_cpucount(self):
         '''Get the number of cpu in the system.
@@ -323,10 +321,14 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.ProcessorSummary.Count
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "ProcessorSummary", None)):
+		    processor_summary = self.data.ProcessorSummary
+		else:
+		    return "Not available"
+		if (getattr(processor_summary, "Count", None)):
+		    return processor_summary.Count
+		else:
+		    return "Not available"
 
     def get_cpumodel(self):
         '''Get the cpu model available in the system.
@@ -335,10 +337,14 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.ProcessorSummary.Model
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "ProcessorSummary", None)):
+		    processor_summary = self.data.ProcessorSummary
+		else:
+		    return "Not available"
+		if (getattr(processor_summary, "Model", None)):
+		    return processor_summary.Model
+		else:
+		    return "Not available"
 
     def get_memory(self):
         '''Get the memory available in the system.
@@ -347,10 +353,14 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.MemorySummary.TotalSystemMemoryGiB
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "MemorySummary", None)):
+		    memory_summary = self.data.MemorySummary
+		else:
+		    return "Not available"
+		if (getattr(memory_summary, "TotalSystemMemoryGiB", None)):
+		    return memory_summary.TotalSystemMemoryGiB
+		else:
+		    return "Not available"
 
     def get_type(self):
         '''Get system type
@@ -359,10 +369,10 @@ class Systems(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.SystemType
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "SystemType", None)):
+		    return self.data.SystemType
+		else:
+		    return "Not available"
 
     def get_chassis(self):
         '''Get chassis ids used by the system
@@ -501,14 +511,14 @@ class EthernetInterfaces(Base):
         :returns:  string -- interface macaddress or "Not available"
 
         '''
-        try:
-            # Proliant firmware seems to not follow redfish systax
-            return self.data.MacAddress
-        except AttributeError:
-            try:
-                return self.data.MACAddress
-            except AttributeError:
-                return "Not available"
+		
+		if (getattr(self.data, "MacAddress", None)):
+		    return self.data.MacAddress
+		else if (getattr(self.data, "MACAddress", None)):
+		    return self.data.MACAddress
+		else:
+		    return "Not available"
+
 
     def get_fqdn(self):
         '''Get EthernetInterface fqdn
@@ -516,10 +526,10 @@ class EthernetInterfaces(Base):
         :returns:  string -- interface fqdn or "Not available"
 
         '''
-        try:
-            return self.data.FQDN
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "FQDN", None)):
+		    return self.data.FQDN
+		else:
+		    return "Not available"
 
     def get_ipv4(self):
         '''Get EthernetInterface ipv4 address
@@ -581,10 +591,10 @@ class Processors(Base):
         :rtype: string
 
         '''
-        try:
-            return self.data.MaxSpeedMHz
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "MaxSpeedMHz", None)):
+		    return self.data.MaxSpeedMHz
+		else:
+		    return "Not available"
 
     def get_cores(self):
         '''Get processor cores number
@@ -593,10 +603,10 @@ class Processors(Base):
         :rtype: string
 
         '''
-        try:
-            return self.data.TotalCores
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "TotalCores", None)):
+		    return self.data.TotalCores
+		else:
+		    return "Not available"
 
     def get_threads(self):
         '''Get processor threads number
@@ -605,10 +615,10 @@ class Processors(Base):
         :rtype: string
 
         '''
-        try:
-            return self.data.TotalThreads
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "TotalThreads", None)):
+		    return self.data.TotalThreads
+		else:
+		    return "Not available"
 
 
 class SimpleStorageCollection(BaseCollection):
@@ -634,10 +644,10 @@ class SimpleStorage(Base):
         :rtype: dict
 
         '''
-        try:
-            return self.data.Status
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "Status", None)):
+		    return self.data.Status
+		else:
+		    return "Not available"
 
     def get_devices(self):
         '''Get storage devices
@@ -646,10 +656,10 @@ class SimpleStorage(Base):
         :rtype: list of dict
 
         '''
-        try:
-            return self.data.Devices
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "Devices", None)):
+		    return self.data.Devices
+		else:
+		    return "Not available"
 
 
 class ChassisCollection(BaseCollection):
@@ -690,10 +700,10 @@ class Chassis(Device):
         :rtype: string
 
         '''
-        try:
-            return self.data.ChassisType
-        except AttributeError:
-            return "Not available"
+		if (getattr(self.data, "ChassisType", None)):
+		    return self.data.ChassisType
+		else:
+		    return "Not available"
 
 
 class Thermal(Base):
