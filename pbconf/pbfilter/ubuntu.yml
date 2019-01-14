@@ -1,0 +1,13 @@
+---
+#
+# $Id$
+#
+# Filter for ubuntu build
+#
+# PBDEBSTD is replaced by the Debian standard version
+filter:
+  PBDEBCOMP: 7
+  PBDEBSTD: 3.8.3
+#
+# PBDEBCOMP is replaced by the Debian Compatibility value
+#
