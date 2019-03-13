@@ -1,6 +1,9 @@
 # coding=utf-8
 
-""" Simple example to use python-redfish with DMTF simulator """
+""" Simple example to use python-redfish with HPE simulator """
+""" Works fine after the declaration of the default server with """
+""" redfish-client config add default https://ilorestfulapiexplorer.ext.hpe.com/redfish/v1 """
+
 from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
@@ -39,6 +42,7 @@ try:
                                   USER_NAME,
                                   PASSWORD,
                                   simulator=True,
+                                  verify_cert=False,
                                   enforceSSL=False)
 except redfish.exception.RedfishException as e:
     sys.stderr.write(e.message)
@@ -52,5 +56,5 @@ print("System 1 :\n")
 print("Bios version : {}\n".format(
     remote_mgmt.Systems.systems_dict["1"].get_bios_version()))
 print("System 2 :\n")
-print("Bios version : {}\n".format(
-    remote_mgmt.Systems.systems_dict["2"].get_parameter("SerialNumber")))
+print("Serial Number : {}\n".format(
+    remote_mgmt.Systems.systems_dict["1"].get_parameter("SerialNumber")))
