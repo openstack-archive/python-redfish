@@ -8,13 +8,13 @@
 # PBGRP is replaced by the RPM group of apps
 filter:
   PBPYTHON3BDEP: python3-devel,python3-setuptools >= 18,python3-future >= 0.15.2,python3-docopt >= 0.6.2,python3-requests >= 2.9.1,python3-simplejson >= 3.8.1,python3-sphinx_rtd_theme,python3-pbr >= 0.8,python3-tortilla >= 0.4.1
-  PBPYTHON2DEP: python-docopt >= 0.6.2,python-tortilla >= 0.4.1,python-jinja2 >= 2.7.3,python-simplejson >= 3.8.1,python-requests >= 2.9.1,python-configparser >= 3.3.0,python-future >= 0.15.2
+  PBPYTHON2BDEP: make,python-devel,python2-setuptools >= 18,python-future >= 0.15.2,python-docopt >= 0.6.2,python-requests >= 2.9.1,python-simplejson >= 3.8.1,python-configparser >= 3.3.0,python-sphinx_rtd_theme,python-pbr >= 0.8,python-tortilla >= 0.4.1
+  PBPYTHON3DEP: python3-docopt >= 0.6.2,python3-tortilla >= 0.4.1,python3-jinja2 >= 2.7.3,python3-simplejson >= 3.8.1,python3-requests >= 2.9.1,python3-future >= 0.15.2,python3-pbr >= 0.8,python3-pbr <= 2.0
+  PBPYTHON2DEP: python-docopt >= 0.6.2,python-tortilla >= 0.4.1,python-jinja2 >= 2.7.3,python-simplejson >= 3.8.1,python-requests >= 2.9.1,python-configparser >= 3.3.0,python-future >= 0.15.2,python-pbr >= 0.8,python3-pbr <= 2.0
   PBPYTHONDOCBDEP: texlive
-  PBPYTHON2BDEP: make,python-devel,python-setuptools >= 18,python-future >= 0.15.2,python-docopt >= 0.6.2,python-requests >= 2.9.1,python-simplejson >= 3.8.1,python-configparser >= 3.3.0,python-sphinx_rtd_theme,python-pbr >= 0.8,python-tortilla >= 0.4.1
   PBPYTHON3PKG: python3-redfish
   PBGRP: Applications/System
   PBSUF: $pb->{'suf'}
-  PBPYTHON3DEP: python3-docopt >= 0.6.2,python3-tortilla >= 0.4.1,python3-jinja2 >= 2.7.3,python3-simplejson >= 3.8.1,python3-requests >= 2.9.1
   PBLIC: ASL 2.0
 #
 # PBLIC is replaced by the license of the application
