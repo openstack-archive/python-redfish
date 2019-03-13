@@ -1,6 +1,6 @@
 # coding=utf-8
 
-""" Simple example to use python-redfish on HP Proliant servers """
+""" Simple example to use python-redfish on HPE Proliant servers """
 from __future__ import unicode_literals
 from __future__ import print_function
 from __future__ import division
