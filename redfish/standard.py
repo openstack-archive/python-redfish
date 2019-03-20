@@ -213,12 +213,12 @@ class Systems(Device):
             self.simple_storage_collection = None
 
         try:
-            self.data.Oem.Hp
+            self.data.Oem.Hpe
             try:
                 self.network_adapters_collection = \
                     hpe.NetworkAdaptersCollection(
                         self.get_link_url('NetworkAdapters',
-                                          self.data.Oem.Hp.Links),
+                                          self.data.Oem.Hpe.Links),
                         connection_parameters)
             except AttributeError:
                 # This means we don't have NetworkAdapters
@@ -227,7 +227,7 @@ class Systems(Device):
                 self.smart_storage = \
                     hpe.SmartStorage(
                         self.get_link_url('SmartStorage',
-                                          self.data.Oem.Hp.Links),
+                                          self.data.Oem.Hpe.Links),
                         connection_parameters)
             except AttributeError:
                 # This means we don't have SmartStorage

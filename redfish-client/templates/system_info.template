@@ -50,7 +50,7 @@ Ethernet Interface :
     This system has no ethernet interface as Redfish standard data
 {%- endif %}
 Looking for potential OEM information :
-{%- if system.data.Oem.Hp %}
+{%- if system.data.Oem.Hpe %}
     Supplemental information from HPE OEM part.
     {%- if system.network_adapters_collection %}
     {%- for networkadapter_index in system.network_adapters_collection.network_adapters_dict | sort %}
@@ -84,7 +84,7 @@ Simple Storage :
     This system has no simple storage as Redfish standard data
 {%- endif %}
 Looking for potential OEM information :
-{%- if system.data.Oem.Hp %}
+{%- if system.data.Oem.Hpe %}
     Supplemental information from HPE OEM part.
     {%- if system.smart_storage %}
     {%- for array_controllers_index in system.smart_storage.array_controllers_collection.array_controllers_dict | sort %}
