@@ -114,6 +114,16 @@ class ArrayControllers(Device):
             # This means we don't have ArrayControllers
             self.logical_drives_collection = None
 
+        try:
+            self.physical_drives_collection = \
+                PhysicalDrivesCollection(
+                    self.get_link_url('PhysicalDrives', self.data.Links),
+                    connection_parameters)
+
+        except AttributeError:
+            # This means we don't have ArrayControllers
+            self.physical_drives_collection = None
+
 
 class LogicalDrivesCollection(BaseCollection):
     '''Class to manage redfish hpe oem LogicalDrivesCollection data.'''
@@ -153,3 +163,34 @@ class LogicalDrives(Device):
             return self.data.Raid
         except AttributeError:
             return "Not available"
+
+class PhysicalDrivesCollection(BaseCollection):
+    '''Class to manage redfish hpe oem PhysicalDrivesCollection data.'''
+    def __init__(self, url, connection_parameters):
+        super(PhysicalDrivesCollection, self).__init__(url,
+                                                      connection_parameters)
+        self.physical_drives_dict = {}
+
+        for link in self.links:
+            index = re.search(r'DiskDrives/(\w+)', link)
+            self.physical_drives_dict[index.group(1)] = DiskDrives(
+                link, connection_parameters)
+
+
+class DiskDrives(Device):
+    '''Class to manage redfish hpe oem DiskDrives data.'''
+    def get_capacity(self):
+        '''Get Logical drive capacity
+
+        :returns: Logical drive capacity or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.CapacityMiB
+        except AttributeError:
+            return "Not available"
+
+class StorageEnclosures(Device):
+    '''Class to manage redfish hpe oem StorageEnclosures data.'''
+    pass
