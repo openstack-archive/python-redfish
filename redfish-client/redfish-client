@@ -247,6 +247,11 @@ if __name__ == '__main__':
         # Display system information using jinja2 template
         render_template("system_info.template")
 
+    def display_part_serial_numbers(redfish_data):
+        # Display PartNumbers and SerialNumber entries
+        # information using jinja2 template
+        render_template("serial_info.template")
+
     def render_template(template):
         try:
             template = jinja2_env.get_template(template)
@@ -396,8 +401,8 @@ if __name__ == '__main__':
                                          arguments['<changed_value>'])
             logger.debug(inventory.data)
             inventory.save()
-    elif arguments['getinfo'] is True:
-        logger.debug('getinfo command')
+    elif arguments['getinfo'] is True or arguments['getserial'] is True:
+        logger.debug('get commands')
         # If manager is not defined set it to 'default'
         if not arguments['<manager_name>']:
             manager_name = 'default'
@@ -416,14 +421,18 @@ if __name__ == '__main__':
             redfish_data = get_redfish_data(connection_parameters, False)
         else:
             redfish_data = get_redfish_data(connection_parameters, True)
-        if arguments['manager'] is True:
-            logger.debug("Manager commands")
-            display_manager_info(redfish_data)
-        elif arguments['system'] is True:
-            logger.debug("system commands")
-            display_system_info(redfish_data)
-        elif arguments['chassis'] is True:
-            logger.debug("chassis commands")
-            display_chassis_info(redfish_data)
+        if arguments['getinfo'] is True:
+            if arguments['manager'] is True:
+                logger.debug("Manager commands")
+                display_manager_info(redfish_data)
+            elif arguments['system'] is True:
+                logger.debug("system commands")
+                display_system_info(redfish_data)
+            elif arguments['chassis'] is True:
+                logger.debug("chassis commands")
+                display_chassis_info(redfish_data)
+        if arguments['getserial'] is True:
+            logger.debug("serial & part number commands")
+            display_part_serial_numbers(redfish_data)
     logger.info("Client session terminated")
     sys.exit(0)
