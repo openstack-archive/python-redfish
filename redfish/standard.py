@@ -212,6 +212,8 @@ class Systems(Device):
             # This means we don't have Processors detailed data
             self.simple_storage_collection = None
 
+        hpeflag = False
+        hpflag = False
         try:
             self.data.Oem.Hpe
             try:
@@ -233,6 +235,34 @@ class Systems(Device):
                 # This means we don't have SmartStorage
                 self.smart_storage = None
         except AttributeError:
+            # This means we don't have Hpe oem data
+            hpeflag = True
+
+        try:
+            self.data.Oem.Hp
+            try:
+                self.network_adapters_collection = \
+                    hpe.NetworkAdaptersCollection(
+                        self.get_link_url('NetworkAdapters',
+                                          self.data.Oem.Hp.Links),
+                        connection_parameters)
+            except AttributeError:
+                # This means we don't have NetworkAdapters
+                self.network_adapters_collection = None
+            try:
+                self.smart_storage = \
+                    hpe.SmartStorage(
+                        self.get_link_url('SmartStorage',
+                                          self.data.Oem.Hp.Links),
+                        connection_parameters)
+            except AttributeError:
+                # This means we don't have SmartStorage
+                self.smart_storage = None
+        except AttributeError:
+            # This means we don't have Hp oem data
+            hpflag = True
+
+        if hpeflag and hpflag:
             # This means we don't have oem data
             self.data.Oem = None
 

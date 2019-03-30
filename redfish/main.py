@@ -75,7 +75,7 @@ versions of resource types.
 
 On HTTP POST to create:
 
-WHen POSTing to create a resource (e.g. create an account or session) the
+When POSTing to create a resource (e.g. create an account or session) the
 guarantee is that a successful response includes a "Location" HTTP header
 indicating the resource URI of the newly created resource.  The POST may also
 include a representation of the newly created object in a JSON response body
@@ -99,7 +99,7 @@ JSON-SCHEMA:
 The json-schema available at /redfish/v1/Schemas governs the content of the
 resources, but keep in mind:
 * not every property in the schema is implemented in every implementation.
-* some properties are schemed to allow both null and anotehr type like string
+* some properties are schemed to allow both null and another type like string
 * or integer.
 
 Robust client code should check both the existence and type of interesting
@@ -168,7 +168,7 @@ class RedfishConnection(object):
         """Initialize a connection to a Redfish service."""
         # Specify a name for the logger as recommended by the logging
         # documentation. However for strange reason requests logs are not
-        # anymore capture in the log file.
+        # anymore captured in the log file.
         # TODO : Check strange behavior about requests logs.
         config.logger = config.initialize_logger(config.REDFISH_LOGFILE,
                                                  config.CONSOLE_LOGGER_LEVEL,
@@ -184,7 +184,7 @@ class RedfishConnection(object):
         self.connection_parameters.enforceSSL = enforceSSL
         self.connection_parameters.verify_cert = verify_cert
 
-        # Use DMTF mockup or not
+        # Use a mockup or not (like the DMTF or HPE one)
         self.__simulator = simulator
 
         # Session attributes
@@ -233,7 +233,7 @@ class RedfishConnection(object):
         # Structure change with mockup 1.0.0, there is no links
         # section anymore.
         # ===================================================================
-        # TODO : Add a switch to allow the both structure
+        # TODO : Add a switch to allow both structures
         # ===================================================================
 
         # standard
@@ -259,7 +259,8 @@ class RedfishConnection(object):
 
         try:
             self.Chassis = standard.ChassisCollection(
-                self.Root.get_link_url("Chassis"), self.connection_parameters)
+                self.Root.get_link_url("Chassis"),
+                self.connection_parameters)
         except AttributeError:
             self.Chassis = None
 
