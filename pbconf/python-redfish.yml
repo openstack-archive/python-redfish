@@ -68,7 +68,7 @@ sshport:
 # a QEMU rhel-3-i286 here means that the VM will be named rhel-3-i386.qemu
 #
 vmlist:
-  python-redfish: opensuse-12.3-i386,debian-8-i386,ubuntu-16.04-i386,mageia-5-i386,mageia-5-x86_64,fedora-23-x86_64,rhel-7-x86_64,opensuse-12.3-x86_64,sles-12-x86_64,debian-8-x86_64,ubuntu-16.04-x86_64
+  python-redfish: rhel-6-i386,sles-11-i386,mageia-5-i386,rhel-6-x86_64,rhel-7-x86_64,sles-12-x86_64,sles-15-x86_64
 #
 #
 # Valid values for vmtype are
@@ -102,7 +102,7 @@ vmlist:
 #
 # Supported distribution for python-redfish
 velist:
-  python-redfish: opensuse-42.2-x86_64,centos-7-x86_64,fedora-25-x86_64,debian-8-x86_64,mageia-5-x86_64,ubuntu-16.04-x86_64
+  python-redfish: centos-6-x86_64,centos-7-x86_64,debian-8-x86_64,debian-9-x86_64,ubuntu-16.04-x86_64,ubuntu-17.10-x86_64,ubuntu-18.04-x86_64,ubuntu-18.10-x86_64,mageia-5-x86_64,mageia-6-x86_64,fedora-25-x86_64,fedora-26-x86_64,fedora-27-x86_64,fedora-28-x86_64,fedora-29-x86_64,opensuse-42.1-x86_64,opensuse-42.2-x86_64,opensuse-42.3-x86_64,opensuse-15.0-x86_64,opensuse-15.1-x86_64
 #
 # VE params
 vetype:

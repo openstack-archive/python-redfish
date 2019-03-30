@@ -240,7 +240,7 @@ if __name__ == '__main__':
         render_template("manager_info.template")
 
     def display_chassis_info(redfish_data):
-        # Display system information using jinja2 template
+        # Display chassis information using jinja2 template
         render_template("chassis_info.template")
 
     def display_system_info(redfish_data):
