@@ -271,3 +271,40 @@ class Device(Base):
             return self.data.PartNumber
         except AttributeError:
             return "Not available"
+
+    def get_name(self):
+        '''Get name of the device.
+
+        :returns: name or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.Name
+        except AttributeError:
+            try:
+                return self.data.ProductName
+            except AttributeError:
+                return "Not available"
+
+    def get_fw_version(self):
+        '''Get firmware version of the device.
+
+        :returns: firmware version or "Not available"
+        :rtype: string
+
+        '''
+        try:
+            return self.data.FirmwareVersion.Current.VersionString
+        except AttributeError:
+            try:
+                return self.data.Firmware.Current.VersionString
+            except AttributeError:
+                # For some NICs
+                try:
+                    return self.data.FirmwareVersion
+                except AttributeError:
+                    try:
+                        return self.data.Firmware
+                    except AttributeError:
+                        return "Not available"

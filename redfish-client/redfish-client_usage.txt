@@ -9,6 +9,7 @@ Usage:
   redfish-client [options] manager getinfo [<manager_name>]
   redfish-client [options] chassis getinfo [<manager_name>]
   redfish-client [options] system getinfo [<manager_name>]
+  redfish-client [options] getserial [<manager_name>]
   redfish-client (-h | --help)
   redfish-client --version
 

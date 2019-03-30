@@ -523,7 +523,7 @@ class EthernetInterfacesCollection(BaseCollection):
                 EthernetInterfaces(link, connection_parameters)
 
 
-class EthernetInterfaces(Base):
+class EthernetInterfaces(Device):
     '''Class to manage redfish EthernetInterfaces.'''
     def get_mac(self):
         '''Get EthernetInterface MacAddress
@@ -602,7 +602,7 @@ class ProcessorsCollection(BaseCollection):
                 Processors(link, connection_parameters)
 
 
-class Processors(Base):
+class Processors(Device):
     '''Class to manage redfish Processors.'''
     def get_speed(self):
         '''Get processor speed
@@ -655,7 +655,7 @@ class SimpleStorageCollection(BaseCollection):
                 SimpleStorage(link, connection_parameters)
 
 
-class SimpleStorage(Base):
+class SimpleStorage(Device):
     '''Class to manage redfish SimpleStorage'''
     def get_status(self):
         '''Get storage status
