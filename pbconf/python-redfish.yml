@@ -50,13 +50,11 @@ pbpackager:
 # Needs hostname, account and directory
 #
 sshhost:
-  python-redfish: www.mondorescue.org
+  python-redfish: www.project-builder.org
 sshlogin:
-  python-redfish: bruno
+  python-redfish: account
 sshdir:
-  python-redfish: /prj/ftp
-sshport:
-  python-redfish: 22
+  python-redfish: /path/to/ftp
 #
 #
 #
@@ -102,7 +100,7 @@ vmlist:
 #
 # Supported distribution for python-redfish
 velist:
-  python-redfish: centos-6-x86_64,centos-7-x86_64,debian-8-x86_64,debian-9-x86_64,ubuntu-16.04-x86_64,ubuntu-17.10-x86_64,ubuntu-18.04-x86_64,ubuntu-18.10-x86_64,mageia-5-x86_64,mageia-6-x86_64,fedora-25-x86_64,fedora-26-x86_64,fedora-27-x86_64,fedora-28-x86_64,fedora-29-x86_64,opensuse-42.1-x86_64,opensuse-42.2-x86_64,opensuse-42.3-x86_64,opensuse-15.0-x86_64,opensuse-15.1-x86_64
+  python-redfish: centos-6-x86_64,centos-7-x86_64,debian-8-x86_64,debian-9-x86_64,ubuntu-12.04-x86_64,ubuntu-14.04-x86_64,ubuntu-16.04-x86_64,ubuntu-17.10-x86_64,ubuntu-18.04-x86_64,ubuntu-18.10-x86_64,mageia-5-x86_64,mageia-6-x86_64,fedora-25-x86_64,fedora-26-x86_64,fedora-27-x86_64,fedora-28-x86_64,fedora-29-x86_64,opensuse-42.1-x86_64,opensuse-42.2-x86_64,opensuse-42.3-x86_64,opensuse-15.0-x86_64,opensuse-15.1-x86_64
 #
 # VE params
 vetype:
@@ -141,6 +139,8 @@ addrepo:
   mageia-5-x86_64: ftp://ftp.project-builder.org/mageia/5/x86_64/pb.addmedia
   fedora-25-x86_64: ftp://ftp.project-builder.org/fedora/25/x86_64/pb.repo
   opensuse-42.2-x86_64: ftp://ftp.project-builder.org/opensuse/42.2/x86_64/pb.repo,http://download.opensuse.org/repositories/devel:languages:python3/openSUSE_Leap_42.2/devel:languages:python3.repo,http://download.opensuse.org/repositories/Virtualization:containers/openSUSE_Leap_42.2/Virtualization:containers.repo,http://download.opensuse.org/repositories/devel:languages:python/openSUSE_Leap_42.2/devel:languages:python.repo
+  ubuntu-12.04-x86_64: ftp://ftp.project-builder.org/ubuntu/12.04/python-tortilla.sources.list
+  ubuntu-18.04-x86_64: ftp://ftp.project-builder.org/ubuntu/18.04/python-tortilla.sources.list
 #
 # Adapt to your needs:
 # Optional if you need to overwrite the global values above

@@ -1,11 +1,12 @@
 #!/usr/bin/make -f
 
-export PYBUILD_NAME=PBPKG
-export PYBUILD_AFTER_INSTALL_python3=rm -rf {destdir}/usr/bin
+export PYBUILD_NAME=redfish
+export DH_VERBOSE=1
+#export PYBUILD_DISABLE=install
 
 %:
 		dh $@ --with python2,python3,sphinxdoc --buildsystem=pybuild
-		#dh $@ --with python2,python3 --buildsystem=python_distutils
+		cd doc ; make man ; make singlehtml ; make latexpdf
 
 PYPI_DESC = PBSUMMARY
 DEB_UPSTREAM_VERSION=$(shell dpkg-parsechangelog | sed -rne 's,^Version: ([^-]+).*,\1,p')
